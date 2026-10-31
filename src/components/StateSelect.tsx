@@ -21,7 +21,7 @@ function StateSelect(
     <select
       id={props.id}
       aria-label="Bundesland"
-      className="select mt-2 block w-full max-w-sm"
+      className="select mt-1 w-full"
       value={value ?? ""}
       onChange={(event) => {
         const code = stateCodeSchema.safeParse(event.target.value);

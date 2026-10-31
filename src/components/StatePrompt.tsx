@@ -20,10 +20,12 @@ function StatePrompt(
         Three questions in the test are about the federal state of your main
         residence.
       </p>
-      <StateSelect
-        value={null}
-        onChange={onChange}
-      />
+      <div className="mt-2 max-w-sm">
+        <StateSelect
+          value={null}
+          onChange={onChange}
+        />
+      </div>
     </section>
   );
 }
