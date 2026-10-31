@@ -20,11 +20,13 @@ results are saved locally, so you can watch your score climb towards exam day.
 ## Quick start
 
 ```sh
-make install   # once
+make install   # once: locked JavaScript and Python dependencies
 make start     # builds, serves on http://localhost:5179 and opens the browser
 ```
 
-Pick your Bundesland on first launch. Run `make` to see every other command.
+Pick your Bundesland and set your exam date on first launch. Run `make` to see
+every other command; [CONTRIBUTING.md](CONTRIBUTING.md) covers using it for
+your own exam.
 
 ## How it works
 
@@ -56,10 +58,13 @@ flowchart LR
 | App        | React 19, Tailwind CSS 4, TypeScript 7                                  |
 | Server     | Node 26 with its built-in SQLite (`node:sqlite`)                        |
 | Toolchain  | [Vite+](https://viteplus.dev): Vite 8 / Rolldown, Oxlint, Oxfmt, Vitest |
-| Data build | Python 3.15 (uv, Ruff, ty), poppler                                     |
+| Data build | Python 3.15 (uv, Ruff, ty, pyrefly, pytest), poppler                    |
+| Testing    | Vitest, Playwright with axe accessibility audits                        |
 
 Most of the tooling is written in Rust (Rolldown, Oxc, Tailwind's engine, uv,
-Ruff, ty, prek) for fast feedback.
+Ruff, ty, prek, typos, lychee) for fast feedback. Every lint rule is on, with
+narrow exceptions explained in place; the [quality gates](docs/development.md#quality-gates)
+run on every pull request.
 
 ## Documentation
 
@@ -72,7 +77,13 @@ Ruff, ty, prek) for fast feedback.
 | [Development](docs/development.md)             | Commands, checks, git hooks, CI, versions, agent tooling |
 | [AGENTS.md](AGENTS.md)                         | Conventions for coding agents                            |
 
-> [!NOTE]
-> Questions and pictures come from the official BAMF catalogue (edition
-> 07.05.2025); some pictures are third-party photos, so this repository stays
-> private and is meant for personal study.
+## Licence
+
+The code is released under the [MIT licence](LICENSE). The question data
+combines the official BAMF catalogue with MIT-licensed translations and
+explanations; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+> [!IMPORTANT]
+> Five pictures are photos the BAMF catalogue credits to third parties and are
+> not covered by the MIT licence. Replace them before publishing the
+> repository (see the notices).

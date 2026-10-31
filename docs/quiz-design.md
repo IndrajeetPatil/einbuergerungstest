@@ -1,8 +1,9 @@
 # Quiz design
 
 How questions are chosen, presented and scored, and which questionnaire
-practices the app follows. The rules live in `src/lib/quiz.ts` (selection,
-mastery) and `src/lib/session.ts` (session state), both covered by unit tests.
+practices the app follows. The rules live in `src/lib/quiz.ts` (selection),
+`src/lib/mastery.ts` (mastery) and `src/lib/session.ts` (session state), all
+covered by unit tests.
 
 ## Modes
 

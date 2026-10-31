@@ -34,17 +34,18 @@ flowchart LR
   Catalogue -- "answer key" --> Store
 ```
 
-| Layer         | Files                               | Role                                                                                           |
-| ------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
-| UI            | `src/App.tsx`, `src/components/*`   | Views, bilingual question rows, feedback, score chart                                          |
-| Quiz logic    | `src/lib/quiz.ts`                   | Exam draw, practice selection, mastery, streaks (pure functions)                               |
-| Session state | `src/lib/session.ts`                | Option order, answers, flags, retry queue, timing; persisted to `localStorage`                 |
-| API client    | `src/lib/api.ts`                    | Typed `fetch` wrapper                                                                          |
-| Shared types  | `src/lib/types.ts`                  | Used by both browser and server                                                                |
-| API           | `server/api.ts`                     | Connect-style handler with input validation                                                    |
-| Store         | `server/db.ts`                      | Migrations, answer judging, statistics, backup — see [Progress database](progress-database.md) |
-| Servers       | `vite.config.ts`, `server/serve.ts` | The same API mounted in `vp dev`, `vp preview` and the production server                       |
-| CLI           | `server/cli.ts`                     | `make backup`, `export`, `stats`, `reset-progress`                                             |
+| Layer | Files | Role |
+| --- | --- | --- |
+| UI | `src/App.tsx`, `src/components/*` | One component per file: screens, bilingual question rows, feedback, chart |
+| Quiz rules | `src/lib/quiz.ts`, `mastery.ts`, `dates.ts` | Exam draw, practice selection, mastery, streaks (pure, unit-tested) |
+| Session state | `src/lib/session.ts` | Option order, answers, flags, retry queue, timing; persisted to `localStorage` |
+| Hooks | `src/lib/use*.ts` | Summary, view, trainer and quiz controllers; quiz actions read the latest session |
+| Schemas | `src/lib/schemas.ts` | Zod schemas and inferred types, shared by browser and server |
+| API client | `src/lib/api.ts` | `fetch` wrapper that validates every response |
+| API | `server/api.ts` | Connect-style route table with input validation |
+| Store | `server/db.ts`, `queries.ts`, `migrations.ts`, `validation.ts` | Migrations, answer judging, statistics, backup — see [Progress database](progress-database.md) |
+| Servers | `vite.config.ts`, `server/serve.ts` | The same API mounted in `vp dev`, `vp preview` and the production server |
+| CLI | `server/cli.ts` | `make backup`, `export`, `stats`, `reset-progress` |
 
 ## Request flow
 
@@ -110,7 +111,9 @@ src/       React app
   lib/     quiz logic, session state, API client, shared types
   data/    generated question catalogue
 public/    favicon and generated question pictures
-scripts/   data pipeline (Python uv script)
+scripts/   data pipeline (uv project with pytest suite)
+tests/e2e/ Playwright end-to-end and accessibility tests
+makefiles/ Make targets by topic
 docs/      this documentation
 data/      your progress database, backups and exports (git-ignored)
 ```

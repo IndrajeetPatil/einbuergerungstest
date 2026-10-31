@@ -20,28 +20,34 @@ the [README](README.md).
 
 ## Commands
 
-| Command                          | Purpose                                                      |
-| -------------------------------- | ------------------------------------------------------------ |
-| `make start`                     | Build, serve on <http://localhost:5179> and open the browser |
-| `make dev`                       | Vite+ dev server with hot reload on port 5178                |
-| `make ci`                        | Everything the QA workflow runs: `check`, `test`, `build`    |
-| `make check`                     | Oxfmt, Oxlint (type-aware), tsgo, Ruff and ty                |
-| `make fix`                       | Write formatting and safe lint fixes                         |
-| `make test`                      | Vitest unit tests (quiz logic and SQLite store)              |
-| `make hooks` / `make hooks-push` | prek pre-commit / pre-push stages on all files               |
-| `make data`                      | Rebuild `catalogue.json` and pictures (needs poppler and uv) |
+| Command | Purpose |
+| --- | --- |
+| `make install` | Install locked JavaScript and Python dependencies |
+| `make start` | Build, serve on <http://localhost:5179> and open the browser |
+| `make dev` | Vite+ dev server with hot reload on port 5178 |
+| `make ci` | Every static gate, unit tests and the build (no network) |
+| `make test-e2e` | Playwright end-to-end tests with axe accessibility audits |
+| `make security` | gitleaks, actionlint, zizmor, pnpm and uv audits |
+| `make link-check` | lychee link check (network) |
+| `make fix` | Write formatting and safe lint fixes |
+| `make hooks` / `make hooks-push` | prek pre-commit / pre-push stages on all files |
+| `make data` | Rebuild `catalogue.json` and pictures (needs poppler) |
+
+Every gate is listed in [docs/development.md](docs/development.md#quality-gates).
 
 ## Before committing and pushing
 
-- Run `make ci`; it must pass. `make check` only verifies, `make fix` writes.
+- Run `make ci`, and `make test-e2e` for UI changes; both must pass. Run
+  `make link-check` when links change and `make security` when workflows or
+  dependencies change.
 - Install hooks once with `make hooks-install`. Run `make hooks` and
-  `make hooks-push` before opening a pull request.
+  `make hooks-push` before opening a pull request. Never bypass hooks unless
+  the user asks.
 - Every commit and PR title is a Conventional Commit (`feat`, `fix`, `docs`,
   `refactor`, `test`, `build`, `ci`, `chore`, …). The commit-msg hook and the
   `Conventional Commits` workflow check structure only.
 - `main` is protected by the `protected-main` ruleset: squash-merged pull
-  requests with passing `QA` and `Conventional Commits` checks. Workflows run
-  on pull requests only.
+  requests with every workflow passing. Workflows run on pull requests only.
 - Keep the PR title and body in sync with the net diff. Never rewrite `main`.
 
 ## Gotchas
@@ -68,6 +74,21 @@ the [README](README.md).
   no emoji in UI chrome.
 - Never put information in a native `title` attribute; its tooltip is
   hover-only. Show it visibly instead.
+- Fix failures rather than weakening checks: every Oxlint category is an
+  error, Ruff selects `ALL`, ty enables every rule, pyrefly needs 100% type
+  coverage, fallow caps cyclomatic and cognitive complexity at 5, and coverage
+  floors only rise. Add a narrow, commented exception only when a rule
+  contradicts another or forbids a core idiom.
+- Validate every external value with the Zod schemas in `src/lib/schemas.ts`
+  (catalogue, API bodies, SQLite rows, `localStorage`); never use `as` casts.
+- One React component per file (PascalCase); pure logic goes in `src/lib/`
+  with unit tests. Each module ends with a single `export { … }` block.
+- Use the `#components/*`, `#lib/*`, `#data/*` and `#server/*` import aliases
+  from `package.json` instead of `../` paths; Node resolves them natively.
+- Python imports are `lazy` (Python 3.15) and the data pipeline is a uv
+  project in `scripts/` with its own lockfile.
+- Quiz actions read the latest session through `latest()`, not the render's
+  closure, so fast key presses build on each other.
 - Every visible German string has an English counterpart (`Deutsch · English`).
   English copy uses British spelling; question text keeps the official wording.
 - Node 26 runs `server/*.ts` directly (type stripping): use erasable syntax only

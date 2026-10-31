@@ -69,7 +69,7 @@ Only finished sessions appear on the dashboard.
 
 ## Migrations
 
-`MIGRATIONS` in `server/db.ts` is an ordered list of SQL scripts.
+`MIGRATIONS` in `server/migrations.ts` is an ordered list of SQL scripts.
 `PRAGMA user_version` records how many have run; each new one runs in a
 transaction when the store opens. Never edit an applied migration — append a
 new one.

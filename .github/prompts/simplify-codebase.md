@@ -32,14 +32,14 @@ eliminate duplicated logic. Do not refactor for aesthetics alone.
 | Hand-rolled SVG chart             | `src/components/ScoreChart.tsx` |
 | Session state transitions         | `src/lib/session.ts`            |
 | Sampling and shuffling            | `src/lib/quiz.ts`               |
-| PDF parsing and picture rendering | `scripts/build_data.py`         |
+| PDF parsing and picture rendering | `scripts/pdf_*.py`, `scripts/pictures.py` |
 
 ## Guardrails
 
 - Never trade simplicity for regressions, weaker validation, poorer
   accessibility or hidden behaviour changes.
 - Keep the exam format, answer judging on the server, the data cross-checks in
-  `scripts/build_data.py` and the DESIGN.md rules intact.
+  `scripts/build_data.py`, the quality gates and the DESIGN.md rules intact.
 - Do not add a dependency to replace small, straightforward code.
 - Keep the change to one coherent theme. If no safe candidate exists, report
   why and stop.

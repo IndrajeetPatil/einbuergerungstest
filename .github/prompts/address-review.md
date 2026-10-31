@@ -19,10 +19,11 @@ have merit. Fix those; reply to every comment on my behalf either way. Use the
 
 ## Validating changes
 
-- Run the checks relevant to the files you changed, then `make ci`.
+- Run the checks relevant to the files you changed, then `make ci`, and
+  `make test-e2e` for UI changes.
 - Run `make hooks` and `make hooks-push` before pushing; stage any hygiene-hook
   fixes and rerun.
-- For changes to `scripts/build_data.py`, also run `make data` and confirm it
+- For changes to `scripts/`, also run `make data` and confirm it
   still reports 460 questions with no data problems.
 - Keep the PR's Conventional Commit title and body in sync with the resulting
   diff, and verify the live metadata after updating it.
@@ -38,7 +39,7 @@ repository for every declaration of that version and fix all of them at once.
 | pnpm   | `devEngines.packageManager` in `package.json` | —                                                       |
 | Vite+  | `catalog` in `pnpm-workspace.yaml`            | —                                                       |
 | prek   | `minimum_prek_version` in `prek.toml`         | `prek-version` in `.github/workflows/commitlint.yml`    |
-| Python | `requires-python` in `scripts/build_data.py`  | `target-version` / `python-version` in `pyproject.toml` |
+| Python | `requires-python` in `scripts/pyproject.toml` | Ruff `target-version` and ty `python-version` in the same file |
 
 Do not mirror Node or pnpm versions into workflows; `setup-vp` reads
 `.node-version` and `package.json`.
