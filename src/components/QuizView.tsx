@@ -142,7 +142,6 @@ export function QuizView(props: Props) {
             className="btn btn-quiet min-h-9 px-2 text-sm"
             onClick={onToggleEnglish}
             aria-pressed={settings.showEnglish}
-            title="Toggle English (E)"
           >
             {settings.showEnglish ? "Hide English" : "Show English"}
           </button>

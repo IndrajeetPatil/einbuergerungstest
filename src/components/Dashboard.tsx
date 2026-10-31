@@ -551,7 +551,6 @@ function MasteryBar({ counts, total }: { counts: Record<Mastery, number>; total:
           counts[k] > 0 ? (
             <div
               key={k}
-              title={`${MASTERY_LABEL[k].en}: ${counts[k]}`}
               style={{ width: `${(counts[k] / total) * 100}%`, background: MASTERY_FILL[k] }}
               className="first:rounded-l-full last:rounded-r-full"
             />
