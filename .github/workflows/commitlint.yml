@@ -1,13 +1,11 @@
 name: Commit conventions
 
-# Pull requests validate their commits; pushes to main validate the squash subject.
+# Validates every commit of a pull request and its title, which becomes the
+# squash-merge subject on `main`. Re-runs when the title is edited.
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, edited]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -44,18 +42,18 @@ jobs:
 
       - name: Validate commit messages
         env:
-          FROM_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
-          TO_REF: ${{ github.event.pull_request.head.sha || github.sha }}
+          FROM_REF: ${{ github.event.pull_request.base.sha }}
+          TO_REF: ${{ github.event.pull_request.head.sha }}
         run: |
-          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
-            commits="$TO_REF"
-          elif [[ "$FROM_REF" == 0000000000000000000000000000000000000000 ]]; then
-            commits="$(git rev-list --reverse --end-of-options "$TO_REF")"
-          else
-            commits="$(git rev-list --reverse --end-of-options "${FROM_REF:?}..${TO_REF:?}")"
-          fi
-          for commit in $commits; do
+          for commit in $(git rev-list --reverse --end-of-options "${FROM_REF:?}..${TO_REF:?}"); do
             printf 'Checking commit %s\n' "$commit"
             git show --no-patch --format=%B "$commit" > "$RUNNER_TEMP/commit-message"
             prek run conventional-pre-commit --stage commit-msg --commit-msg-filename "$RUNNER_TEMP/commit-message"
           done
+
+      - name: Validate pull request title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          printf '%s\n' "$PR_TITLE" > "$RUNNER_TEMP/pr-title"
+          prek run conventional-pre-commit --stage commit-msg --commit-msg-filename "$RUNNER_TEMP/pr-title"
