@@ -173,9 +173,19 @@ The build stops when:
 | ----------- | ---------------------------------------------------------------------------------- |
 | Everyday    | `start`, `serve`, `open`, `dev`, `stats`                                           |
 | Quality     | `check`, `fix`, `fmt`, `lint`, `typecheck`, `check-py`, `test`, `test-watch`, `ci` |
+| Git hooks   | `hooks-install`, `hooks`, `hooks-push`                                             |
 | Build       | `install`, `build`, `data`, `data-refresh`                                         |
 | Progress    | `backup`, `export`, `reset-progress CONFIRM=yes`                                   |
 | Maintenance | `outdated`, `update`, `doctor`, `clean`, `distclean`                               |
+
+## Contributing and agents
+
+| Topic                         | Where                                                                                                                                                                                                                      |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Conventions for coding agents | [AGENTS.md](AGENTS.md) (`CLAUDE.md` imports it)                                                                                                                                                                            |
+| Merge gate                    | Pull requests into `main`, squash-merged; `QA` and `Conventional Commits` workflows run on pull requests only                                                                                                              |
+| Skills                        | [`agent-browser`](.agents/skills/agent-browser/SKILL.md), [`frontend-pr-screenshot`](.agents/skills/frontend-pr-screenshot/SKILL.md)                                                                                       |
+| Prompts                       | [`address-review`](.github/prompts/address-review.md), [`update-deps`](.github/prompts/update-deps.md), [`simplify-codebase`](.github/prompts/simplify-codebase.md), [`codex-security`](.github/prompts/codex-security.md) |
 
 ## Stack
 
