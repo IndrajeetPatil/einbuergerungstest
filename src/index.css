@@ -1,0 +1,200 @@
+@import "tailwindcss";
+@import "@fontsource-variable/fraunces";
+@import "@fontsource-variable/hanken-grotesk";
+
+/* Tokens mirror DESIGN.md of indrapatil.com ("Career Atlas"), light mode only. */
+@theme {
+  --color-bg: #faf8f4;
+  --color-bg-alt: #f2efe8;
+  --color-surface: #fdfcf9;
+  --color-ink: #201d18;
+  --color-muted: #5d574c;
+  --color-accent: #14584d;
+  --color-accent-light: #0e7466;
+  --color-line: #e3ded2;
+  --color-rust: #9a3d2e;
+  --color-ochre: #7a5410;
+  --color-moss: #4d6220;
+  --color-slate: #3f5b7d;
+  --color-plum: #7d3f68;
+
+  --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-sans: "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --text-title: clamp(2.25rem, 1.6rem + 2.6vw, 3.75rem);
+  --text-title--line-height: 1.05;
+  --text-heading: clamp(1.4rem, 1.2rem + 0.9vw, 1.9rem);
+  --text-heading--line-height: 1.15;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  html {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-accent) 18%, transparent);
+  }
+}
+
+@layer components {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 0.05rem 0.45rem;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+  .chip-accent {
+    color: var(--color-accent);
+    border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
+  }
+  .chip-rust {
+    color: var(--color-rust);
+    border-color: color-mix(in oklab, var(--color-rust) 40%, transparent);
+  }
+  .chip-ochre {
+    color: var(--color-ochre);
+    border-color: color-mix(in oklab, var(--color-ochre) 40%, transparent);
+  }
+  .chip-slate {
+    color: var(--color-slate);
+    border-color: color-mix(in oklab, var(--color-slate) 40%, transparent);
+  }
+
+  .btn {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    transition:
+      border-color 120ms,
+      background-color 120ms,
+      color 120ms;
+  }
+  .btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    color: var(--color-muted);
+  }
+  .btn-primary {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-surface);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+  }
+  .btn-primary:disabled {
+    border-color: var(--color-line);
+    background: var(--color-bg-alt);
+  }
+  .btn-quiet {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-muted);
+  }
+
+  .link {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
+    text-underline-offset: 0.18em;
+  }
+  .link:hover {
+    text-decoration-color: var(--color-accent);
+  }
+
+  .field-mark {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .folio-mark {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Axis-tick rule: the signature divider, reserved for major transitions. */
+  .rule-ticks {
+    height: 9px;
+    border-top: 1px solid var(--color-line);
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-line) 0 1px,
+      transparent 1px 24px
+    );
+    background-size: 100% 6px;
+    background-repeat: no-repeat;
+  }
+
+  .select,
+  .input {
+    min-height: 44px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    padding: 0.4rem 0.75rem;
+    color: var(--color-ink);
+  }
+  .select:hover,
+  .input:hover {
+    border-color: var(--color-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
