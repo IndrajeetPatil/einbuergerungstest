@@ -87,6 +87,18 @@ test-watch: node_modules ## Run unit tests in watch mode
 .PHONY: ci
 ci: check test build ## Everything CI would run
 
+.PHONY: hooks-install
+hooks-install: ## Install the prek git hooks (pre-commit, pre-push, commit-msg)
+	prek install
+
+.PHONY: hooks
+hooks: ## Run the pre-commit hooks on all tracked files
+	prek run --all-files
+
+.PHONY: hooks-push
+hooks-push: ## Run the pre-push hooks on all tracked files
+	prek run --all-files --hook-stage pre-push
+
 ##@ Build
 
 node_modules: package.json pnpm-lock.yaml
