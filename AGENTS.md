@@ -6,14 +6,17 @@ the [README](README.md).
 
 ## Read the guidance relevant to your change
 
-| Work                                         | Guidance                                                                                                                     |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Setup, commands, architecture, API, database | [README](README.md)                                                                                                          |
-| UI and styling                               | [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md) (light mode only) |
-| Question data, pictures, sources             | [README › Question data](README.md#question-data), `scripts/build_data.py`                                                   |
-| Quiz rules (exam draw, smart mix, mastery)   | `src/lib/quiz.ts`, `src/lib/session.ts` and their tests                                                                      |
-| Dependency, hook or Action upgrades          | [`update-deps` prompt](.github/prompts/update-deps.md)                                                                       |
-| Screenshots for a PR                         | [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md)                                             |
+| Work                                       | Guidance                                                                                                                     |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Product overview and stack                 | [README](README.md)                                                                                                          |
+| Components, request flow, API              | [Architecture](docs/architecture.md)                                                                                         |
+| Schema, scoring, migrations, backups       | [Progress database](docs/progress-database.md)                                                                               |
+| Commands, checks, hooks, CI, versions      | [Development](docs/development.md)                                                                                           |
+| UI and styling                             | [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md) (light mode only) |
+| Question data, pictures, sources           | [Question data](docs/question-data.md), `scripts/build_data.py`                                                              |
+| Quiz rules (exam draw, smart mix, mastery) | [Quiz design](docs/quiz-design.md), `src/lib/quiz.ts`, `src/lib/session.ts`                                                  |
+| Dependency, hook or Action upgrades        | [`update-deps` prompt](.github/prompts/update-deps.md)                                                                       |
+| Screenshots for a PR                       | [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md)                                             |
 
 ## Commands
 
@@ -54,6 +57,8 @@ the [README](README.md).
   `:memory:`.
 - Schema changes go in a new entry of `MIGRATIONS` in `server/db.ts`; never
   edit an applied migration.
+- Keep `docs/` in sync with behaviour changes; the README stays a short
+  overview with at most a couple of diagrams.
 - Keep the real exam format in `EXAM` (`src/lib/quiz.ts`): 30 general + 3
   state questions, 60 minutes, 17 to pass.
 - Picture and number options keep catalogue order (`keepOrder`); everything

@@ -1,200 +1,78 @@
 # Leben in Deutschland — Einbürgerungstest trainer
 
-A local, bilingual (German | English) practice app for the German citizenship test,
-with a SQLite database that tracks how your scores change day by day.
+A personal study app for the German citizenship test (_Einbürgerungstest_ /
+_Leben in Deutschland_). Every question is shown in German and English side by
+side, so the exam language and your own build a direct correspondence. Your
+results are saved locally, so you can watch your score climb towards exam day.
+
+## What you can do
+
+- **Take a mock exam** — the real format: 33 questions (30 general, 3 about
+  your Bundesland), 60 minutes, 17 correct to pass.
+- **Practise with explanations** — immediate feedback in both languages, an
+  explanation of _why_ the answer is right, and missed questions coming back a
+  few questions later.
+- **Track your progress** — score chart up to exam day, catalogue coverage,
+  weak spots and a daily streak.
+- **Look things up** — a searchable read-through of all 310 questions that can
+  come up for you.
 
 ## Quick start
 
-| Step | Command              | Result                                                          |
-| ---- | -------------------- | --------------------------------------------------------------- |
-| 1    | `make install`       | Installs JavaScript dependencies                                |
-| 2    | `make start`         | Builds, serves on <http://localhost:5179> and opens the browser |
-| 3    | Pick your Bundesland | Enables the 3 state questions of the real test                  |
+```sh
+make install   # once
+make start     # builds, serves on http://localhost:5179 and opens the browser
+```
 
-Run `make` to list every chore.
+Pick your Bundesland on first launch. Run `make` to see every other command.
 
-## Features
-
-| Mode                               | What happens                                                                  | Feedback                        |
-| ---------------------------------- | ----------------------------------------------------------------------------- | ------------------------------- |
-| **Prüfungssimulation** (mock exam) | 30 random general + 3 Bundesland questions, 60-minute timer, flag and revisit | After submitting; 17/33 to pass |
-| **Üben** (practice)                | Smart mix, unseen, mistakes, Bundesland or whole catalogue; 10–50 questions   | After every answer              |
-| **Fragenkatalog**                  | Searchable read-through of all 310 questions that can come up for you         | Answer + explanation on demand  |
-| **Übersicht** (dashboard)          | Score chart, coverage, weak spots, streak, session history, settings          | —                               |
-
-Feedback on a wrong answer shows:
-
-- the correct option in German **and** English;
-- your answer, struck through;
-- an explanation of _why_ the answer is right;
-- your history on that question;
-- a note that it will come back four questions later, with reshuffled options.
-
-## Questionnaire practice
-
-| Practice              | How it is applied                                                                  |
-| --------------------- | ---------------------------------------------------------------------------------- |
-| No order effects      | Questions drawn and ordered at random every session                                |
-| No position memory    | Answer options shuffled; picture and number options keep their meaningful order    |
-| No accidental answers | Practice answers need an explicit _Prüfen_ (check); nothing is preselected         |
-| Exam realism          | Answers editable until submit; confirmation lists unanswered and flagged questions |
-| Spaced repetition     | Up to half of a smart-mix session revisits missed or shaky questions               |
-| Mastery               | Two correct answers in a row; mastered questions resurface slowly                  |
-| Robustness            | Sessions survive reloads; the exam timer runs on a wall-clock deadline             |
-
-### Keyboard
-
-| Key                | Action                               |
-| ------------------ | ------------------------------------ |
-| `1`–`4` or `A`–`D` | Choose an option                     |
-| `Enter`            | Check / next                         |
-| `←` `→`            | Previous / next question (mock exam) |
-| `F`                | Flag question (mock exam)            |
-| `E`                | Show / hide the English column       |
-
-## Architecture
+## How it works
 
 ```mermaid
 flowchart LR
-  subgraph Browser["Browser · React 19"]
-    UI["Dashboard · Quiz · Results · Catalogue"]
-    Logic["lib/quiz.ts<br/>sampling, shuffling, mastery"]
-    Local[("localStorage<br/>active session")]
-    UI --> Logic
-    UI <--> Local
-  end
-
-  subgraph Server["Node 26 · localhost"]
-    API["server/api.ts<br/>JSON API"]
-    Store["server/db.ts<br/>ProgressStore"]
-    DB[("data/progress.sqlite<br/>node:sqlite")]
-    CLI["server/cli.ts<br/>backup · export · stats · reset"]
-    API --> Store --> DB
-    CLI --> Store
-  end
-
-  Catalogue[["src/data/catalogue.json<br/>public/img/*.webp"]]
-
-  UI -- "fetch /api/*" --> API
-  Catalogue --> UI
-  Catalogue -- "answer key" --> Store
+  BAMF["Official BAMF<br/>question catalogue"] -- "make data" --> Catalogue[["Bilingual question<br/>catalogue"]]
+  Catalogue --> App["Browser app<br/>(React)"]
+  App <-- "answers, scores" --> Server["Local server<br/>(Node)"]
+  Server <--> DB[("Your progress<br/>(SQLite file)")]
 ```
 
-| Layer | Files                                   | Role                                                                |
-| ----- | --------------------------------------- | ------------------------------------------------------------------- |
-| UI    | `src/components/*`                      | Bilingual question rows, feedback, chart, dashboard                 |
-| Logic | `src/lib/quiz.ts`, `src/lib/session.ts` | Exam draw, weighted practice selection, retry queue, timing         |
-| API   | `server/api.ts`                         | One handler mounted in `vp dev`, `vp preview` and `server/serve.ts` |
-| Store | `server/db.ts`                          | Schema migrations, scoring against the official key, statistics     |
-| Data  | `scripts/build_data.py`                 | Builds the catalogue and pictures from pinned sources               |
-
-### API
-
-| Method   | Path                        | Purpose                                                 |
-| -------- | --------------------------- | ------------------------------------------------------- |
-| `GET`    | `/api/summary`              | Settings, finished sessions, per-question statistics    |
-| `PUT`    | `/api/settings`             | Bundesland, exam date, English column, option shuffling |
-| `POST`   | `/api/sessions`             | Start a session                                         |
-| `POST`   | `/api/sessions/:id/answers` | Record a practice answer (judged server-side)           |
-| `POST`   | `/api/sessions/:id/finish`  | Close a session; mock exams submit all answers here     |
-| `DELETE` | `/api/sessions/:id`         | Abandon an unfinished session                           |
-| `GET`    | `/api/export`               | Full JSON dump                                          |
-
-### Database
-
-```mermaid
-erDiagram
-  sessions ||--o{ answers : contains
-  sessions {
-    int id PK
-    text mode "exam | practice"
-    text focus
-    text state "Bundesland code"
-    int question_count
-    text started_at
-    text finished_at
-    int duration_ms
-  }
-  answers {
-    int id PK
-    int session_id FK
-    text question_id
-    int position
-    int chosen "null = unanswered"
-    int correct
-    int retry "second try in practice"
-    int time_ms
-    text answered_at
-  }
-  settings {
-    text key PK
-    text value "JSON"
-  }
-```
-
-- Stored in `data/progress.sqlite` (git-ignored); override with `LID_DB=/path/file.sqlite`.
-- Retries count towards question statistics but not towards the session score.
-
-## Question data
+The questions are built once from the official catalogue, then everything runs
+on your machine: the browser app asks the questions, and a small local server
+checks each answer against the official key and stores it.
 
 ```mermaid
 flowchart LR
-  PDF["BAMF Gesamtfragenkatalog<br/>07.05.2025 · SHA-256 pinned"]
-  LZ["lezeroq/lebenindeutschland<br/>answer key + English"]
-  AB["abdullahbutt/leben-in-deutschland-test<br/>explanations"]
-  Build{{"scripts/build_data.py<br/>cross-validation"}}
-  PDF -- "German wording,<br/>option order, pictures" --> Build
-  LZ --> Build
-  AB --> Build
-  Build --> JSON[["catalogue.json"]]
-  Build --> IMG[["public/img/*.webp"]]
+  Practise["Practise or<br/>mock exam"] --> Feedback["Bilingual feedback<br/>and explanation"]
+  Feedback --> Retry["Missed questions<br/>come back"]
+  Retry --> Mastery["Two in a row<br/>= mastered"]
+  Mastery --> Dashboard["Dashboard:<br/>score over time"]
+  Dashboard --> Practise
 ```
 
-| Source                                                                                                                                      | Licence              | Used for                                              |
-| ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ----------------------------------------------------- |
-| [BAMF Gesamtfragenkatalog](https://www.bamf.de/SharedDocs/Anlagen/DE/Integration/Einbuergerung/gesamtfragenkatalog-lebenindeutschland.html) | Official publication | German text, option order, pictures                   |
-| [lezeroq/lebenindeutschland](https://github.com/lezeroq/lebenindeutschland)                                                                 | MIT                  | Answer key (from the BAMF Online-Testcenter), English |
-| [abdullahbutt/leben-in-deutschland-test](https://github.com/abdullahbutt/leben-in-deutschland-test)                                         | MIT                  | Explanations                                          |
+## Tech stack
 
-The build stops when:
+| Layer      | Tools                                                                   |
+| ---------- | ----------------------------------------------------------------------- |
+| App        | React 19, Tailwind CSS 4, TypeScript 7                                  |
+| Server     | Node 26 with its built-in SQLite (`node:sqlite`)                        |
+| Toolchain  | [Vite+](https://viteplus.dev): Vite 8 / Rolldown, Oxlint, Oxfmt, Vitest |
+| Data build | Python 3.15 (uv, Ruff, ty), poppler                                     |
 
-- the PDF checksum changes (a new BAMF edition — `make data-refresh` detects it);
-- answer-key wording differs from the PDF;
-- an explanation was written for a different correct answer;
-- picture detection disagrees with the answer key.
+Most of the tooling is written in Rust (Rolldown, Oxc, Tailwind's engine, uv,
+Ruff, ty, prek) for fast feedback.
+
+## Documentation
+
+| Read                                           | For                                                      |
+| ---------------------------------------------- | -------------------------------------------------------- |
+| [Quiz design](docs/quiz-design.md)             | Exam rules, questionnaire practices, smart mix, mastery  |
+| [Architecture](docs/architecture.md)           | Components, request flow, API                            |
+| [Progress database](docs/progress-database.md) | Schema, scoring, backups, and why `node:sqlite`          |
+| [Question data](docs/question-data.md)         | Sources, cross-validation, pictures, new BAMF editions   |
+| [Development](docs/development.md)             | Commands, checks, git hooks, CI, versions, agent tooling |
+| [AGENTS.md](AGENTS.md)                         | Conventions for coding agents                            |
 
 > [!NOTE]
-> Some pictures are photos credited to third parties in the BAMF PDF. They are here
-> for personal study, which is why this repository is private.
-
-## Make targets
-
-| Group       | Targets                                                                            |
-| ----------- | ---------------------------------------------------------------------------------- |
-| Everyday    | `start`, `serve`, `open`, `dev`, `stats`                                           |
-| Quality     | `check`, `fix`, `fmt`, `lint`, `typecheck`, `check-py`, `test`, `test-watch`, `ci` |
-| Git hooks   | `hooks-install`, `hooks`, `hooks-push`                                             |
-| Build       | `install`, `build`, `data`, `data-refresh`                                         |
-| Progress    | `backup`, `export`, `reset-progress CONFIRM=yes`                                   |
-| Maintenance | `outdated`, `update`, `doctor`, `clean`, `distclean`                               |
-
-## Contributing and agents
-
-| Topic                         | Where                                                                                                                                                                                                                      |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Conventions for coding agents | [AGENTS.md](AGENTS.md) (`CLAUDE.md` imports it)                                                                                                                                                                            |
-| Merge gate                    | Pull requests into `main`, squash-merged; `QA` and `Conventional Commits` workflows run on pull requests only                                                                                                              |
-| Skills                        | [`agent-browser`](.agents/skills/agent-browser/SKILL.md), [`frontend-pr-screenshot`](.agents/skills/frontend-pr-screenshot/SKILL.md)                                                                                       |
-| Prompts                       | [`address-review`](.github/prompts/address-review.md), [`update-deps`](.github/prompts/update-deps.md), [`simplify-codebase`](.github/prompts/simplify-codebase.md), [`codex-security`](.github/prompts/codex-security.md) |
-
-## Stack
-
-| Concern       | Tool                                                                                                                        |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Runtime       | Node 26 (native TypeScript, `node:sqlite`)                                                                                  |
-| Toolchain     | [Vite+](https://viteplus.dev): Vite 8 / Rolldown, Oxlint, Oxfmt, Vitest                                                     |
-| Language      | TypeScript 7 (tsgo)                                                                                                         |
-| UI            | React 19, Tailwind CSS 4                                                                                                    |
-| Data pipeline | Python 3.15 uv script, Ruff, ty, poppler-utils                                                                              |
-| Git hooks     | [prek](https://github.com/j178/prek) with Conventional Commits                                                              |
-| Design        | [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md), light mode only |
+> Questions and pictures come from the official BAMF catalogue (edition
+> 07.05.2025); some pictures are third-party photos, so this repository stays
+> private and is meant for personal study.
