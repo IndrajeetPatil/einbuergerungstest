@@ -1,0 +1,91 @@
+[project]
+name = "einbuergerungstest-data"
+version = "0.1.0"
+description = "Builds the question catalogue and pictures from the official BAMF catalogue"
+requires-python = ">=3.15"
+license = "MIT"
+dependencies = ["pillow>=13.0.0"]
+
+[dependency-groups]
+# Tools live here, pinned by uv.lock, so their rulesets cannot change between runs.
+dev = ["pyrefly>=1.4.0", "pytest>=9.1.1", "ruff>=0.17.3", "ty>=0.0.95"]
+
+[tool.uv]
+# Allow newly published dependencies immediately.
+exclude-newer = false
+package = false
+
+[tool.pytest]
+# pytest 9 strict mode: rejects unknown config keys and markers, makes
+# unexpectedly passing xfails fail, and forbids duplicate parametrisation ids.
+strict = true
+# Warnings are failures: a deprecation is exactly the early signal to act on.
+filterwarnings = ["error"]
+pythonpath = ["."]
+testpaths = ["."]
+
+[tool.ruff]
+target-version = "py315"
+preview = true
+line-length = 100
+indent-width = 4
+
+[tool.ruff.lint]
+# Start from Ruff's complete stable and preview ruleset; exceptions below are
+# formatter conflicts or project conventions, each explained.
+select = ["ALL"]
+ignore = [
+  # Ruff's formatter owns trailing-comma layout.
+  "missing-trailing-comma",
+  # No copyright headers or public docstrings required; functions carry
+  # short docstrings where they help.
+  "CPY",
+  "D",
+  "DOC",
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+require-lazy = "all"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 5
+
+[tool.ruff.lint.pylint]
+max-branches = 6
+max-returns = 3
+max-statements = 20
+
+[tool.ruff.lint.per-file-ignores]
+# Command-line reporting: stdout and stderr are the build's interface.
+"build_data.py" = ["print"]
+# Downloads only the pinned https:// URLs in SOURCES; _download refuses others.
+"sources.py" = ["print", "suspicious-url-open-usage"]
+# poppler's pdftotext and pdftoppm run with fixed arguments, absolute tool paths
+# (shutil.which) and local paths; no shell and no untrusted input.
+"{build_data,pdf_layout,pictures}.py" = [
+  "subprocess-without-shell-equals-true",
+  "suspicious-subprocess-import",
+]
+# The XML is pdftotext's own output for the checksum-verified catalogue PDF.
+"pdf_layout.py" = [
+  "suspicious-xml-element-tree-usage",
+  "suspicious-xml-etree-import",
+]
+# Tests call assert, compare fixture values and exercise private helpers.
+"test_*.py" = ["assert", "magic-value-comparison", "private-member-access"]
+
+[tool.ruff.format]
+preview = true
+docstring-code-format = true
+
+[tool.ty.environment]
+python-version = "3.15"
+
+[tool.ty.rules]
+# Every diagnostic, including those ty leaves off by default.
+all = "error"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false
+strict-equality-semantics = true
+strict-generic-narrowing = true
