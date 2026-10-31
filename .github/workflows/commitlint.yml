@@ -1,0 +1,61 @@
+name: Commit conventions
+
+# Pull requests validate their commits; pushes to main validate the squash subject.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: commitlint-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: "1"
+  PREK_COLOR: always
+
+jobs:
+  commitlint:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install prek
+        uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d # v3.1.0
+        with:
+          prek-version: "0.5.7"
+          install-only: true
+          cache: false
+
+      - name: Validate commit messages
+        env:
+          FROM_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          TO_REF: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            commits="$TO_REF"
+          elif [[ "$FROM_REF" == 0000000000000000000000000000000000000000 ]]; then
+            commits="$(git rev-list --reverse --end-of-options "$TO_REF")"
+          else
+            commits="$(git rev-list --reverse --end-of-options "${FROM_REF:?}..${TO_REF:?}")"
+          fi
+          for commit in $commits; do
+            printf 'Checking commit %s\n' "$commit"
+            git show --no-patch --format=%B "$commit" > "$RUNNER_TEMP/commit-message"
+            prek run conventional-pre-commit --stage commit-msg --commit-msg-filename "$RUNNER_TEMP/commit-message"
+          done

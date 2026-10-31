@@ -1,0 +1,62 @@
+minimum_prek_version = "0.5.7"
+default_install_hook_types = ["pre-commit", "pre-push", "commit-msg"]
+default_stages = ["pre-commit"]
+
+[update]
+freeze = true
+cooldown_days = 0
+
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "f368fb366ff7f2f808dd324b83a6d32267799e19" # frozen: v0.17.2
+hooks = [
+  { id = "ruff-check", files = "^scripts/" },
+  { id = "ruff-format", files = "^scripts/", args = [
+    "--check",
+  ] },
+]
+
+[[repos]]
+repo = "https://github.com/compilerla/conventional-pre-commit"
+rev = "91ab4bf57e58b32adf1a122681f6ebe164d081c8" # frozen: v4.4.0
+hooks = [
+  # Strict mode also checks merge and fixup messages.
+  { id = "conventional-pre-commit", stages = ["commit-msg"], args = ["--strict", "--verbose"] },
+]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "vite-plus"
+name = "Vite+ format, lint and types (Oxfmt + Oxlint + tsgolint)"
+language = "system"
+entry = "vp check"
+files = "\\.([cm]?[jt]sx?|json|css|ya?ml|toml|md)$"
+pass_filenames = false
+
+[[repos.hooks]]
+id = "tests"
+name = "Unit tests and project type check"
+language = "system"
+entry = "make typecheck test"
+pass_filenames = false
+always_run = true
+stages = ["pre-push"]
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  # pnpm writes a multi-document YAML lockfile.
+  { id = "check-yaml", args = ["--allow-multiple-documents"] },
+  { id = "check-toml" },
+  # tsconfig files are JSONC.
+  { id = "check-json", exclude = "^tsconfig(\\.\\w+)?\\.json$" },
+  { id = "check-merge-conflict" },
+  { id = "mixed-line-ending" },
+  { id = "check-added-large-files", args = ["--maxkb=1024"] },
+  { id = "detect-private-key" },
+  { id = "fix-byte-order-marker" },
+]
