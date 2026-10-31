@@ -32,3 +32,16 @@ dist-ssr
 data/
 # Downloaded sources for scripts/build_data.py
 .cache/
+
+# Reports and tool caches
+coverage/
+.fallow/
+playwright-report/
+test-results/
+.ruff_cache/
+.rumdl_cache/
+.pytest_cache/
+scripts/.venv/
+scripts/.ruff_cache/
+scripts/.pytest_cache/
+__pycache__/

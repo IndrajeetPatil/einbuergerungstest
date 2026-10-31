@@ -1,287 +1,278 @@
+// The progress store: one SQLite file through Node's built-in node:sqlite.
+// Correctness is judged here against the official answer key, and every row
+// read back is validated against the shared schemas.
 import { mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import catalogue from "../src/data/catalogue.json" with { type: "json" };
+
+import { z as zod } from "zod/mini";
+
+import {
+  answerInputSchema,
+  sessionSummarySchema,
+  settingsPatchSchema,
+  startSessionInputSchema,
+} from "#lib/schemas.ts";
 import type {
   AnswerInput,
-  Catalogue,
   QuestionStat,
   SessionSummary,
   Settings,
-  StartSessionInput,
-  StateCode,
   Summary,
-} from "../src/lib/types.ts";
+} from "#lib/schemas.ts";
+import { mergeSettings } from "#lib/settings.ts";
 
-/** Override with `LID_DB=/path/to/file.sqlite` (used by end-to-end checks to keep real progress clean). */
-export const DEFAULT_DB_PATH =
-  process.env.LID_DB ?? join(import.meta.dirname, "..", "data", "progress.sqlite");
+import { ValidationError } from "./errors.ts";
+import { MIGRATIONS } from "./migrations.ts";
+import {
+  SQL,
+  countRowSchema,
+  openRowSchema,
+  settingRowSchema,
+  statRowSchema,
+  versionRowSchema,
+} from "./queries.ts";
+import { judge, parse, roundOrNull } from "./validation.ts";
 
-export const DEFAULT_SETTINGS: Settings = {
+interface FinishInput {
+  answers?: unknown;
+  durationMs?: number | null;
+}
+
+/** Override with `LID_DB=/path/file.sqlite`; tests and checks use a throwaway. */
+const DEFAULT_DB_PATH =
+  process.env["LID_DB"] ??
+  path.join(import.meta.dirname, "..", "data", "progress.sqlite");
+
+const DEFAULT_SETTINGS: Settings = {
   state: null,
-  examDate: "2026-11-11",
+  examDate: null,
   showEnglish: true,
   shuffleOptions: true,
 };
 
-const QUESTIONS = new Map((catalogue as Catalogue).questions.map((q) => [q.id, q]));
-const STATES = new Set((catalogue as Catalogue).states.map((s) => s.code));
+/** Progress persisted in SQLite. */
+class ProgressStore {
+  public readonly db: DatabaseSync;
 
-/** Schema migrations, applied in order; `PRAGMA user_version` records how many have run. */
-const MIGRATIONS = [
-  `
-  CREATE TABLE settings (
-    key   TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-  );
-  CREATE TABLE sessions (
-    id             INTEGER PRIMARY KEY,
-    mode           TEXT    NOT NULL CHECK (mode IN ('exam', 'practice')),
-    focus          TEXT,
-    state          TEXT    NOT NULL,
-    question_count INTEGER NOT NULL,
-    started_at     TEXT    NOT NULL,
-    finished_at    TEXT,
-    duration_ms    INTEGER
-  );
-  CREATE TABLE answers (
-    id          INTEGER PRIMARY KEY,
-    session_id  INTEGER NOT NULL REFERENCES sessions (id) ON DELETE CASCADE,
-    question_id TEXT    NOT NULL,
-    position    INTEGER NOT NULL,
-    chosen      INTEGER CHECK (chosen BETWEEN 0 AND 3),
-    correct     INTEGER NOT NULL CHECK (correct IN (0, 1)),
-    retry       INTEGER NOT NULL DEFAULT 0 CHECK (retry IN (0, 1)),
-    time_ms     INTEGER,
-    answered_at TEXT    NOT NULL
-  );
-  CREATE INDEX answers_by_question ON answers (question_id, answered_at);
-  CREATE INDEX answers_by_session ON answers (session_id);
-  `,
-];
-
-export class ValidationError extends Error {}
-
-export class ProgressStore {
-  readonly db: DatabaseSync;
-
-  constructor(path: string = DEFAULT_DB_PATH) {
-    if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
-    this.db = new DatabaseSync(path);
+  public constructor(file: string = DEFAULT_DB_PATH) {
+    if (file !== ":memory:") {
+      mkdirSync(path.dirname(file), { recursive: true });
+    }
+    this.db = new DatabaseSync(file);
     this.db.exec(
       "PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 3000;",
     );
     this.migrate();
   }
 
-  private migrate(): void {
-    const { user_version: version } = this.db.prepare("PRAGMA user_version").get() as {
-      user_version: number;
-    };
-    for (let i = version; i < MIGRATIONS.length; i++) {
-      this.db.exec("BEGIN");
-      try {
-        this.db.exec(MIGRATIONS[i]!);
-        this.db.exec(`PRAGMA user_version = ${i + 1}`);
-        this.db.exec("COMMIT");
-      } catch (error) {
-        this.db.exec("ROLLBACK");
-        throw error;
-      }
-    }
+  public [Symbol.dispose](): void {
+    this.close();
   }
 
-  close(): void {
+  public close(): void {
     this.db.close();
   }
 
-  getSettings(): Settings {
-    const rows = this.db.prepare("SELECT key, value FROM settings").all() as {
-      key: string;
-      value: string;
-    }[];
-    const stored = Object.fromEntries(rows.map((r) => [r.key, JSON.parse(r.value) as unknown]));
-    return { ...DEFAULT_SETTINGS, ...stored };
+  public getSettings(): Settings {
+    const rows = zod.parse(
+      zod.array(settingRowSchema),
+      this.db.prepare(SQL.settings).all(),
+    );
+    const stored: unknown = Object.fromEntries(
+      rows.map((row) => [row.key, JSON.parse(row.value)]),
+    );
+    const known = zod.safeParse(settingsPatchSchema, stored);
+    return mergeSettings(DEFAULT_SETTINGS, known.success ? known.data : {});
   }
 
-  updateSettings(patch: Partial<Settings>): Settings {
-    const clean: Partial<Settings> = {};
-    if ("state" in patch) {
-      if (patch.state !== null && !STATES.has(patch.state as StateCode)) {
-        throw new ValidationError("unknown federal state");
-      }
-      clean.state = patch.state ?? null;
+  public updateSettings(patch: unknown): Settings {
+    const upsert = this.db.prepare(SQL.upsertSetting);
+    for (const [key, value] of Object.entries(
+      parse(settingsPatchSchema, patch),
+    )) {
+      upsert.run(key, JSON.stringify(value));
     }
-    if ("examDate" in patch) {
-      if (typeof patch.examDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(patch.examDate)) {
-        throw new ValidationError("examDate must be YYYY-MM-DD");
-      }
-      clean.examDate = patch.examDate;
-    }
-    for (const key of ["showEnglish", "shuffleOptions"] as const) {
-      if (key in patch) {
-        if (typeof patch[key] !== "boolean") throw new ValidationError(`${key} must be a boolean`);
-        clean[key] = patch[key];
-      }
-    }
-    const upsert = this.db.prepare(
-      "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
-    );
-    for (const [key, value] of Object.entries(clean)) upsert.run(key, JSON.stringify(value));
     return this.getSettings();
   }
 
-  startSession(input: StartSessionInput, now = new Date()): number {
-    if (input.mode !== "exam" && input.mode !== "practice") throw new ValidationError("bad mode");
-    if (!STATES.has(input.state)) throw new ValidationError("unknown federal state");
-    if (!Number.isInteger(input.questionCount) || input.questionCount < 1) {
-      throw new ValidationError("questionCount must be a positive integer");
-    }
+  public startSession(input: unknown, now: Date = new Date()): number {
+    const valid = parse(startSessionInputSchema, input);
     const result = this.db
-      .prepare(
-        "INSERT INTO sessions (mode, focus, state, question_count, started_at) VALUES (?, ?, ?, ?, ?)",
-      )
-      .run(input.mode, input.focus ?? null, input.state, input.questionCount, now.toISOString());
+      .prepare(SQL.startSession)
+      .run(
+        valid.mode,
+        valid.focus,
+        valid.state,
+        valid.questionCount,
+        now.toISOString(),
+      );
     return Number(result.lastInsertRowid);
   }
 
-  private requireOpenSession(id: number): void {
-    const row = this.db.prepare("SELECT finished_at FROM sessions WHERE id = ?").get(id) as
-      | { finished_at: string | null }
-      | undefined;
-    if (!row) throw new ValidationError("unknown session");
-    if (row.finished_at) throw new ValidationError("session already finished");
-  }
-
-  /** Stores one answer; correctness is judged here, against the official answer key. */
-  recordAnswer(sessionId: number, input: AnswerInput, now = new Date()): boolean {
+  /**
+   * Stores one practice answer and reports whether it was correct.
+   * @param sessionId - Open session.
+   * @param input - The answer; validated here.
+   * @param now - Time of the answer.
+   * @returns Whether the chosen option is the official answer.
+   */
+  public recordAnswer(
+    sessionId: number,
+    input: unknown,
+    now: Date = new Date(),
+  ): boolean {
     this.requireOpenSession(sessionId);
-    return this.insertAnswer(sessionId, input, now);
+    return this.insertAnswer(sessionId, parse(answerInputSchema, input), now);
   }
 
-  private insertAnswer(sessionId: number, input: AnswerInput, now: Date): boolean {
-    const question = QUESTIONS.get(input.questionId);
-    if (!question) throw new ValidationError(`unknown question ${String(input.questionId)}`);
-    const chosen = input.chosen;
-    if (chosen !== null && !(Number.isInteger(chosen) && chosen >= 0 && chosen <= 3)) {
-      throw new ValidationError("chosen must be 0-3 or null");
+  /**
+   * Closes a session; mock exams submit all their answers here.
+   * @param id - Open session.
+   * @param input - Answers to store with it (validated here) and time spent.
+   * @param now - Time of closing.
+   * @returns The finished session's summary.
+   */
+  public finishSession(
+    id: number,
+    input: FinishInput = {},
+    now: Date = new Date(),
+  ): SessionSummary {
+    this.requireOpenSession(id);
+    const answers = parse(zod.array(answerInputSchema), input.answers ?? []);
+    this.transaction(() => {
+      for (const answer of answers) {
+        this.insertAnswer(id, answer, now);
+      }
+      this.db
+        .prepare(SQL.finishSession)
+        .run(now.toISOString(), roundOrNull(input.durationMs), id);
+    });
+    const summary = this.sessions().find((session) => session.id === id);
+    if (summary === undefined) {
+      throw new Error(`session ${id} vanished after finishing`);
     }
-    const correct = chosen === question.answer;
+    return summary;
+  }
+
+  /**
+   * Abandons a session: deleted when empty, otherwise closed as is.
+   * @param id - Session to abandon.
+   * @param now - Time of abandoning.
+   */
+  public discardSession(id: number, now: Date = new Date()): void {
+    this.transaction(() => {
+      const { count } = zod.parse(
+        countRowSchema,
+        this.db.prepare(SQL.countAnswers).get(id),
+      );
+      if (count === 0) {
+        this.db.prepare(SQL.deleteOpenSession).run(id);
+        return;
+      }
+      const stamp = now.toISOString();
+      this.db.prepare(SQL.closeOpenSession).run(stamp, stamp, id);
+    });
+  }
+
+  public sessions(): SessionSummary[] {
+    return zod.parse(
+      zod.array(sessionSummarySchema),
+      this.db.prepare(SQL.sessions).all(),
+    );
+  }
+
+  public stats(): Record<string, QuestionStat> {
+    const rows = zod.parse(
+      zod.array(statRowSchema),
+      this.db.prepare(SQL.stats).all(),
+    );
+    return Object.fromEntries(rows.map(({ id, ...stat }) => [id, stat]));
+  }
+
+  public summary(): Summary {
+    return {
+      settings: this.getSettings(),
+      sessions: this.sessions(),
+      stats: this.stats(),
+    };
+  }
+
+  /**
+   * Everything, for `make export`.
+   * @returns Settings, sessions and answers.
+   */
+  public dump(): Record<string, unknown> {
+    return {
+      exportedAt: new Date().toISOString(),
+      settings: this.getSettings(),
+      sessions: this.db.prepare(SQL.allSessions).all(),
+      answers: this.db.prepare(SQL.allAnswers).all(),
+    };
+  }
+
+  public backup(file: string): void {
+    mkdirSync(path.dirname(file), { recursive: true });
+    this.db.prepare(SQL.backup).run(file);
+  }
+
+  private migrate(): void {
+    const { user_version: version } = zod.parse(
+      versionRowSchema,
+      this.db.prepare(SQL.userVersion).get(),
+    );
+    for (const [index, sql] of MIGRATIONS.entries()) {
+      if (index >= version) {
+        this.transaction(() => {
+          this.db.exec(sql);
+          this.db.exec(`PRAGMA user_version = ${index + 1}`);
+        });
+      }
+    }
+  }
+
+  private transaction(work: () => void): void {
+    this.db.exec("BEGIN");
+    try {
+      work();
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  private requireOpenSession(id: number): void {
+    const row = this.db.prepare(SQL.sessionState).get(id);
+    if (row === undefined) {
+      throw new ValidationError("unknown session");
+    }
+    if (zod.parse(openRowSchema, row).finished_at !== null) {
+      throw new ValidationError("session already finished");
+    }
+  }
+
+  private insertAnswer(
+    sessionId: number,
+    input: AnswerInput,
+    now: Date,
+  ): boolean {
+    const correct = judge(input);
     this.db
-      .prepare(
-        `INSERT INTO answers (session_id, question_id, position, chosen, correct, retry, time_ms, answered_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      )
+      .prepare(SQL.insertAnswer)
       .run(
         sessionId,
         input.questionId,
         input.position,
-        chosen,
+        input.chosen,
         correct ? 1 : 0,
-        input.retry ? 1 : 0,
-        input.timeMs === null ? null : Math.max(0, Math.round(input.timeMs)),
+        input.retry === true ? 1 : 0,
+        roundOrNull(input.timeMs),
         now.toISOString(),
       );
     return correct;
   }
-
-  /** Closes a session, optionally storing a batch of answers (exam mode submits all at once). */
-  finishSession(
-    id: number,
-    answers: AnswerInput[] = [],
-    durationMs: number | null = null,
-    now = new Date(),
-  ): SessionSummary {
-    this.requireOpenSession(id);
-    this.db.exec("BEGIN");
-    try {
-      for (const answer of answers) this.insertAnswer(id, answer, now);
-      this.db
-        .prepare("UPDATE sessions SET finished_at = ?, duration_ms = ? WHERE id = ?")
-        .run(now.toISOString(), durationMs === null ? null : Math.round(durationMs), id);
-      this.db.exec("COMMIT");
-    } catch (error) {
-      this.db.exec("ROLLBACK");
-      throw error;
-    }
-    return this.sessions().find((s) => s.id === id)!;
-  }
-
-  /** Abandons an unfinished session; answers already given in practice are kept as evidence. */
-  discardSession(id: number): void {
-    this.db.exec("BEGIN");
-    try {
-      const { n } = this.db
-        .prepare("SELECT COUNT(*) AS n FROM answers WHERE session_id = ?")
-        .get(id) as { n: number };
-      if (n === 0) {
-        this.db.prepare("DELETE FROM sessions WHERE id = ? AND finished_at IS NULL").run(id);
-      } else {
-        this.db
-          .prepare(
-            `UPDATE sessions SET finished_at = ?,
-               duration_ms = CAST((julianday(?) - julianday(started_at)) * 86400000 AS INTEGER)
-             WHERE id = ? AND finished_at IS NULL`,
-          )
-          .run(new Date().toISOString(), new Date().toISOString(), id);
-      }
-      this.db.exec("COMMIT");
-    } catch (error) {
-      this.db.exec("ROLLBACK");
-      throw error;
-    }
-  }
-
-  sessions(): SessionSummary[] {
-    const rows = this.db
-      .prepare(
-        `SELECT s.id, s.mode, s.focus, s.state, s.question_count AS questionCount,
-                s.started_at AS startedAt, s.finished_at AS finishedAt, s.duration_ms AS durationMs,
-                COUNT(a.id) FILTER (WHERE a.retry = 0 AND a.chosen IS NOT NULL) AS answered,
-                COALESCE(SUM(a.correct) FILTER (WHERE a.retry = 0), 0) AS correct
-         FROM sessions s LEFT JOIN answers a ON a.session_id = s.id
-         WHERE s.finished_at IS NOT NULL
-         GROUP BY s.id
-         ORDER BY s.started_at`,
-      )
-      .all() as unknown as SessionSummary[];
-    return rows.map((r) => ({ ...r }));
-  }
-
-  stats(): Record<string, QuestionStat> {
-    const rows = this.db
-      .prepare(
-        `WITH ranked AS (
-           SELECT question_id, correct, answered_at,
-                  ROW_NUMBER() OVER (PARTITION BY question_id ORDER BY answered_at DESC, id DESC) AS rn
-           FROM answers
-         )
-         SELECT question_id AS id, COUNT(*) AS attempts, SUM(correct) AS correct,
-                MAX(answered_at) AS lastAt,
-                GROUP_CONCAT(CASE WHEN rn <= 5 THEN correct END, '' ORDER BY rn) AS recent
-         FROM ranked
-         GROUP BY question_id`,
-      )
-      .all() as unknown as (QuestionStat & { id: string })[];
-    return Object.fromEntries(rows.map(({ id, ...stat }) => [id, { ...stat }]));
-  }
-
-  summary(): Summary {
-    return { settings: this.getSettings(), sessions: this.sessions(), stats: this.stats() };
-  }
-
-  /** Everything, for `make export`. */
-  dump(): Record<string, unknown> {
-    return {
-      exportedAt: new Date().toISOString(),
-      settings: this.getSettings(),
-      sessions: this.db.prepare("SELECT * FROM sessions ORDER BY id").all(),
-      answers: this.db.prepare("SELECT * FROM answers ORDER BY id").all(),
-    };
-  }
-
-  backup(path: string): void {
-    mkdirSync(dirname(path), { recursive: true });
-    this.db.prepare("VACUUM INTO ?").run(path);
-  }
 }
+
+export { DEFAULT_DB_PATH, ProgressStore };
+export type { FinishInput };

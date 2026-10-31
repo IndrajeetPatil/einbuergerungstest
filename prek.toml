@@ -10,36 +10,73 @@ cooldown_days = 0
 repo = "https://github.com/astral-sh/ruff-pre-commit"
 rev = "25bcf95026b96e2dd3c0aec3090c3d6ef6ca2e6c" # frozen: v0.17.3
 hooks = [
+  # Discover scripts/pyproject.toml per file so scripts/ stays the project root.
   { id = "ruff-check", files = "^scripts/" },
-  { id = "ruff-format", files = "^scripts/", args = [
-    "--check",
-  ] },
+  { id = "ruff-format", files = "^scripts/", args = ["--check"] },
 ]
+
+[[repos]]
+repo = "https://github.com/rvben/rumdl-pre-commit"
+rev = "b0cff962ee693b9e612c097d22e71e0cba127447" # frozen: v0.3.2
+hooks = [{ id = "rumdl-check" }]
+
+[[repos]]
+repo = "https://github.com/crate-ci/typos"
+rev = "7f9d0819ca1c008ade73f4b41fa9d258d48f605b" # frozen: v1.51.1
+hooks = [{ id = "typos" }]
 
 [[repos]]
 repo = "https://github.com/compilerla/conventional-pre-commit"
 rev = "33b50eb042bee26eac0ee96ad84aa9c1b4dccdd8" # frozen: v4.5.0
 hooks = [
-  # Strict mode also checks merge and fixup messages.
-  { id = "conventional-pre-commit", stages = ["commit-msg"], args = ["--strict", "--verbose"] },
+  # No Node or project dependencies; strict mode also checks merge and fixup messages.
+  { id = "conventional-pre-commit", stages = [
+    "commit-msg",
+  ], args = [
+    "--strict",
+    "--verbose",
+  ] },
 ]
 
 [[repos]]
 repo = "local"
 
+# Managed environments install only these tools, not the app's dependencies.
+# Keep additional_dependencies aligned with pnpm-lock.yaml.
+[[repos.hooks]]
+id = "ls-lint"
+name = "file naming (pinned ls-lint)"
+language = "node"
+language_version = ">=22"
+additional_dependencies = ["@ls-lint/ls-lint@2.3.2"]
+entry = "node --run file-naming"
+pass_filenames = false
+always_run = true
+
+# Type-aware linting resolves the app's own dependencies, so this hook runs
+# against the locked node_modules from `make install`.
 [[repos.hooks]]
 id = "vite-plus"
-name = "Vite+ format, lint and types (Oxfmt + Oxlint + tsgolint)"
+name = "Vite+ format, lint and types (Oxfmt + Oxlint)"
 language = "system"
-entry = "vp check"
-files = "\\.([cm]?[jt]sx?|json|css|ya?ml|toml|md)$"
+entry = "make lint"
+files = "\\.([cm]?[jt]sx?|json|css|ya?ml|toml)$"
 pass_filenames = false
 
 [[repos.hooks]]
-id = "tests"
-name = "Unit tests and project type check"
+id = "typecheck"
+name = "TypeScript and Python type checks"
 language = "system"
-entry = "make typecheck test"
+entry = "make typecheck qa-python"
+pass_filenames = false
+always_run = true
+stages = ["pre-push"]
+
+[[repos.hooks]]
+id = "tests"
+name = "Unit tests (Vitest and pytest)"
+language = "system"
+entry = "make test"
 pass_filenames = false
 always_run = true
 stages = ["pre-push"]

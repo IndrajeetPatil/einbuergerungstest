@@ -105,10 +105,9 @@
     padding: 0.5rem 1rem;
     font-weight: 600;
     color: var(--color-ink);
-    transition:
-      border-color 120ms,
-      background-color 120ms,
-      color 120ms;
+    /* Only the border animates: fading text and fill separately would pass
+       through low-contrast mixes when a button turns primary. */
+    transition: border-color 120ms;
   }
   .btn:hover:not(:disabled) {
     border-color: var(--color-accent);
@@ -139,7 +138,11 @@
   .link {
     color: var(--color-accent);
     text-decoration: underline;
-    text-decoration-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
+    text-decoration-color: color-mix(
+      in oklab,
+      var(--color-accent) 40%,
+      transparent
+    );
     text-underline-offset: 0.18em;
   }
   .link:hover {
@@ -173,6 +176,31 @@
     );
     background-size: 100% 6px;
     background-repeat: no-repeat;
+  }
+
+  /* Native <progress>, drawn as a thin accent bar on a hairline track. */
+  .progress-bar {
+    display: block;
+    width: 100%;
+    height: 4px;
+    appearance: none;
+    border: 0;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: var(--color-line);
+    color: var(--color-accent);
+  }
+  .progress-bar::-webkit-progress-bar {
+    background: var(--color-line);
+  }
+  .progress-bar::-webkit-progress-value {
+    background: var(--color-accent);
+    border-radius: 9999px;
+    transition: width 300ms;
+  }
+  .progress-bar::-moz-progress-bar {
+    background: var(--color-accent);
+    border-radius: 9999px;
   }
 
   .select,

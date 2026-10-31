@@ -1,7 +1,7 @@
 name: QA
 
 # Merge gate for pull requests into the protected `main` branch. Runs on pull
-# requests only: direct pushes to `main` are validated locally with `make ci`.
+# requests only; direct pushes to `main` are validated locally with `make ci`.
 on:
   pull_request:
     branches: [main]
@@ -28,7 +28,7 @@ jobs:
   qa:
     name: QA
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -44,18 +44,34 @@ jobs:
           cache-toolchain: true
           run-install: false
 
-      # Ruff and ty for the Python data pipeline run through uv.
+      # Ruff, ty, pyrefly and rumdl run through uv.
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
       - name: Install dependencies
-        run: vp install --frozen-lockfile
+        run: make install
 
-      - name: Format, lint and types (Oxfmt, Oxlint, tsgo, Ruff, ty)
-        run: make check
+      # The same gates as `make qa`, with separately readable step logs.
+      - name: File naming
+        run: make file-naming
 
-      - name: Unit tests
-        run: make test
+      - name: Format and lint (Oxfmt, Oxlint)
+        run: make lint
+
+      - name: Types (TypeScript 7)
+        run: make typecheck
+
+      - name: Python lint and types (Ruff, ty, pyrefly)
+        run: make qa-python
+
+      - name: Markdown lint (rumdl)
+        run: make lint-markdown
+
+      - name: Unit tests, coverage, dead code and complexity (Vitest, fallow)
+        run: make fallow
+
+      - name: CSS quality
+        run: make css-quality
 
       - name: Production build
         run: make build

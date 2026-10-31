@@ -1,0 +1,41 @@
+import type { ReactElement } from "react";
+
+import { MastheadNav } from "./MastheadNav.tsx";
+
+/**
+ * Site title with navigation, or a pause button during sessions.
+ * @param props - Current view, exam date and pause handler.
+ * @returns The header.
+ */
+function Masthead(
+  props: Readonly<{
+    catalogue: boolean;
+    inSession: boolean;
+    examDate: string | null;
+    onPause: () => void;
+  }>,
+): ReactElement {
+  return (
+    <header className="border-b border-line">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-3 md:px-8">
+        <p className="font-serif text-lg font-semibold">Leben in Deutschland</p>
+        {props.inSession ? (
+          <button
+            type="button"
+            className="btn btn-quiet min-h-9 text-sm"
+            onClick={props.onPause}
+          >
+            Pause · back to overview
+          </button>
+        ) : (
+          <MastheadNav
+            catalogue={props.catalogue}
+            examDate={props.examDate}
+          />
+        )}
+      </div>
+    </header>
+  );
+}
+
+export { Masthead };

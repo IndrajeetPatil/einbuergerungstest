@@ -2,7 +2,13 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "es2024",
-    "lib": ["ES2024", "ESNext.Array", "ESNext.Collection"],
+    "lib": [
+      "ES2024",
+      "ESNext.Array",
+      "ESNext.Collection",
+      "ESNext.Disposable",
+      "DOM"
+    ],
     "types": ["node"],
     "skipLibCheck": true,
 
@@ -14,13 +20,21 @@
     "moduleDetection": "force",
     "noEmit": true,
 
-    /* Linting */
+    /* Strictest (mirrors @tsconfig/strictest) */
     "strict": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "erasableSyntaxOnly": true
   },
-  "include": ["vite.config.ts", "server"]
+  "include": ["vite.config.ts", "playwright.config.ts", "server", "tests"]
 }

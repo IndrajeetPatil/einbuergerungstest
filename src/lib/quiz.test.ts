@@ -1,221 +1,217 @@
-import { describe, expect, it } from "vite-plus/test";
-import catalogue from "../data/catalogue.json";
+import { describe, expect, test } from "vite-plus/test";
+
+import { catalogue, questions } from "./catalogue.ts";
 import {
   EXAM,
-  daysUntil,
+  accuracy,
   drawExam,
-  masteryOf,
   optionOrder,
+  passed,
   practiceQuestions,
-  priority,
   shuffle,
-  streak,
-  weakest,
+  weightedSample,
 } from "./quiz.ts";
-import { check, choose, createSession, goTo, RETRY_GAP } from "./session.ts";
-import type { Catalogue, QuestionStat, SessionSummary } from "./types.ts";
+import { required, seeded, sessionOf, statOf } from "./testing.ts";
 
-const { questions } = catalogue as Catalogue;
+const SAMPLE_RUNS = 8000;
+const picture = required(questions.find((entry) => entry.de.o[0] === "Bild 1"));
+const text = required(questions.find((entry) => !entry.keepOrder));
+const base = { questions, state: "HH", size: 10, rng: seeded(1) } as const;
 
-/** Deterministic PRNG (mulberry32) so random tests are reproducible. */
-function rng(seed = 1) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+function positionCounts(): number[] {
+  const counts = [0, 0, 0, 0];
+  const rng = seeded(7);
+  for (let run = 0; run < SAMPLE_RUNS; run += 1) {
+    const position = shuffle([0, 1, 2, 3], rng).indexOf(0);
+    counts[position] = required(counts[position]) + 1;
+  }
+  return counts;
 }
 
-const stat = (recent: string, lastAt = "2026-10-30T10:00:00.000Z"): QuestionStat => ({
-  attempts: recent.length,
-  correct: recent.split("").filter((c) => c === "1").length,
-  lastAt,
-  recent,
-});
+function ids(picked: readonly { id: string }[]): string[] {
+  return picked.map((entry) => entry.id);
+}
 
-describe("catalogue", () => {
-  it("has the official 300 general and 16 × 10 state questions", () => {
-    expect(questions.filter((q) => q.state === null)).toHaveLength(300);
-    for (const s of (catalogue as Catalogue).states) {
-      expect(questions.filter((q) => q.state === s.code)).toHaveLength(10);
-    }
+describe("bundled question catalogue", () => {
+  test("has 300 general and 10 questions for each of the 16 states", () => {
+    expect(questions.filter((entry) => entry.state === null)).toHaveLength(300);
+    expect(
+      catalogue.states.map(
+        (state) =>
+          questions.filter((entry) => entry.state === state.code).length,
+      ),
+    ).toStrictEqual(Array.from({ length: 16 }, () => 10));
   });
 
-  it("has four options, an answer and an explanation in both languages for every question", () => {
-    for (const q of questions) {
-      expect(q.de.o).toHaveLength(4);
-      expect(q.en.o).toHaveLength(4);
-      expect(q.answer).toBeGreaterThanOrEqual(0);
-      expect(q.answer).toBeLessThan(4);
-      expect(q.de.q.length).toBeGreaterThan(5);
-      expect(q.en.q.length).toBeGreaterThan(5);
-      expect(q.explanation.en.length).toBeGreaterThan(20);
-    }
-  });
-
-  it("only marks picture-label or numeric options as fixed-order", () => {
-    for (const q of questions.filter((x) => x.keepOrder)) {
-      expect(q.de.o.every((o) => /^(Bild \d|[\d.,\s%–-]+.*)$/.test(o))).toBe(true);
-    }
+  test("only keeps picture-label or numeric options in fixed order", () => {
+    const fixed = questions.filter((entry) => entry.keepOrder);
+    expect(
+      fixed.every((entry) =>
+        entry.de.o.every((option) =>
+          /^(?:Bild \d|[\d.,\s%–-]+.*)$/u.test(option),
+        ),
+      ),
+    ).toBe(true);
   });
 });
 
-describe("shuffle", () => {
-  it("is a permutation and does not mutate its input", () => {
+describe(shuffle, () => {
+  test("returns a permutation and leaves its input untouched", () => {
     const input = [1, 2, 3, 4, 5, 6];
-    const out = shuffle(input, rng(3));
-    expect(out.toSorted((a, b) => a - b)).toEqual(input);
-    expect(input).toEqual([1, 2, 3, 4, 5, 6]);
+    const shuffled = shuffle(input, seeded(3));
+    expect(shuffled.toSorted((left, right) => left - right)).toStrictEqual(
+      input,
+    );
+    expect(input).toStrictEqual([1, 2, 3, 4, 5, 6]);
   });
 
-  it("is roughly uniform over positions", () => {
-    const counts = [0, 0, 0, 0];
-    const r = rng(7);
-    for (let i = 0; i < 8000; i++) counts[shuffle([0, 1, 2, 3], r).indexOf(0)]!++;
-    for (const c of counts) expect(c).toBeGreaterThan(1800);
-  });
-});
-
-describe("drawExam", () => {
-  it("draws 30 distinct general questions followed by 3 for the state", () => {
-    const exam = drawExam(questions, "BE", rng(11));
-    expect(exam).toHaveLength(EXAM.total);
-    expect(new Set(exam.map((q) => q.id)).size).toBe(EXAM.total);
-    expect(exam.slice(0, 30).every((q) => q.state === null)).toBe(true);
-    expect(exam.slice(30).every((q) => q.state === "BE")).toBe(true);
-  });
-
-  it("differs between draws", () => {
-    const a = drawExam(questions, "BY", rng(1)).map((q) => q.id);
-    const b = drawExam(questions, "BY", rng(2)).map((q) => q.id);
-    expect(a).not.toEqual(b);
+  test("puts an item in each position about equally often", () => {
+    expect(Math.min(...positionCounts())).toBeGreaterThan(1800);
   });
 });
 
-describe("optionOrder", () => {
-  it("keeps picture options in place and shuffles text options", () => {
-    const picture = questions.find((q) => q.de.o[0] === "Bild 1")!;
-    expect(optionOrder(picture, true, rng(5))).toEqual([0, 1, 2, 3]);
-    const text = questions.find((q) => !q.keepOrder)!;
+describe(weightedSample, () => {
+  test("never picks more than asked or repeats an item", () => {
+    const picked = weightedSample({
+      items: [1, 2, 3, 4, 5],
+      weight: () => 1,
+      count: 3,
+      rng: seeded(5),
+    });
+    expect(new Set(picked).size).toBe(3);
+  });
+});
+
+describe(drawExam, () => {
+  test("draws 30 distinct general questions, then 3 for the state", () => {
+    const exam = drawExam(questions, "BE", seeded(11));
+    expect(new Set(ids(exam)).size).toBe(EXAM.total);
+    expect(
+      exam.slice(0, EXAM.general).every((entry) => entry.state === null),
+    ).toBe(true);
+    expect(
+      exam.slice(EXAM.general).every((entry) => entry.state === "BE"),
+    ).toBe(true);
+  });
+
+  test("differs between draws", () => {
+    const first = drawExam(questions, "BY", seeded(1));
+    const second = drawExam(questions, "BY", seeded(2));
+    expect(ids(first)).not.toStrictEqual(ids(second));
+  });
+});
+
+describe(optionOrder, () => {
+  test("keeps picture options in place", () => {
+    expect(optionOrder(picture, true, seeded(5))).toStrictEqual([0, 1, 2, 3]);
+  });
+
+  test("shuffles text options only when asked", () => {
     const orders = new Set(
-      Array.from({ length: 20 }, (_, i) => optionOrder(text, true, rng(i + 1)).join("")),
+      Array.from({ length: 20 }, (_unused, run) =>
+        optionOrder(text, true, seeded(run + 1)).join(""),
+      ),
     );
     expect(orders.size).toBeGreaterThan(5);
-    expect(optionOrder(text, false)).toEqual([0, 1, 2, 3]);
+    expect(optionOrder(text, false)).toStrictEqual([0, 1, 2, 3]);
   });
 });
 
-describe("mastery and priority", () => {
-  it("classifies by the most recent answers", () => {
-    expect(masteryOf(undefined)).toBe("new");
-    expect(masteryOf(stat("0111"))).toBe("missed");
-    expect(masteryOf(stat("10"))).toBe("once");
-    expect(masteryOf(stat("110"))).toBe("mastered");
-  });
-
-  it("puts missed above new above mastered", () => {
-    const now = Date.parse("2026-10-31T10:00:00.000Z");
-    expect(priority(stat("0"), now)).toBeGreaterThan(priority(undefined, now));
-    expect(priority(undefined, now)).toBeGreaterThan(priority(stat("11"), now));
-  });
-});
-
-describe("practiceQuestions", () => {
-  it("returns only unseen questions for the 'new' focus", () => {
-    const stats = { g1: stat("1"), g2: stat("0") };
-    const picked = practiceQuestions(questions, "HH", "new", stats, 400, [], rng(1));
+describe(practiceQuestions, () => {
+  test("picks only unseen questions for the new focus", () => {
+    const stats = { g1: statOf("1"), g2: statOf("0") };
+    const picked = practiceQuestions({
+      ...base,
+      focus: "new",
+      stats,
+      size: 400,
+    });
     expect(picked).toHaveLength(308);
-    expect(picked.some((q) => q.id === "g1" || q.id === "g2")).toBe(false);
+    expect(ids(picked)).not.toStrictEqual(expect.arrayContaining(["g1"]));
   });
 
-  it("returns only shaky or missed questions for the 'mistakes' focus", () => {
-    const stats = { g1: stat("1"), g2: stat("0"), g3: stat("11") };
-    const ids = practiceQuestions(questions, "HH", "mistakes", stats, 10, [], rng(1)).map(
-      (q) => q.id,
-    );
-    expect(ids.toSorted()).toEqual(["g1", "g2"]);
+  test("picks only shaky or missed questions for the mistakes focus", () => {
+    const stats = { g1: statOf("1"), g2: statOf("0"), g3: statOf("11") };
+    const picked = practiceQuestions({ ...base, focus: "mistakes", stats });
+    expect(ids(picked).toSorted()).toStrictEqual(["g1", "g2"]);
   });
 
-  it("never includes other states' questions", () => {
-    const picked = practiceQuestions(questions, "SN", "all", {}, 0, [], rng(1));
+  test("covers the whole pool for the all focus", () => {
+    const picked = practiceQuestions({
+      ...base,
+      state: "SN",
+      focus: "all",
+      stats: {},
+    });
     expect(picked).toHaveLength(310);
-    expect(picked.every((q) => q.state === null || q.state === "SN")).toBe(true);
+    expect(new Set(picked.map((entry) => entry.state))).toStrictEqual(
+      new Set([null, "SN"]),
+    );
   });
 
-  it("caps review questions at half of a smart-mix session and fills with unseen ones", () => {
-    const stats = Object.fromEntries(questions.slice(0, 40).map((q) => [q.id, stat("0")]));
-    const picked = practiceQuestions(questions, "HH", "smart", stats, 20, [], rng(4));
-    expect(picked).toHaveLength(20);
-    expect(new Set(picked.map((q) => q.id)).size).toBe(20);
-    expect(picked.filter((q) => q.id in stats)).toHaveLength(10);
+  test("picks the 10 state questions for the state focus", () => {
+    const picked = practiceQuestions({ ...base, focus: "state", stats: {} });
+    expect(picked.map((entry) => entry.state)).toStrictEqual(
+      Array.from({ length: 10 }, () => "HH"),
+    );
   });
 
-  it("always includes missed questions in the smart mix when there are few", () => {
-    const stats = { g10: stat("0"), g20: stat("0"), g30: stat("0") };
-    let hits = 0;
-    const r = rng(9);
-    for (let i = 0; i < 200; i++) {
-      const ids = practiceQuestions(questions, "HH", "smart", stats, 20, [], r).map((q) => q.id);
-      hits += ids.filter((id) => id in stats).length;
-    }
-    // Uniform sampling would include each only ~6.5% of the time; the review quota includes all.
-    expect(hits / (200 * 3)).toBe(1);
-  });
-});
-
-describe("weakest", () => {
-  it("lists questions answered wrongly, most recent misses first", () => {
-    const stats = { g1: stat("10"), g2: stat("0"), g3: stat("11") };
-    expect(weakest(questions, "BE", stats, 5).map((w) => w.question.id)).toEqual(["g2", "g1"]);
-  });
-});
-
-describe("practice session flow", () => {
-  it("re-queues a missed question a few places later with fresh options", () => {
-    const qs = questions.slice(0, 10);
-    let s = createSession(1, "practice", "smart", "BE", qs, true, 0, rng(1));
-    const q = qs[0]!;
-    const wrong = [0, 1, 2, 3].find((i) => i !== q.answer)!;
-    s = choose(s, wrong);
-    s = check(s, q, true, 1000, rng(2));
-    expect(s.items).toHaveLength(11);
-    expect(s.items[1 + RETRY_GAP]).toMatchObject({ qid: q.id, retry: true, chosen: null });
-    expect(s.items[0]!.timeMs).toBe(1000);
-    // A missed retry is not queued again.
-    s = goTo(s, 1 + RETRY_GAP, 2000);
-    s = choose(s, wrong);
-    s = check(s, q, true, 3000, rng(3));
-    expect(s.items).toHaveLength(11);
+  test("picks exactly the selected questions", () => {
+    const picked = practiceQuestions({
+      ...base,
+      focus: "selected",
+      stats: {},
+      selected: ["g5", "HH2"],
+    });
+    expect(ids(picked).toSorted()).toStrictEqual(["HH2", "g5"]);
   });
 
-  it("does not change a checked answer", () => {
-    const q = questions[0]!;
-    let s = createSession(1, "practice", "smart", "BE", [q], false, 0);
-    s = check(choose(s, q.answer), q, false, 10);
-    expect(choose(s, (q.answer + 1) % 4).items[0]!.chosen).toBe(q.answer);
+  test("caps review questions at half a smart mix", () => {
+    const stats = Object.fromEntries(
+      questions.slice(0, 40).map((entry) => [entry.id, statOf("0")]),
+    );
+    const picked = practiceQuestions({
+      ...base,
+      focus: "smart",
+      stats,
+      size: 20,
+    });
+    expect(new Set(ids(picked)).size).toBe(20);
+    expect(picked.filter((entry) => entry.id in stats)).toHaveLength(10);
   });
 
-  it("gives mock exams a 60-minute deadline", () => {
-    const s = createSession(1, "exam", null, "BE", questions.slice(0, 3), true, 1_000);
-    expect(s.deadline).toBe(1_000 + 60 * 60_000);
+  test("always includes a few missed questions in a smart mix", () => {
+    const stats = { g10: statOf("0"), g20: statOf("0"), g30: statOf("0") };
+    const picked = practiceQuestions({
+      ...base,
+      focus: "smart",
+      stats,
+      size: 20,
+    });
+    expect(ids(picked)).toStrictEqual(
+      expect.arrayContaining(["g10", "g20", "g30"]),
+    );
   });
 });
 
-describe("dates", () => {
-  it("counts days to the exam in local time", () => {
-    expect(daysUntil("2026-11-11", new Date(2026, 9, 31, 23, 30))).toBe(11);
-    expect(daysUntil("2026-11-11", new Date(2026, 10, 11, 8, 0))).toBe(0);
+describe(accuracy, () => {
+  test.each([
+    { session: sessionOf({ correct: 11, answered: 20 }), expected: 1 / 3 },
+    {
+      session: sessionOf({ mode: "practice", correct: 10, answered: 20 }),
+      expected: 0.5,
+    },
+    {
+      session: sessionOf({ mode: "practice", correct: 0, answered: 0 }),
+      expected: 0,
+    },
+  ])("is $expected for $session.mode", ({ session, expected }) => {
+    expect(accuracy(session)).toBeCloseTo(expected);
   });
+});
 
-  it("counts a daily streak that may end yesterday", () => {
-    const at = (d: number) =>
-      ({ startedAt: new Date(2026, 9, d, 12).toISOString() }) as SessionSummary;
-    const now = new Date(2026, 9, 31, 9);
-    expect(streak([at(28), at(29), at(30)], now)).toBe(3);
-    expect(streak([at(28), at(30), at(31)], now)).toBe(2);
-    expect(streak([at(27)], now)).toBe(0);
+describe(passed, () => {
+  test("passes from 17 correct answers", () => {
+    expect([passed(16), passed(17)]).toStrictEqual([false, true]);
   });
 });

@@ -1,0 +1,51 @@
+name: Hooks
+
+# The pre-commit hooks on every tracked file, on pull requests only.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: prek-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PREK_COLOR: always
+
+jobs:
+  hooks:
+    name: prek hooks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Vite+
+        uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
+        with:
+          node-version-file: ".node-version"
+          cache: true
+          cache-toolchain: true
+          run-install: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Run pre-commit hooks
+        uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d # v3.1.0
+        with:
+          prek-version: "0.5.9"
+          extra-args: --all-files --stage pre-commit

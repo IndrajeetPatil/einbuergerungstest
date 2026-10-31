@@ -1,0 +1,60 @@
+# Directory overrides replace all inherited rules; keep each layer explicit.
+ls:
+  .dir: kebab-case | regex:\.(agents|claude|github)
+  .*: kebab-case
+  .md: kebab-case | regex:(README|AGENTS|CLAUDE|CONTRIBUTING|SECURITY|LICENSE|SKILL|THIRD-PARTY-NOTICES)
+  .toml: kebab-case | regex:_typos
+  .ts: camelCase
+  .test.ts: camelCase
+  .config.ts: kebab-case
+  .d.ts: kebab-case
+
+  src/components:
+    .dir: kebab-case
+    .*: kebab-case
+    # React components are PascalCase; helper modules camelCase.
+    .tsx: PascalCase
+    .ts: camelCase
+
+  src:
+    .dir: kebab-case
+    .*: kebab-case
+    .ts: camelCase
+    .test.ts: camelCase
+    .tsx: PascalCase | regex:main
+
+  scripts:
+    .dir: kebab-case
+    .*: kebab-case
+    .py: snake_case
+    .mjs: kebab-case
+
+  # Picture names follow the catalogue's question ids (g21, BE1, ...).
+  public/img:
+    .webp: regex:(g\d+|[A-Z]{2}\d+)
+
+  tests/e2e:
+    .dir: kebab-case
+    .*: kebab-case
+    .spec.ts: kebab-case
+
+ignore:
+  - .git
+  # Vendored skills follow upstream conventions.
+  - .agents/skills
+  - node_modules
+  - .cache
+  - .ruff_cache
+  - .rumdl_cache
+  - .pytest_cache
+  - .fallow
+  - dist
+  - coverage
+  - data
+  - playwright-report
+  - test-results
+  - scripts/.venv
+  - scripts/.pytest_cache
+  - scripts/.ruff_cache
+  - scripts/__pycache__
+  - LICENSE

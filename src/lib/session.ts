@@ -1,141 +1,287 @@
-import { EXAM, optionOrder, type Rng } from "./quiz.ts";
-import type { AnswerInput, Focus, Mode, Question, StateCode } from "./types.ts";
+// State of the session in progress: option order, answers, flags, timing and
+// the practice retry queue. Pure transitions, persisted to localStorage.
+import { EXAM, optionOrder } from "./quiz.ts";
+import type { Rng } from "./quiz.ts";
+import { activeSessionSchema } from "./schemas.ts";
+import type {
+  ActiveSession,
+  AnswerInput,
+  Focus,
+  Item,
+  Mode,
+  Question,
+  StateCode,
+} from "./schemas.ts";
 
-export interface Item {
-  qid: string;
-  /** Catalogue option indices in display order. */
-  order: number[];
-  /** Catalogue index of the chosen option. */
-  chosen: number | null;
-  flagged: boolean;
-  /** Practice mode: the answer has been checked and feedback shown. */
-  checked: boolean;
-  /** Practice mode: a second chance at a question missed earlier in the session. */
+const STORAGE_KEY = "lid.activeSession.v1";
+const MINUTE_MS = 60_000;
+
+/** A missed question comes back this many questions later in practice. */
+const RETRY_GAP = 4;
+
+interface ItemSource {
+  entry: Question;
+  shuffleOptions: boolean;
+  rng: Rng;
   retry: boolean;
-  timeMs: number;
 }
 
-export interface ActiveSession {
+function newItem({ entry, shuffleOptions, rng, retry }: ItemSource): Item {
+  return {
+    qid: entry.id,
+    order: optionOrder(entry, shuffleOptions, rng),
+    chosen: null,
+    flagged: false,
+    checked: false,
+    retry,
+    timeMs: 0,
+  };
+}
+
+function updateCurrent(
+  session: ActiveSession,
+  update: (item: Item) => Item,
+): ActiveSession {
+  return {
+    ...session,
+    items: session.items.map((item, index) =>
+      index === session.index ? update(item) : item,
+    ),
+  };
+}
+
+interface NewSession {
   id: number;
   mode: Mode;
   focus: Focus | null;
   state: StateCode;
-  startedAt: number;
-  /** Exam mode: wall-clock deadline (ms), so reloading the page does not reset the timer. */
-  deadline: number | null;
-  items: Item[];
-  index: number;
-  /** When the current question was shown (ms); used to time answers. */
-  shownAt: number;
+  questions: readonly Question[];
+  shuffleOptions: boolean;
+  now?: number;
+  rng?: Rng;
 }
 
-const KEY = "lid.activeSession.v1";
-/** A missed question comes back this many questions later in the same practice session. */
-export const RETRY_GAP = 4;
-
-export function createSession(
-  id: number,
-  mode: Mode,
-  focus: Focus | null,
-  state: StateCode,
-  questions: Question[],
-  shuffleOptions: boolean,
-  now = Date.now(),
-  rng: Rng = Math.random,
-): ActiveSession {
+/**
+ * Starts a session; mock exams get a 60-minute wall-clock deadline.
+ * @param options - Server id, mode, focus, state, questions and settings.
+ * @returns The new session at its first question.
+ */
+function createSession(options: NewSession): ActiveSession {
+  const { now = Date.now(), rng = Math.random } = options;
   return {
-    id,
-    mode,
-    focus,
-    state,
+    id: options.id,
+    mode: options.mode,
+    focus: options.focus,
+    state: options.state,
     startedAt: now,
-    deadline: mode === "exam" ? now + EXAM.minutes * 60_000 : null,
-    items: questions.map((q) => ({
-      qid: q.id,
-      order: optionOrder(q, shuffleOptions, rng),
-      chosen: null,
-      flagged: false,
-      checked: false,
-      retry: false,
-      timeMs: 0,
-    })),
+    deadline: options.mode === "exam" ? now + EXAM.minutes * MINUTE_MS : null,
+    items: options.questions.map((entry) =>
+      newItem({
+        entry,
+        shuffleOptions: options.shuffleOptions,
+        rng,
+        retry: false,
+      }),
+    ),
     index: 0,
     shownAt: now,
   };
 }
 
-/** Adds the time spent on the current question and moves to `index`. */
-export function goTo(s: ActiveSession, index: number, now = Date.now()): ActiveSession {
-  const clamped = Math.max(0, Math.min(index, s.items.length - 1));
-  const items = s.items.map((it, i) =>
-    i === s.index ? { ...it, timeMs: it.timeMs + Math.max(0, now - s.shownAt) } : it,
+/**
+ * Adds the time spent on the current question and moves to another one.
+ * @param session - The session.
+ * @param index - Target position; clamped to the session.
+ * @param now - Current time in ms.
+ * @returns The updated session.
+ */
+function goTo(
+  session: ActiveSession,
+  index: number,
+  now: number = Date.now(),
+): ActiveSession {
+  const spent = Math.max(0, now - session.shownAt);
+  const timed = updateCurrent(session, (item) => ({
+    ...item,
+    timeMs: item.timeMs + spent,
+  }));
+  const clamped = Math.max(0, Math.min(index, session.items.length - 1));
+  return { ...timed, index: clamped, shownAt: now };
+}
+
+/**
+ * Chooses an option for the current question unless it is already checked.
+ * @param session - The session.
+ * @param chosen - Catalogue index of the option.
+ * @returns The updated session.
+ */
+function choose(session: ActiveSession, chosen: number): ActiveSession {
+  return updateCurrent(session, (item) =>
+    item.checked ? item : { ...item, chosen },
   );
-  return { ...s, items, index: clamped, shownAt: now };
 }
 
-export function choose(s: ActiveSession, chosen: number): ActiveSession {
-  const current = s.items[s.index]!;
-  if (current.checked) return s;
-  return { ...s, items: s.items.map((it, i) => (i === s.index ? { ...it, chosen } : it)) };
+/**
+ * Flags or unflags the current question.
+ * @param session - The session.
+ * @returns The updated session.
+ */
+function toggleFlag(session: ActiveSession): ActiveSession {
+  return updateCurrent(session, (item) => ({
+    ...item,
+    flagged: !item.flagged,
+  }));
 }
 
-export function toggleFlag(s: ActiveSession): ActiveSession {
+interface CheckOptions {
+  question: Question;
+  shuffleOptions: boolean;
+  now?: number;
+  rng?: Rng;
+}
+
+function withRetry(
+  session: ActiveSession,
+  options: CheckOptions,
+  rng: Rng,
+): Item[] {
+  const items = [...session.items];
+  const at = Math.min(session.index + 1 + RETRY_GAP, items.length);
+  items.splice(
+    at,
+    0,
+    newItem({
+      entry: options.question,
+      shuffleOptions: options.shuffleOptions,
+      rng,
+      retry: true,
+    }),
+  );
+  return items;
+}
+
+function checkable(item: Item | undefined): item is Item & { chosen: number } {
+  return item !== undefined && !item.checked && item.chosen !== null;
+}
+
+function isFirstMiss(item: Item, question: Question): boolean {
+  return item.chosen !== question.answer && !item.retry;
+}
+
+/**
+ * Practice: locks in the current answer. A first-time miss is queued again a
+ * few questions later with freshly shuffled options.
+ * @param session - The session.
+ * @param options - The current question, settings, time and randomness.
+ * @returns The updated session.
+ */
+function check(session: ActiveSession, options: CheckOptions): ActiveSession {
+  const { now = Date.now(), rng = Math.random } = options;
+  const current = session.items[session.index];
+  if (!checkable(current)) {
+    return session;
+  }
+  const spent = Math.max(0, now - session.shownAt);
+  const checked = updateCurrent(session, (item) => ({
+    ...item,
+    checked: true,
+    timeMs: item.timeMs + spent,
+  }));
   return {
-    ...s,
-    items: s.items.map((it, i) => (i === s.index ? { ...it, flagged: !it.flagged } : it)),
+    ...checked,
+    items: isFirstMiss(current, options.question)
+      ? withRetry(checked, options, rng)
+      : checked.items,
+    shownAt: now,
+  };
+}
+
+type NextStep = "advance" | "confirm" | "finish";
+
+/**
+ * What "next" does: move on, ask to submit a mock exam, or finish practice.
+ * @param session - The session.
+ * @returns The step to take.
+ */
+function nextStep(session: ActiveSession): NextStep {
+  if (session.index < session.items.length - 1) {
+    return "advance";
+  }
+  return session.mode === "exam" ? "confirm" : "finish";
+}
+
+/**
+ * Ends a practice session early: saves it when something was answered,
+ * otherwise just leaves.
+ * @param session - The session.
+ * @param actions - Saving and leaving.
+ * @param actions.finish - Saves the session.
+ * @param actions.exit - Leaves without saving.
+ */
+function endSession(
+  session: ActiveSession,
+  actions: { finish: () => void; exit: () => void },
+): void {
+  const answered = session.items.some((item) => item.checked && !item.retry);
+  (answered ? actions.finish : actions.exit)();
+}
+
+/**
+ * Converts an item into the API's answer shape.
+ * @param item - A session item.
+ * @param position - Its position in the session.
+ * @returns The answer to send.
+ */
+function toAnswer(item: Item, position: number): AnswerInput {
+  return {
+    questionId: item.qid,
+    position,
+    chosen: item.chosen,
+    timeMs: item.timeMs,
+    retry: item.retry,
   };
 }
 
 /**
- * Practice mode: locks in the current answer. A first-time miss is queued again a few
- * questions later with freshly shuffled options, so the correction is rehearsed while fresh.
+ * Persists the session in progress, or clears it.
+ * @param session - The session, or null to clear.
  */
-export function check(
-  s: ActiveSession,
-  question: Question,
-  shuffleOptions: boolean,
-  now = Date.now(),
-  rng: Rng = Math.random,
-): ActiveSession {
-  const current = s.items[s.index]!;
-  if (current.checked || current.chosen === null) return s;
-  const timeMs = current.timeMs + Math.max(0, now - s.shownAt);
-  const items = s.items.map((it, i) => (i === s.index ? { ...it, checked: true, timeMs } : it));
-  if (current.chosen !== question.answer && !current.retry) {
-    const at = Math.min(s.index + 1 + RETRY_GAP, items.length);
-    items.splice(at, 0, {
-      qid: question.id,
-      order: optionOrder(question, shuffleOptions, rng),
-      chosen: null,
-      flagged: false,
-      checked: false,
-      retry: true,
-      timeMs: 0,
-    });
+function save(session: ActiveSession | null): void {
+  if (session === null) {
+    localStorage.removeItem(STORAGE_KEY);
+  } else {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
   }
-  return { ...s, items, shownAt: now };
 }
 
-export function toAnswer(it: Item, position: number): AnswerInput {
-  return {
-    questionId: it.qid,
-    position,
-    chosen: it.chosen,
-    timeMs: it.timeMs,
-    retry: it.retry,
-  };
-}
-
-export function save(s: ActiveSession | null): void {
-  if (s) localStorage.setItem(KEY, JSON.stringify(s));
-  else localStorage.removeItem(KEY);
-}
-
-export function load(): ActiveSession | null {
+/**
+ * Restores the session in progress, ignoring anything malformed.
+ * @returns The saved session, or null.
+ */
+function load(): ActiveSession | null {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw === null) {
+    return null;
+  }
   try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as ActiveSession) : null;
+    const parsed = activeSessionSchema.safeParse(JSON.parse(raw));
+    return parsed.success ? parsed.data : null;
   } catch {
     return null;
   }
 }
+
+export {
+  RETRY_GAP,
+  createSession,
+  goTo,
+  choose,
+  toggleFlag,
+  check,
+  toAnswer,
+  save,
+  load,
+  endSession,
+  nextStep,
+};
+export type { NextStep, NewSession, CheckOptions };

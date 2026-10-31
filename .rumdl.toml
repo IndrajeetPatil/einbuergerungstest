@@ -1,0 +1,14 @@
+# rumdl (Markdown linter) configuration. Run: make lint-markdown
+
+[global]
+# Prose is written in long, unwrapped lines so editing a sentence does not
+# reflow the paragraph. Prompts under .github/prompts/ start with YAML front
+# matter and no heading, so the first-line heading rule is off globally.
+disable = ["MD013", "MD041"]
+exclude = [
+  "node_modules",
+  "dist",
+  ".venv",
+  "scripts/.venv",
+  ".agents/skills/agent-browser",
+]

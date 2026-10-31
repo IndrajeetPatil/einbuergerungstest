@@ -1,0 +1,50 @@
+# typos spell-checker configuration: https://github.com/crate-ci/typos
+
+[default]
+locale = "en-gb"
+
+[files]
+extend-exclude = [
+  # Official German catalogue text and its generated pictures.
+  "src/data/catalogue.json",
+  "public/img/",
+  "pnpm-lock.yaml",
+  "scripts/uv.lock",
+  # Generated coverage report.
+  "coverage/",
+  # Vendored upstream skill, kept verbatim.
+  ".agents/skills/agent-browser/",
+]
+
+[default.extend-identifiers]
+# GitHub GraphQL API names.
+minimizeComment = "minimizeComment"
+minimizedComment = "minimizedComment"
+isMinimized = "isMinimized"
+# API names that cannot use British spelling: String.prototype.normalize
+# and axe-core's AxeBuilder.analyze.
+normalize = "normalize"
+analyze = "analyze"
+# GitHub Actions event type for pull-request pushes.
+synchronize = "synchronize"
+
+[default.extend-words]
+# CSS properties, values and Tailwind utilities (transition-colors,
+# text-rendering: optimizeLegibility): American English is mandated by CSS.
+color = "color"
+colors = "colors"
+center = "center"
+optimize = "optimize"
+# The HTML <dialog> element and the components built on it.
+dialog = "dialog"
+dialogs = "dialogs"
+Dialog = "Dialog"
+Dialogs = "Dialogs"
+# Oxlint "capitalized-comments" rule name.
+capitalized = "capitalized"
+# Code and API identifiers: renaming would break interfaces.
+catalog = "catalog"
+# German words in bilingual UI copy and quoted catalogue text.
+Sie = "Sie"
+offen = "offen"
+ist = "ist"

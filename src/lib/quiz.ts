@@ -1,214 +1,229 @@
-import type { Focus, Question, QuestionStat, SessionSummary, StateCode } from "./types.ts";
+// Drawing questions for mock exams and practice sessions. Pure functions, so
+// every rule is unit-tested with a seeded random number generator.
+import { needsReview, poolFor, priority } from "./mastery.ts";
+import type { Stats } from "./mastery.ts";
+import type { Focus, Question, SessionSummary, StateCode } from "./schemas.ts";
 
-/** Format of the official test: 30 general + 3 state questions, 60 minutes, 17 correct to pass. */
-export const EXAM = { general: 30, state: 3, total: 33, passMark: 17, minutes: 60 } as const;
+type Rng = () => number;
 
-export type Rng = () => number;
+interface PracticeOptions {
+  questions: readonly Question[];
+  state: StateCode;
+  focus: Focus;
+  stats: Stats;
+  size: number;
+  selected?: readonly string[];
+  rng?: Rng;
+}
 
-/** Unbiased Fisher–Yates shuffle; returns a new array. */
-export function shuffle<T>(items: readonly T[], rng: Rng = Math.random): T[] {
-  const out = items.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [out[i], out[j]] = [out[j]!, out[i]!];
+interface Sample<Item> {
+  items: readonly Item[];
+  weight: (item: Item) => number;
+  count: number;
+  rng: Rng;
+}
+
+type Picker = (
+  pool: readonly Question[],
+  options: Required<PracticeOptions>,
+) => Question[];
+
+/** Format of the official test. */
+const EXAM = {
+  general: 30,
+  state: 3,
+  total: 33,
+  passMark: 17,
+  minutes: 60,
+} as const;
+
+/** Share of a smart-mix session reserved for missed or shaky questions. */
+const REVIEW_SHARE = 0.5;
+const MIN_WEIGHT = 1e-6;
+const OPTION_COUNT = 4;
+const OPTION_INDICES: readonly number[] = Array.from(
+  { length: OPTION_COUNT },
+  (_unused, index) => index,
+);
+
+function randomIndex(rng: Rng, length: number): number {
+  return Math.floor(rng() * length);
+}
+
+/**
+ * Unbiased shuffle: repeatedly draws uniformly from the items left, which is
+ * equivalent to Fisher–Yates.
+ * @param items - Items to shuffle; left untouched.
+ * @param rng - Random number generator in [0, 1).
+ * @returns A shuffled copy.
+ */
+function shuffle<Item>(items: readonly Item[], rng: Rng = Math.random): Item[] {
+  const remaining = [...items];
+  const out: Item[] = [];
+  while (remaining.length > 0) {
+    const index = randomIndex(rng, remaining.length);
+    out.push(...remaining.splice(index, 1));
   }
   return out;
 }
 
-/** Weighted sampling without replacement (Efraimidis–Spirakis): picks `k` items. */
-export function weightedSample<T>(
-  items: readonly T[],
-  weight: (item: T) => number,
-  k: number,
-  rng: Rng = Math.random,
-): T[] {
-  return items
-    .map((item) => ({ item, key: Math.pow(rng(), 1 / Math.max(weight(item), 1e-6)) }))
-    .sort((a, b) => b.key - a.key)
-    .slice(0, k)
-    .map((x) => x.item);
-}
-
-export function poolFor(questions: readonly Question[], state: StateCode): Question[] {
-  return questions.filter((q) => q.state === null || q.state === state);
+/**
+ * Weighted sampling without replacement (Efraimidis–Spirakis).
+ * @param sample - Candidates, their weights, how many to pick, randomness.
+ * @returns The picked items, highest key first.
+ */
+function weightedSample<Item>(sample: Sample<Item>): Item[] {
+  const keyed = sample.items.map((item) => {
+    const weight = Math.max(sample.weight(item), MIN_WEIGHT);
+    return { item, key: sample.rng() ** (1 / weight) };
+  });
+  return keyed
+    .toSorted((left, right) => right.key - left.key)
+    .slice(0, sample.count)
+    .map((entry) => entry.item);
 }
 
 /**
- * Draws a mock exam like the real paper: 30 random general questions followed by 3 random
- * questions about the chosen state, each block in random order.
+ * Draws a mock exam like the real paper: 30 general questions followed by 3
+ * about the state, each block in random order.
+ * @param questions - The whole catalogue.
+ * @param state - Federal state of main residence.
+ * @param rng - Random number generator in [0, 1).
+ * @returns The 33 exam questions.
  */
-export function drawExam(questions: readonly Question[], state: StateCode, rng: Rng = Math.random) {
-  const general = questions.filter((q) => q.state === null);
-  const local = questions.filter((q) => q.state === state);
+function drawExam(
+  questions: readonly Question[],
+  state: StateCode,
+  rng: Rng = Math.random,
+): Question[] {
+  const general = questions.filter((entry) => entry.state === null);
+  const local = questions.filter((entry) => entry.state === state);
   return [
     ...shuffle(general, rng).slice(0, EXAM.general),
     ...shuffle(local, rng).slice(0, EXAM.state),
   ];
 }
 
-/** Display order of a question's options (catalogue indices). */
-export function optionOrder(
-  q: Question,
+/**
+ * Display order of a question's options, as catalogue indices.
+ * @param entry - The question.
+ * @param shuffleOptions - Whether shuffling is switched on.
+ * @param rng - Random number generator in [0, 1).
+ * @returns Option indices in display order.
+ */
+function optionOrder(
+  entry: Question,
   shuffleOptions: boolean,
   rng: Rng = Math.random,
 ): number[] {
-  const order = [0, 1, 2, 3];
-  return shuffleOptions && !q.keepOrder ? shuffle(order, rng) : order;
+  return shuffleOptions && !entry.keepOrder
+    ? shuffle(OPTION_INDICES, rng)
+    : [...OPTION_INDICES];
 }
 
-export type Mastery = "new" | "missed" | "once" | "mastered";
+function smartMix(
+  pool: readonly Question[],
+  { stats, size, rng }: Required<PracticeOptions>,
+): Question[] {
+  const weight = (entry: Question): number => priority(stats[entry.id]);
+  const isReview = (entry: Question): boolean => needsReview(stats[entry.id]);
+  const review = weightedSample({
+    items: pool.filter((entry) => isReview(entry)),
+    weight,
+    count: Math.ceil(size * REVIEW_SHARE),
+    rng,
+  });
+  const rest = weightedSample({
+    items: pool.filter((entry) => !isReview(entry)),
+    weight,
+    count: size - review.length,
+    rng,
+  });
+  return shuffle([...review, ...rest], rng);
+}
 
-export const MASTERY_LABEL: Record<Mastery, { en: string; de: string }> = {
-  mastered: { en: "Mastered", de: "Sicher" },
-  once: { en: "Correct once", de: "Einmal richtig" },
-  missed: { en: "Missed last time", de: "Zuletzt falsch" },
-  new: { en: "Not seen yet", de: "Noch nicht gesehen" },
+function pickFiltered(
+  pool: readonly Question[],
+  { size, rng }: Required<PracticeOptions>,
+  keep: (entry: Question) => boolean,
+): Question[] {
+  return shuffle(
+    pool.filter((entry) => keep(entry)),
+    rng,
+  ).slice(0, size);
+}
+
+const PICKERS: Readonly<Record<Focus, Picker>> = {
+  smart: smartMix,
+  new: (pool, options) =>
+    pickFiltered(
+      pool,
+      options,
+      (entry) => options.stats[entry.id] === undefined,
+    ),
+  mistakes: (pool, options) =>
+    pickFiltered(pool, options, (entry) =>
+      needsReview(options.stats[entry.id]),
+    ),
+  state: (pool, options) =>
+    pickFiltered(pool, options, (entry) => entry.state !== null),
+  all: (pool, { rng }) => shuffle(pool, rng),
+  selected: (pool, { selected, rng }) => {
+    const ids = new Set(selected);
+    return shuffle(
+      pool.filter((entry) => ids.has(entry.id)),
+      rng,
+    );
+  },
 };
 
-/** Mastered = the two most recent answers were both correct. */
-export function masteryOf(stat: QuestionStat | undefined): Mastery {
-  if (!stat || stat.attempts === 0) return "new";
-  if (stat.recent.startsWith("0")) return "missed";
-  if (stat.recent.startsWith("11")) return "mastered";
-  return "once";
+/**
+ * Picks the questions of a practice session.
+ * @param options - Catalogue, state, focus, statistics and size.
+ * @returns The questions, in random order.
+ */
+function practiceQuestions(options: PracticeOptions): Question[] {
+  const full: Required<PracticeOptions> = {
+    selected: [],
+    rng: Math.random,
+    ...options,
+  };
+  return PICKERS[full.focus](poolFor(full.questions, full.state), full);
 }
-
-const DAY = 86_400_000;
-/** Share of a smart-mix session reserved for questions you missed or are unsure of. */
-export const REVIEW_SHARE = 0.5;
 
 /**
- * Priority for the "smart mix": questions you got wrong come back most, unseen questions next,
- * and mastered ones resurface slowly as time passes (a light spaced-repetition schedule).
+ * Whether a mock-exam score passes.
+ * @param correct - Correct answers.
+ * @returns True from 17 correct answers.
  */
-export function priority(stat: QuestionStat | undefined, now = Date.now()): number {
-  const mastery = masteryOf(stat);
-  if (mastery === "new") return 3;
-  if (mastery === "missed") return 6;
-  const days = Math.max(0, (now - Date.parse(stat!.lastAt)) / DAY);
-  if (mastery === "once") return 2 + Math.min(days, 3) / 3;
-  return 0.25 + Math.min(days, 6) / 4;
-}
-
-export function practiceQuestions(
-  questions: readonly Question[],
-  state: StateCode,
-  focus: Focus,
-  stats: Record<string, QuestionStat>,
-  size: number,
-  selected: readonly string[] = [],
-  rng: Rng = Math.random,
-): Question[] {
-  const pool = poolFor(questions, state);
-  switch (focus) {
-    case "smart": {
-      // Up to half the session reviews missed / shaky questions; the rest brings in unseen
-      // questions and occasionally resurfaces mastered ones. Then the whole set is shuffled.
-      const isReview = (q: Question) => {
-        const m = masteryOf(stats[q.id]);
-        return m === "missed" || m === "once";
-      };
-      const review = weightedSample(
-        pool.filter(isReview),
-        (q) => priority(stats[q.id]),
-        Math.ceil(size * REVIEW_SHARE),
-        rng,
-      );
-      const rest = weightedSample(
-        pool.filter((q) => !isReview(q)),
-        (q) => priority(stats[q.id]),
-        size - review.length,
-        rng,
-      );
-      return shuffle([...review, ...rest], rng);
-    }
-    case "new":
-      return shuffle(
-        pool.filter((q) => !stats[q.id]),
-        rng,
-      ).slice(0, size);
-    case "mistakes":
-      return shuffle(
-        pool.filter((q) => {
-          const m = masteryOf(stats[q.id]);
-          return m === "missed" || m === "once";
-        }),
-        rng,
-      ).slice(0, size);
-    case "state":
-      return shuffle(
-        pool.filter((q) => q.state !== null),
-        rng,
-      ).slice(0, size);
-    case "all":
-      return shuffle(pool, rng);
-    case "selected": {
-      const ids = new Set(selected);
-      return shuffle(
-        pool.filter((q) => ids.has(q.id)),
-        rng,
-      );
-    }
-  }
-}
-
-export function passed(correct: number): boolean {
+function passed(correct: number): boolean {
   return correct >= EXAM.passMark;
 }
 
-export function accuracy(
-  s: Pick<SessionSummary, "correct" | "answered" | "questionCount" | "mode">,
-) {
-  const denominator = s.mode === "exam" ? s.questionCount : s.answered;
-  return denominator === 0 ? 0 : s.correct / denominator;
+/**
+ * Share of correct answers: out of 33 for exams, of answered for practice.
+ * @param session - A finished session.
+ * @returns A number between 0 and 1.
+ */
+function accuracy(
+  session: Pick<
+    SessionSummary,
+    "correct" | "answered" | "questionCount" | "mode"
+  >,
+): number {
+  const denominator =
+    session.mode === "exam" ? session.questionCount : session.answered;
+  return denominator === 0 ? 0 : session.correct / denominator;
 }
 
-/** Questions answered wrongly most often, then by most recent miss. */
-export function weakest(
-  questions: readonly Question[],
-  state: StateCode,
-  stats: Record<string, QuestionStat>,
-  n: number,
-): { question: Question; stat: QuestionStat }[] {
-  return poolFor(questions, state)
-    .flatMap((question) => {
-      const stat = stats[question.id];
-      return stat && stat.attempts > stat.correct ? [{ question, stat }] : [];
-    })
-    .sort((a, b) => {
-      const ma = masteryOf(a.stat) === "missed" ? 1 : 0;
-      const mb = masteryOf(b.stat) === "missed" ? 1 : 0;
-      return (
-        mb - ma ||
-        b.stat.attempts - b.stat.correct - (a.stat.attempts - a.stat.correct) ||
-        b.stat.lastAt.localeCompare(a.stat.lastAt)
-      );
-    })
-    .slice(0, n);
-}
-
-/** Whole days from today until the exam date (local time); negative once it has passed. */
-export function daysUntil(examDate: string, now = new Date()): number {
-  const [y, m, d] = examDate.split("-").map(Number);
-  const exam = new Date(y!, m! - 1, d!);
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.round((exam.getTime() - today.getTime()) / DAY);
-}
-
-/** Consecutive days, ending today or yesterday, with at least one finished session. */
-export function streak(sessions: readonly SessionSummary[], now = new Date()): number {
-  const days = new Set(sessions.map((s) => localDay(new Date(s.startedAt))));
-  const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if (!days.has(localDay(cursor))) cursor.setDate(cursor.getDate() - 1);
-  let count = 0;
-  while (days.has(localDay(cursor))) {
-    count++;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  return count;
-}
-
-export function localDay(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
+export {
+  EXAM,
+  accuracy,
+  drawExam,
+  optionOrder,
+  passed,
+  practiceQuestions,
+  shuffle,
+  weightedSample,
+};
+export type { PracticeOptions, Rng };
