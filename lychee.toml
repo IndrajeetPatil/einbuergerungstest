@@ -17,6 +17,7 @@ exclude = [
   "^http://127\\.0\\.0\\.1",
   # Private repository links resolve only for signed-in collaborators.
   "^https://github\\.com/IndrajeetPatil/einbuergerungstest",
+  "^https://github\\.com/IndrajeetPatil/indrajeetpatil\\.github\\.io",
 ]
 
 # GitHub returns 429 without a token; lychee reads GITHUB_TOKEN when set.
