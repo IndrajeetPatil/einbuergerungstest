@@ -28,8 +28,9 @@ dist-ssr
 .env.*
 !.env.example
 
-# Local progress database, backups and exports (personal data)
-data/
+# Local progress database, backups and exports (personal data). Anchored so
+# the generated question catalogue in src/data/ stays tracked.
+/data/
 # Downloaded sources for scripts/build_data.py
 .cache/
 
