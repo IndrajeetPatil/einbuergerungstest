@@ -12,7 +12,7 @@ the [README](README.md).
 | Components, request flow, API              | [Architecture](docs/architecture.md)                                                                                         |
 | Schema, scoring, migrations, backups       | [Progress database](docs/progress-database.md)                                                                               |
 | Commands, checks, hooks, CI, versions      | [Development](docs/development.md)                                                                                           |
-| UI and styling                             | [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md) (light mode only) |
+| UI and styling                             | [DESIGN.md](DESIGN.md), which extends the [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md) |
 | Question data, pictures, sources           | [Question data](docs/question-data.md), `scripts/build_data.py`                                                              |
 | Quiz rules (exam draw, smart mix, mastery) | [Quiz design](docs/quiz-design.md), `src/lib/quiz.ts`, `src/lib/session.ts`                                                  |
 | Dependency, hook or Action upgrades        | [`update-deps` prompt](.github/prompts/update-deps.md)                                                                       |
@@ -69,9 +69,10 @@ Every gate is listed in [docs/development.md](docs/development.md#quality-gates)
   state questions, 60 minutes, 17 to pass.
 - Picture and number options keep catalogue order (`keepOrder`); everything
   else is shuffled per session.
-- Follow DESIGN.md: Fraunces for headings, Hanken Grotesk for text, the single
-  teal accent for interaction, no box shadows, no opacity to de-emphasise text,
-  no emoji in UI chrome.
+- Follow [DESIGN.md](DESIGN.md): Fraunces for headings, Hanken Grotesk for
+  text, the single teal accent for interaction, the fixed state hues, no box
+  shadows, no opacity to de-emphasise text, no emoji in UI chrome. Keep its
+  front matter in sync with `src/index.css`.
 - Never put information in a native `title` attribute; its tooltip is
   hover-only. Show it visibly instead.
 - Fix failures rather than weakening checks: every Oxlint category is an

@@ -113,7 +113,7 @@ upgrading all of them.
 
 ## Design
 
-The interface follows the
+The interface follows [DESIGN.md](../DESIGN.md), which extends the
 [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md):
 warm paper background, Fraunces headings, Hanken Grotesk text, one teal accent
 for interaction, flat surfaces without shadows. Light mode only.
