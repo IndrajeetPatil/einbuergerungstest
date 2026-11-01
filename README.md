@@ -75,6 +75,7 @@ run on every pull request.
 | [Progress database](docs/progress-database.md) | Schema, scoring, backups, and why `node:sqlite`          |
 | [Question data](docs/question-data.md)         | Sources, cross-validation, pictures, new BAMF editions   |
 | [Development](docs/development.md)             | Commands, checks, git hooks, CI, versions, agent tooling |
+| [DESIGN.md](DESIGN.md)                         | Visual design: tokens, state colours, components         |
 | [AGENTS.md](AGENTS.md)                         | Conventions for coding agents                            |
 
 ## Licence

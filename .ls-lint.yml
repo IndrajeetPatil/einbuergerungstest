@@ -2,7 +2,7 @@
 ls:
   .dir: kebab-case | regex:\.(agents|claude|github)
   .*: kebab-case
-  .md: kebab-case | regex:(README|AGENTS|CLAUDE|CONTRIBUTING|SECURITY|LICENSE|SKILL|THIRD-PARTY-NOTICES)
+  .md: kebab-case | regex:(README|AGENTS|CLAUDE|CONTRIBUTING|DESIGN|SECURITY|LICENSE|SKILL|THIRD-PARTY-NOTICES)
   .toml: kebab-case | regex:_typos
   .ts: camelCase
   .test.ts: camelCase

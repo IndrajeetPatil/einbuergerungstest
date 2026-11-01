@@ -12,3 +12,9 @@ exclude = [
   "scripts/.venv",
   ".agents/skills/agent-browser",
 ]
+
+[MD025]
+# DESIGN.md's front matter holds a nested `title:` typography token; rumdl
+# reads it as the document title and flags the real `# DESIGN.md` heading as a
+# duplicate H1, so front-matter title detection is off.
+front-matter-title = ""
