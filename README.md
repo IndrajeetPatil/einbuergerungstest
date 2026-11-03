@@ -16,6 +16,9 @@ results are saved locally, so you can watch your score climb towards exam day.
   weak spots and a daily streak.
 - **Look things up** — a searchable read-through of all 310 questions that can
   come up for you.
+- **Check current affairs** — the questions whose answer depends on when you
+  take the test (Chancellor, head of state, Bundestag, population, EU), with
+  the latest facts, their sources and when they were last checked.
 
 ## Quick start
 

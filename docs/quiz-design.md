@@ -12,6 +12,7 @@ covered by unit tests.
 | **Prüfungssimulation** (mock exam) | 30 random general questions, then 3 random Bundesland questions (positions 31–33, as on the real paper) | None until you submit            | Correct out of 33; 17 passes; unanswered counts as wrong |
 | **Üben** (practice)                | 10, 20, 33 or 50 from the chosen focus; all of them for _Bundesland_ and _Whole catalogue_              | After every answer               | First-try accuracy                                       |
 | **Fragenkatalog**                  | All 310 questions that can come up for you, searchable in German or English                             | Answer and explanation on demand | Not scored                                               |
+| **Aktuelles** (current affairs)    | The general questions whose answer depends on when the test is taken                                    | Official answer beside the latest facts | Not scored                                        |
 
 The real test: 33 questions, 60 minutes, at least 17 correct, drawn from 300
 general questions plus the 10 for the Bundesland of your main residence. These

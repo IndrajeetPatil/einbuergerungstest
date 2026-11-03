@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
 
+import type { View } from "#lib/useView.ts";
+
 import { MastheadNav } from "./MastheadNav.tsx";
 
 /**
@@ -9,7 +11,7 @@ import { MastheadNav } from "./MastheadNav.tsx";
  */
 function Masthead(
   props: Readonly<{
-    catalogue: boolean;
+    view: View["name"];
     inSession: boolean;
     examDate: string | null;
     onPause: () => void;
@@ -29,7 +31,7 @@ function Masthead(
           </button>
         ) : (
           <MastheadNav
-            catalogue={props.catalogue}
+            view={props.view}
             examDate={props.examDate}
           />
         )}

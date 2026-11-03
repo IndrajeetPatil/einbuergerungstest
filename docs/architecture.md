@@ -9,7 +9,7 @@ built ahead of time (see [Question data](question-data.md)).
 ```mermaid
 flowchart LR
   subgraph Browser["Browser · React 19"]
-    UI["Dashboard · Quiz · Results · Catalogue"]
+    UI["Dashboard · Quiz · Results · Catalogue · Aktuelles"]
     Logic["lib/quiz.ts<br/>sampling, shuffling, mastery"]
     Session["lib/session.ts<br/>session state"]
     Local[("localStorage<br/>active session")]
@@ -38,6 +38,7 @@ flowchart LR
 | --- | --- | --- |
 | UI | `src/App.tsx`, `src/components/*` | One component per file: screens, bilingual question rows, feedback, chart |
 | Quiz rules | `src/lib/quiz.ts`, `mastery.ts`, `dates.ts` | Exam draw, practice selection, mastery, streaks (pure, unit-tested) |
+| Current affairs | `src/lib/currentAffairs.ts` | Time-dependent questions with the latest facts, sources and check date |
 | Session state | `src/lib/session.ts` | Option order, answers, flags, retry queue, timing; persisted to `localStorage` |
 | Hooks | `src/lib/use*.ts` | Summary, view, trainer and quiz controllers; quiz actions read the latest session |
 | Schemas | `src/lib/schemas.ts` | Zod schemas and inferred types, shared by browser and server |

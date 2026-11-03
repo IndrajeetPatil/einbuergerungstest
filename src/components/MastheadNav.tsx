@@ -1,6 +1,13 @@
 import type { ReactElement } from "react";
 
 import { countdownChip } from "#lib/countdown.ts";
+import type { View } from "#lib/useView.ts";
+
+const LINKS: readonly { view: View["name"]; href: string; text: string }[] = [
+  { view: "dashboard", href: "#uebersicht", text: "Übersicht" },
+  { view: "catalogue", href: "#katalog", text: "Fragenkatalog" },
+  { view: "current", href: "#aktuell", text: "Aktuelles · Current affairs" },
+];
 
 function navClass(active: boolean): string {
   const tone = active
@@ -10,34 +17,36 @@ function navClass(active: boolean): string {
 }
 
 /**
- * Overview and catalogue links with the exam countdown.
- * @param props - Whether the catalogue is shown, and the exam date.
+ * Page links with the exam countdown.
+ * @param props - The current view, and the exam date.
  * @returns The navigation.
  */
 function MastheadNav(
-  props: Readonly<{ catalogue: boolean; examDate: string | null }>,
+  props: Readonly<{ view: View["name"]; examDate: string | null }>,
 ): ReactElement {
-  const { catalogue } = props;
   const chip = countdownChip(props.examDate);
+  // Results and other views without a link of their own sit under Übersicht.
+  const page = LINKS.some((link) => link.view === props.view)
+    ? props.view
+    : "dashboard";
   return (
     <nav
       aria-label="Main"
-      className="flex items-center gap-1 text-sm"
+      className="flex flex-wrap items-center gap-1 text-sm"
     >
-      <a
-        href="#uebersicht"
-        className={navClass(!catalogue)}
-        aria-current={catalogue ? undefined : "page"}
-      >
-        Übersicht
-      </a>
-      <a
-        href="#katalog"
-        className={navClass(catalogue)}
-        aria-current={catalogue ? "page" : undefined}
-      >
-        Fragenkatalog
-      </a>
+      {LINKS.map((link) => {
+        const active = link.view === page;
+        return (
+          <a
+            key={link.view}
+            href={link.href}
+            className={navClass(active)}
+            aria-current={active ? "page" : undefined}
+          >
+            {link.text}
+          </a>
+        );
+      })}
       {chip === null ? null : (
         <span className="chip chip-accent ml-3 hidden sm:inline-flex">
           {chip}

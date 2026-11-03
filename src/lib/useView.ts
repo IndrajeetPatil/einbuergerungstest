@@ -6,17 +6,22 @@ import type { ActiveSession, SessionSummary } from "./schemas.ts";
 type View =
   | { name: "dashboard" }
   | { name: "catalogue" }
+  | { name: "current" }
   | { name: "session" }
   | { name: "results"; summary: SessionSummary; session: ActiveSession };
 
+// Pages reached through a masthead link; any other hash is the dashboard.
+const HASH_VIEWS: Readonly<Partial<Record<string, View>>> = {
+  "#katalog": { name: "catalogue" },
+  "#aktuell": { name: "current" },
+};
+
 function viewFromHash(): View {
-  return globalThis.location.hash === "#katalog"
-    ? { name: "catalogue" }
-    : { name: "dashboard" };
+  return HASH_VIEWS[globalThis.location.hash] ?? { name: "dashboard" };
 }
 
 /**
- * Tracks the view, switching between dashboard and catalogue on hash changes.
+ * Tracks the view, switching between pages on hash changes.
  * @returns The view and its setter.
  */
 function useView(): [View, (view: View) => void] {

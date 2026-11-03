@@ -34,3 +34,21 @@ test("searches the catalogue in German or English", async ({ page }) => {
   ).toBeVisible();
   await expectAccessible(page);
 });
+
+test("lists time-dependent answers with the last check", async ({ page }) => {
+  await openDashboard(page);
+  await page
+    .getByRole("link", { name: "Aktuelles · Current affairs", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Aktuelles · Current affairs" }),
+  ).toBeVisible();
+  await expect(page.getByText("Zuletzt geprüft am")).toBeVisible();
+  await expect(
+    page.getByText(
+      "Wie heißt die jetzige Bundeskanzlerin/der jetzige Bundeskanzler von Deutschland?",
+    ),
+  ).toBeVisible();
+  await expect(page.getByText("Up to date")).toHaveCount(5);
+  await expectAccessible(page);
+});
