@@ -37,8 +37,12 @@ test("searches the catalogue in German or English", async ({ page }) => {
 
 test("lists time-dependent answers with the last check", async ({ page }) => {
   await openDashboard(page);
-  await page.getByRole("link", { name: "Aktuelles", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Aktuelles" })).toBeVisible();
+  await page
+    .getByRole("link", { name: "Aktuelles · Current affairs", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Aktuelles · Current affairs" }),
+  ).toBeVisible();
   await expect(page.getByText("Zuletzt geprüft am")).toBeVisible();
   await expect(
     page.getByText(

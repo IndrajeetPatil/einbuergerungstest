@@ -20,7 +20,9 @@ function CurrentAffairsScreen(props: Readonly<ScreenProps>): ReactElement {
   const { showEnglish } = props.summary.settings;
   return (
     <main className="mx-auto max-w-5xl px-5 pt-10 pb-24 md:px-8">
-      <h1 className="text-title">Aktuelles</h1>
+      <h1 className="text-title">
+        Aktuelles <span className="text-muted">· Current affairs</span>
+      </h1>
       <p className="mt-3 max-w-prose text-lg text-muted">
         The {affairs.length} questions whose answer depends on when you take the
         test: who holds office, who sits in the Bundestag, how many people live
