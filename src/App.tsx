@@ -21,7 +21,7 @@ function App(): ReactElement {
         Skip to content
       </a>
       <Masthead
-        catalogue={view.name === "catalogue"}
+        view={view.name}
         inSession={view.name === "session" && trainer.active !== null}
         examDate={trainer.summary?.settings.examDate ?? null}
         onPause={() => {

@@ -25,6 +25,18 @@ const longGermanDate = new Intl.DateTimeFormat("de-DE", {
   year: "numeric",
 });
 
+const germanDate = new Intl.DateTimeFormat("de-DE", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+const englishDate = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
 /**
  * Formats a share as a whole percentage.
  * @param share - A number between 0 and 1.
@@ -57,4 +69,13 @@ function clock(remainingMs: number): string {
   return `${mins.padStart(CLOCK_DIGITS, "0")}:${secs.padStart(CLOCK_DIGITS, "0")}`;
 }
 
-export { shortDate, dateTime, longGermanDate, percent, minutes, clock };
+export {
+  shortDate,
+  dateTime,
+  longGermanDate,
+  germanDate,
+  englishDate,
+  percent,
+  minutes,
+  clock,
+};

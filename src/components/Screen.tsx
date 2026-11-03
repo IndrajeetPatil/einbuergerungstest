@@ -4,6 +4,7 @@ import type { Trainer } from "#lib/useTrainer.ts";
 import type { View } from "#lib/useView.ts";
 
 import { CatalogueScreen } from "./CatalogueScreen.tsx";
+import { CurrentAffairsScreen } from "./CurrentAffairsScreen.tsx";
 import { DashboardScreen } from "./DashboardScreen.tsx";
 import { ResultsScreen } from "./ResultsScreen.tsx";
 import type { ScreenProps } from "./screenProps.ts";
@@ -14,6 +15,7 @@ const SCREENS: Readonly<
 > = {
   dashboard: DashboardScreen,
   catalogue: CatalogueScreen,
+  current: CurrentAffairsScreen,
   session: SessionScreen,
   results: ResultsScreen,
 };
