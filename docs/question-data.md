@@ -78,6 +78,27 @@ WebP with Pillow.
 > Some pictures are photos the BAMF PDF credits to third parties. They are used
 > for personal study only, which is why this repository is private.
 
+## Time-dependent answers
+
+A few general questions ask about the present: the Chancellor (`g72`), the two
+largest parliamentary groups (`g73`), the head of state (`g75`), the
+population (`g213`) and the number of EU member states (`g236`). Their answers
+can change between BAMF editions, so the **Aktuelles** page (`#aktuell`) shows
+each official answer beside the latest facts, their sources and the day they
+were last checked. The facts live in `src/lib/currentAffairs.ts`, not in the
+generated catalogue.
+
+To re-check them:
+
+1. Verify each fact against its sources, preferring official ones
+   (Bundesregierung, Bundestag, Destatis, the EU).
+2. Update `latest`, `outlook` and `sources`, and set `option` to the catalogue
+   option that is correct today. When it differs from the answer key, the page
+   marks the official answer as out of date.
+3. Move `CHECKED` to the day of the check and run `make ci`.
+
+The server still judges answers against the official key, as the exam does.
+
 ## When BAMF publishes a new edition
 
 1. `make data-refresh` downloads the sources again and stops on the checksum.

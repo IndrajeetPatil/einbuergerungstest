@@ -14,6 +14,7 @@ the [README](README.md).
 | Commands, checks, hooks, CI, versions      | [Development](docs/development.md)                                                                                           |
 | UI and styling                             | [DESIGN.md](DESIGN.md), which extends the [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md) |
 | Question data, pictures, sources           | [Question data](docs/question-data.md), `scripts/build_data.py`                                                              |
+| Time-dependent answers (Aktuelles page)    | [Question data](docs/question-data.md#time-dependent-answers), `src/lib/currentAffairs.ts`                                   |
 | Quiz rules (exam draw, smart mix, mastery) | [Quiz design](docs/quiz-design.md), `src/lib/quiz.ts`, `src/lib/session.ts`                                                  |
 | Dependency, hook or Action upgrades        | [`update-deps` prompt](.github/prompts/update-deps.md)                                                                       |
 | Screenshots for a PR                       | [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md)                                             |
