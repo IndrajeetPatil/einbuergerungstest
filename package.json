@@ -26,16 +26,16 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@ls-lint/ls-lint": "2.3.2",
-    "@playwright/test": "1.64.1",
+    "@playwright/test": "1.65.0",
     "@projectwallace/css-code-quality": "^3.1.5",
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.4",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
-    "@vitest/coverage-v8": "5.0.5",
-    "fallow": "^3.37.0",
-    "tailwindcss": "^4.3.3",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vitest/coverage-v8": "5.1.0",
+    "fallow": "^3.40.0",
+    "tailwindcss": "^4.3.4",
     "typescript": "~7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"
@@ -43,7 +43,7 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "12.16.1",
+      "version": "12.18.0",
       "onFail": "download"
     }
   },
