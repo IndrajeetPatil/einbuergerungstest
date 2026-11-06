@@ -1,7 +1,7 @@
 ##@ Git hooks
 
 # One prek version for local hooks and CI, including its built-in hooks.
-PREK_VERSION := 0.5.9
+PREK_VERSION := 0.5.10
 PREK := $(UV) tool run prek@$(PREK_VERSION)
 
 .PHONY: hooks-install

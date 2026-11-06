@@ -8,7 +8,7 @@ dependencies = ["pillow>=13.0.0"]
 
 [dependency-groups]
 # Tools live here, pinned by uv.lock, so their rulesets cannot change between runs.
-dev = ["pyrefly>=1.4.0", "pytest>=9.1.1", "ruff>=0.17.3", "ty>=0.0.95"]
+dev = ["pyrefly>=1.4.1", "pytest>=9.2.0", "ruff>=0.17.4", "ty>=0.0.99"]
 
 [tool.uv]
 # Allow newly published dependencies immediately.
