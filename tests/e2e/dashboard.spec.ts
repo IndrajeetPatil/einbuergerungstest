@@ -59,7 +59,9 @@ test("follows the system theme until dark mode is toggled", async ({
   await page.emulateMedia({ colorScheme: "dark" });
   await openDashboard(page);
   const html = page.locator("html");
-  const toggle = page.getByRole("button", { name: "Dunkel · Dark" });
+  const toggle = page.getByRole("button", {
+    name: "Dunkler Modus · Dark mode",
+  });
   await expect(html).toHaveClass("dark");
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await toggle.click();

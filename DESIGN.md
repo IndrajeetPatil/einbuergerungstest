@@ -170,10 +170,11 @@ both.
 
 - **Masthead:** the app name in the serif at `text-lg` on the left, quiet
   navigation on the right (active link in semibold accent with
-  `aria-current`), above a hairline. No sticky or blurred header. The
-  "Dunkel · Dark" theme toggle closes the row on every screen, including
-  sessions: a quiet 36px button with a moon icon and `aria-pressed`, in the
-  accent while dark mode is on.
+  `aria-current`), above a hairline. No sticky or blurred header. The theme
+  toggle closes the row on every screen, including sessions: a quiet,
+  icon-only 36px square button with a moon icon, the accessible name
+  "Dunkler Modus · Dark mode" and `aria-pressed`, in the accent while dark
+  mode is on.
 - **Dashboard opening:** an asymmetric `1.4fr / 1fr` spread — field mark,
   `text-title` heading, and muted standfirst on the left; the exam date and
   countdown in a right-aligned folio column.
