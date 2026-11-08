@@ -51,7 +51,7 @@ function ConfirmDialog(props: Readonly<Props>): ReactElement {
         onCancel();
       }}
       aria-labelledby={titleId}
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-lg border border-line bg-surface p-6 text-ink backdrop:bg-ink/25"
+      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-lg border border-line bg-surface p-6 text-ink backdrop:bg-ink/25 dark:backdrop:bg-bg/70"
     >
       <h2
         id={titleId}

@@ -12,7 +12,7 @@ flowchart LR
     UI["Dashboard · Quiz · Results · Catalogue · Aktuelles"]
     Logic["lib/quiz.ts<br/>sampling, shuffling, mastery"]
     Session["lib/session.ts<br/>session state"]
-    Local[("localStorage<br/>active session")]
+    Local[("localStorage<br/>active session, theme")]
     UI --> Logic
     UI --> Session
     Session <--> Local
@@ -40,6 +40,7 @@ flowchart LR
 | Quiz rules | `src/lib/quiz.ts`, `mastery.ts`, `dates.ts` | Exam draw, practice selection, mastery, streaks (pure, unit-tested) |
 | Current affairs | `src/lib/currentAffairs.ts` | Time-dependent questions with the latest facts, sources and check date |
 | Session state | `src/lib/session.ts` | Option order, answers, flags, retry queue, timing; persisted to `localStorage` |
+| Theme | `src/lib/theme.ts`, `useTheme.ts`, `index.html` | Light or dark: the stored choice, else the system setting; applied before first paint |
 | Hooks | `src/lib/use*.ts` | Summary, view, trainer and quiz controllers; quiz actions read the latest session |
 | Schemas | `src/lib/schemas.ts` | Zod schemas and inferred types, shared by browser and server |
 | API client | `src/lib/api.ts` | `fetch` wrapper that validates every response |

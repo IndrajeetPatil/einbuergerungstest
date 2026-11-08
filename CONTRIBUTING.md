@@ -33,6 +33,6 @@ leaves your machine.
 | Python | Ruff `ALL` (preview), ty with every rule, 100% type coverage |
 | Tests | Coverage floors only rise; end-to-end tests audit accessibility (WCAG 2.2 AA) |
 | Copy | German paired with English; English in British spelling |
-| Design | The [design notes](docs/development.md#design), light mode only |
+| Design | The [design notes](docs/development.md#design), checked in light and dark mode |
 
 See [docs/development.md](docs/development.md) for every command and check.
