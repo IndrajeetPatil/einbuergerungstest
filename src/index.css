@@ -2,7 +2,10 @@
 @import "@fontsource-variable/fraunces";
 @import "@fontsource-variable/hanken-grotesk";
 
-/* Tokens mirror DESIGN.md of indrapatil.com ("Career Atlas"), light mode only. */
+/* Dark mode is class-based: `.dark` on <html>, set by src/lib/theme.ts. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens mirror DESIGN.md; light values here, dark counterparts in `.dark`. */
 @theme {
   --color-bg: #faf8f4;
   --color-bg-alt: #f2efe8;
@@ -31,9 +34,30 @@
   --radius-lg: 8px;
 }
 
+/* The base's warm ink-and-ember dark set. Light and dark values swap together
+   and are never mixed across modes. */
+.dark {
+  --color-bg: #171410;
+  --color-bg-alt: #1d1a15;
+  --color-surface: #211d17;
+  --color-ink: #ede8de;
+  --color-muted: #a9a294;
+  --color-accent: #5eead4;
+  --color-accent-light: #99f6e4;
+  --color-line: #3a352c;
+  --color-rust: #e8a290;
+  --color-ochre: #dcb877;
+  --color-moss: #b4c98a;
+  --color-slate: #a3bedd;
+  --color-plum: #dda7cd;
+}
+
 @layer base {
   :root {
     color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
   }
   html {
     background: var(--color-bg);
@@ -228,6 +252,10 @@
     background-size: 12px;
     transition: border-color 120ms;
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%235d574c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  /* The same chevron in the dark muted ink. */
+  .dark .select {
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%23a9a294' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 
   /* Where the browser lets pages style the open list, draw it as a card

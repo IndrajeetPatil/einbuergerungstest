@@ -52,3 +52,22 @@ test("lists time-dependent answers with the last check", async ({ page }) => {
   await expect(page.getByText("Up to date")).toHaveCount(5);
   await expectAccessible(page);
 });
+
+test("follows the system theme until dark mode is toggled", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await openDashboard(page);
+  const html = page.locator("html");
+  const toggle = page.getByRole("button", { name: "Dunkel · Dark" });
+  await expect(html).toHaveClass("dark");
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await toggle.click();
+  await expect(html).not.toHaveClass("dark");
+  await page.reload();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(html).not.toHaveClass("dark");
+  await toggle.click();
+  await expect(html).toHaveClass("dark");
+  await expectAccessible(page);
+});

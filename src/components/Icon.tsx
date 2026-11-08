@@ -7,6 +7,7 @@ const PATHS = {
   clock: "M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2zM8 4.75V8l2.25 1.5",
   left: "M13 8H3m4-4L3 8l4 4",
   right: "M3 8h10M9 4l4 4-4 4",
+  moon: "M13.5 9.6A5.75 5.75 0 0 1 6.4 2.5a5.75 5.75 0 1 0 7.1 7.1z",
 } as const;
 
 const TONES = {

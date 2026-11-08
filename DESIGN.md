@@ -2,9 +2,9 @@
 version: alpha
 name: Leben in Deutschland
 description: >-
-  A light-only study app in the indrapatil.com identity — warm paper, ink,
-  Fraunces headings, one teal accent, flat hairline surfaces — set like a
-  well-made bilingual exam paper.
+  A study app in the indrapatil.com identity — warm paper, ink, Fraunces
+  headings, one teal accent, flat hairline surfaces, and a warm
+  ink-and-ember dark mode — set like a well-made bilingual exam paper.
 colors:
   primary: "{colors.accent}"
   bg: "#faf8f4"
@@ -20,6 +20,19 @@ colors:
   moss: "#4d6220"
   slate: "#3f5b7d"
   plum: "#7d3f68"
+  bg-dark: "#171410"
+  bg-alt-dark: "#1d1a15"
+  surface-dark: "#211d17"
+  ink-dark: "#ede8de"
+  muted-dark: "#a9a294"
+  accent-dark: "#5eead4"
+  accent-light-dark: "#99f6e4"
+  line-dark: "#3a352c"
+  rust-dark: "#e8a290"
+  ochre-dark: "#dcb877"
+  moss-dark: "#b4c98a"
+  slate-dark: "#a3bedd"
+  plum-dark: "#dda7cd"
 typography:
   title:
     fontFamily: Fraunces Variable
@@ -94,12 +107,13 @@ components:
 The visual design of the Einbürgerungstest trainer. It extends the
 [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md)
 (the base), last reconciled with
-[indrajeetpatil.github.io#372](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/pull/372).
+[indrajeetpatil.github.io#386](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/pull/386).
 Everything the base says applies here unless this file records a choice or an
 addition below.
 
-The tokens above mirror `src/index.css` (`@theme`), which is normative; when
-either changes, update the other in the same commit. When the base changes,
+The tokens above mirror `src/index.css` (`@theme` for light mode, `.dark` for
+the `-dark` counterparts), which is normative; when either changes, update the
+other in the same commit. Both sets are the base values unchanged. When the base changes,
 bring this app in line and move the reconciled reference forward.
 
 ## Overview
@@ -115,9 +129,9 @@ portrait, career route, or ambient motion.
 | Base parameter | Choice here | Why |
 | --- | --- | --- |
 | Accent | Teal-green, the base default | Nothing about the subject calls for another accent. |
-| Paper and ink | The base values, unchanged | — |
+| Paper and ink | The base values, unchanged, in both modes | — |
 | Chip hues | Accent, rust, and slate for states; ochre for the review flag | Moss and plum are defined but unused. |
-| Dark mode | Not supported; `color-scheme: light` | A single-user local study tool; one mode keeps the state colours easy to verify. |
+| Dark mode | Supported: the base's warm ink-and-ember `.dark` set, class-based, following the system setting until the reader picks one | Study sessions often run late in the evening. |
 | Type scale | No `display`; `title` and `heading` keep the base maxima with smaller minima | A narrow app column needs no display size. |
 | Width | `max-w-5xl`, with `max-w-prose` for explanations | One working column on every screen. |
 | Density | Masthead buttons and choice chips at 36px | Secondary, non-destructive controls; primary actions keep 44px. |
@@ -135,13 +149,31 @@ portrait, career route, or ambient motion.
 | New | Neutral | Mastery chip; `line` in the mastery bar |
 
 Every state carries text or an icon as well (a check or cross, "Richtig ·
-Correct", a screen-reader note on the option row), never colour alone.
+Correct", a screen-reader note on the option row), never colour alone. Each
+hue takes its `-dark` counterpart in dark mode, so the mapping is identical in
+both.
+
+## Dark mode
+
+- **Switching:** a `.dark` class on `<html>`, with `color-scheme: dark`. The
+  reader's choice is stored in `localStorage` (`lid.theme`); without one, the
+  app follows `prefers-color-scheme` and keeps following it live. An inline
+  script in `index.html` applies the same rule before first paint, so there
+  is no flash of the other mode, and `theme-color` follows the page paper.
+- **Accent fills:** the accent flips from dark teal to bright teal, so text on
+  an accent or rust fill (primary buttons, option keys, choice chips) is set
+  in `surface`, which is light paper in light mode and dark ink in dark mode.
+- **Contrast:** every end-to-end accessibility audit runs in light and dark
+  mode alike.
 
 ## Components
 
 - **Masthead:** the app name in the serif at `text-lg` on the left, quiet
   navigation on the right (active link in semibold accent with
-  `aria-current`), above a hairline. No sticky or blurred header.
+  `aria-current`), above a hairline. No sticky or blurred header. The
+  "Dunkel · Dark" theme toggle closes the row on every screen, including
+  sessions: a quiet 36px button with a moon icon and `aria-pressed`, in the
+  accent while dark mode is on.
 - **Dashboard opening:** an asymmetric `1.4fr / 1fr` spread — field mark,
   `text-title` heading, and muted standfirst on the left; the exam date and
   countdown in a right-aligned folio column.
@@ -159,9 +191,10 @@ Correct", a screen-reader note on the option row), never colour alone.
 - **Feedback:** a 2px leading rule in the verdict hue, the verdict line with
   its icon, and an explanation under a "Warum · Why" folio mark.
 - **Official pictures:** question images sit on a white mat (`bg-white`,
-  hairline, 6px radius, inner padding). This is the one pure-white surface,
-  because the official BAMF pictures are drawn on white and look grubby on
-  paper.
+  hairline, 6px radius, inner padding). This is the one pure-white surface, in
+  both modes, because the official BAMF pictures are drawn on white and look
+  grubby on paper. The picture credit sits below the mat, on the page colours,
+  so its muted ink holds contrast in dark mode.
 - **Progress:** the native `<progress>` as a 4px accent bar on a `line`
   track, with a tabular caption below.
 - **Mastery bar:** an 8px segmented bar (accent, slate, rust, `line`) with 2px
@@ -178,10 +211,12 @@ Correct", a screen-reader note on the option row), never colour alone.
 - **Lists:** weak spots, the catalogue, and the review list are open rows
   between hairlines, with a folio question id, never cards.
 - **Dialogues and banners:** as in the base recipes: native `<dialog>` with an
-  ink backdrop at 25%; resume banner outlined in the accent at 40%, error
-  banner in rust at 40%.
+  ink backdrop at 25% (in dark mode, where ink is light, the backdrop is `bg`
+  at 70% instead, so it dims rather than glows); resume banner outlined in the
+  accent at 40%, error banner in rust at 40%.
 - **Dropdowns:** the base select recipe, including the picker shadow where
-  `appearance: base-select` is supported.
+  `appearance: base-select` is supported. The chevron is an inline SVG drawn
+  in `muted`, with a second copy in `muted-dark` for dark mode.
 - **Sources footer:** small muted text with accent links above a top
   hairline.
 

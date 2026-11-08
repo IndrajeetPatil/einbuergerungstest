@@ -184,6 +184,9 @@ const activeSessionSchema = zod.object({
 });
 type ActiveSession = zod.infer<typeof activeSessionSchema>;
 
+const themeSchema = zod.enum(["light", "dark"]);
+type Theme = zod.infer<typeof themeSchema>;
+
 export {
   stateCodeSchema,
   catalogueSchema,
@@ -200,6 +203,7 @@ export {
   answerResultSchema,
   errorBodySchema,
   activeSessionSchema,
+  themeSchema,
 };
 export type {
   StateCode,
@@ -216,4 +220,5 @@ export type {
   StartSessionInput,
   Item,
   ActiveSession,
+  Theme,
 };
