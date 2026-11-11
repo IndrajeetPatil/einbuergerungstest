@@ -7,6 +7,7 @@ import type { Question, QuestionStat } from "#lib/schemas.ts";
 
 import { CatalogueExplanation } from "./CatalogueExplanation.tsx";
 import { OptionList } from "./OptionList.tsx";
+import { QuestionPicture } from "./QuestionPicture.tsx";
 
 const CHIP: Readonly<Record<Mastery, string>> = {
   mastered: "chip-accent",
@@ -68,12 +69,10 @@ function CatalogueEntry(
         ) : null}
       </div>
       {question.image === null ? null : (
-        <img
-          src={`${import.meta.env.BASE_URL}${question.image}`}
-          alt={`Abbildung zu ${question.de.q}`}
-          loading="lazy"
-          decoding="async"
-          className="mt-4 max-h-56 w-auto rounded-md border border-line bg-white p-2"
+        <QuestionPicture
+          image={question.image}
+          question={question.de.q}
+          size="thumbnail"
         />
       )}
       <CatalogueExplanation
