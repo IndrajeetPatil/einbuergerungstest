@@ -130,7 +130,7 @@ portrait, career route, or ambient motion.
 | --- | --- | --- |
 | Accent | Teal-green, the base default | Nothing about the subject calls for another accent. |
 | Paper and ink | The base values, unchanged, in both modes | — |
-| Chip hues | Accent, rust, and slate for states; ochre for the review flag | Moss and plum are defined but unused. |
+| Chip hues | Accent, rust, and slate chips for states; ochre only for the review-flag icon | Moss and plum are defined but unused. |
 | Dark mode | Supported: the base's warm ink-and-ember `.dark` set, class-based, following the system setting until the reader picks one | Study sessions often run late in the evening. |
 | Type scale | No `display`; `title` and `heading` keep the base maxima with smaller minima | A narrow app column needs no display size. |
 | Width | `max-w-5xl`, with `max-w-prose` for explanations | One working column on every screen. |
