@@ -20,9 +20,9 @@ Run `make` for the full list with descriptions.
 | Group | Targets |
 | --- | --- |
 | App | `start`, `serve`, `open`, `dev`, `build`, `build-pages`, `social-card` |
-| Quality | `qa`, `qa-js`, `qa-python`, `lint`, `typecheck`, `fallow`, `css-quality`, `file-naming`, `lint-markdown`, `spell-check`, `link-check`, `format`, `fix`, `ci` |
+| Quality | `qa`, `qa-js`, `qa-python`, `lint`, `lint-python`, `typecheck`, `typecheck-python`, `typecoverage-python`, `fallow`, `css-quality`, `file-naming`, `lint-markdown`, `spell-check`, `link-check`, `format`, `fix`, `ci` |
 | Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `test-e2e-docker` |
-| Security | `security`, `secret-scan`, `workflow-lint`, `workflow-audit`, `audit-js`, `audit-python` |
+| Security | `security`, `secret-scan`, `secret-scan-ci`, `workflow-lint`, `workflow-audit`, `audit-js`, `audit-python` |
 | Hooks | `hooks-install`, `hooks`, `hooks-push`, `hooks-update` |
 | Data | `data`, `data-refresh` |
 | Maintenance | `install`, `outdated`, `update`, `doctor`, `clean`, `distclean` |
@@ -75,7 +75,7 @@ flowchart LR
 | Hook stage | Runs |
 | --- | --- |
 | pre-commit | Ruff, rumdl, typos, ls-lint, Oxfmt + Oxlint, file hygiene |
-| pre-push | TypeScript and Python types, unit tests |
+| pre-push | TypeScript types; Ruff, ty and pyrefly; unit tests |
 | commit-msg | Conventional Commits (strict) |
 
 | Rule | Detail |

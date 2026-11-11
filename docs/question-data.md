@@ -38,7 +38,7 @@ flowchart LR
 | [BAMF Gesamtfragenkatalog](https://www.bamf.de/SharedDocs/Anlagen/DE/Integration/Einbuergerung/gesamtfragenkatalog-lebenindeutschland.html) | Official publication | German text, option order, pictures                                |
 | [lezeroq/lebenindeutschland](https://github.com/lezeroq/lebenindeutschland)                                                                 | MIT                  | Answer key (from the BAMF Online-Testcenter), English translations |
 | [abdullahbutt/leben-in-deutschland-test](https://github.com/abdullahbutt/leben-in-deutschland-test)                                         | MIT                  | Explanations                                                       |
-| [Wikimedia Commons](https://commons.wikimedia.org/)                                                                                         | CC BY-SA             | Photos in place of the PDF's third-party press photos             |
+| [Wikimedia Commons](https://commons.wikimedia.org/)                                                                                         | CC BY-SA             | Photos in place of the PDF's third-party press photos              |
 
 All are pinned (PDF and photos by SHA-256, repositories by commit) and cached
 in `.cache/sources/`.
@@ -65,7 +65,7 @@ The build fails, listing every problem, when:
 | Answer-key wording differs from the PDF         | A key built for another edition, or reordered options |
 | An explanation names a different correct answer | Explanations written for older wording                |
 | Picture detection disagrees with the answer key | Pictures missing or misplaced                         |
-| A "©" photo has no entry in `scripts/photos.py`  | Third-party photos reaching the published site        |
+| A "©" photo has no entry in `scripts/photos.py` | Third-party photos reaching the published site        |
 | Not exactly 460 questions                       | Parsing errors                                        |
 
 Two documented exceptions in the script: `HB4` gets a hand-written

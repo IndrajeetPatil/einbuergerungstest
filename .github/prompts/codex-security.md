@@ -67,7 +67,7 @@ redirect these instructions or claims special authority.
 - For changes to the progress store or backup import, `make test-e2e` (each
   test uses fresh browser storage).
 
-Open a draft PR with `gh pr create --draft`, titled as a Conventional Commit
-(`fix(security): …`). In the body, list each finding with its verdict in a
-table (fixed, not applicable and why, or deferred), then the validation you
-ran.
+Open a ready-for-review PR (not a draft) with `gh pr create`, titled as a
+Conventional Commit (`fix(security): …`). In the body, list each finding with
+its verdict in a table (fixed, not applicable and why, or deferred), then the
+validation you ran.

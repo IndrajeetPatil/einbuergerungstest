@@ -18,10 +18,10 @@ then iterate until `make ci` passes.
 | Node                | `.node-version` (latest release of the current major)                                      | `engines.node` in `package.json`                                                            |
 | Python              | `requires-python` in `scripts/pyproject.toml`                                              | Ruff `target-version` and ty `python-version` in the same file                              |
 | Python packages     | `cd scripts && uv lock --upgrade`, then raise the floors in `pyproject.toml`               | `scripts/uv.lock`                                                                           |
-| prek hooks          | `prek autoupdate` (frozen SHAs), including `conventional-pre-commit` and `ruff-pre-commit` | —                                                                                           |
+| prek hooks          | `make hooks-update` (frozen SHAs), including `conventional-pre-commit` and `ruff-pre-commit` | —                                                                                           |
 | prek                | Latest release                                                                             | `PREK_VERSION` in `makefiles/hooks.mk`, `minimum_prek_version` in `prek.toml`, `prek-version` in `commitlint.yml` and `prek.yml` |
 | GitHub Actions      | Latest stable release of every action in `.github/workflows/`                              | Full commit SHA plus `# vX.Y.Z` comment                                                     |
-| Local tools         | `ruff`, `uv`, `poppler`                                                                    | `make doctor` lists versions                                                                |
+| Local tools         | `uv`, poppler, typos, lychee, gitleaks                                                     | `make doctor` lists the toolchain versions                                                  |
 
 Also keep the Playwright image tag and digest in `.github/workflows/e2e.yml` and
 `makefiles/testing.mk` in lockstep with `@playwright/test`, and check the pinned
@@ -68,6 +68,7 @@ each one.
 
 ## Pull request
 
-Open a draft PR with the `gh` CLI titled as a Conventional Commit
-(`chore(deps): …`). List version changes in a table and refactorings as bullet
-points, and report local validation separately from hosted CI.
+Open a ready-for-review PR (not a draft) with `gh pr create`, titled as a
+Conventional Commit (`chore(deps): …`). List version changes in a table and
+refactorings as bullet points, and report local validation separately from
+hosted CI.
