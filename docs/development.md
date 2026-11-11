@@ -144,20 +144,24 @@ social networks read is static and lives in `index.html` and `public/`.
 
 | What | Where |
 | --- | --- |
-| Title, description, canonical URL, `robots` | `index.html` head |
+| Title, description, canonical URL, `robots`, `format-detection` | `index.html` head |
 | Open Graph and Twitter card (`summary_large_image`) | `index.html` head, image `public/og-image.png` (1200 × 630) |
-| `WebApplication` structured data (JSON-LD) | `index.html` head |
+| `WebApplication` and `BreadcrumbList` structured data (JSON-LD) | `index.html` head |
 | Summary for readers and crawlers without JavaScript | `<noscript>` in `index.html` |
 | [llms.txt](https://llmstxt.org/) for AI assistants | `public/llms.txt`, linked with `rel="describedby"` |
 | Sitemap | `public/sitemap.xml`, one URL: views are hash routes |
-| Apple touch icon | `public/apple-touch-icon.png` |
+| Web app manifest and icons | `public/site.webmanifest`, `public/icon-*.png`, `public/apple-touch-icon.png` |
+| Not-found page (`noindex`, links back to the app, `llms.txt` and the sitemap) | `public/404.html`, which GitHub Pages serves with a 404 status |
 
-`make social-card` renders the card and the touch icon from
-`scripts/social-card.mjs` with Playwright's Chromium; rerun it and commit both
-images after changing their copy or the design tokens. Keep the head, the
+`make social-card` renders the card and the icons from
+`scripts/social-card.mjs` with Playwright's Chromium; rerun it and commit the
+images after changing their copy, the favicon or the design tokens. Keep the head, the
 `<noscript>` summary and `llms.txt` in step with the README's feature list.
 Absolute URLs in the head point at <https://www.indrapatil.com/einbuergerungstest/>;
-Vite prefixes root-relative links with the base path.
+Vite prefixes root-relative links with the base path. `public/` is copied
+verbatim, so `404.html` uses absolute URLs and the manifest relative ones. The
+structured data follows indrapatil.com's: the author is its `#person` node and
+the page has no `dateModified`.
 
 Crawlers read `robots.txt` only at the domain root, which
 [indrajeetpatil.github.io](https://github.com/IndrajeetPatil/indrajeetpatil.github.io)

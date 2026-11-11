@@ -6,6 +6,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
+    <!-- Keep numbers and dates (population, election years) as text rather
+         than phone or calendar links on mobile browsers. -->
+    <meta
+      name="format-detection"
+      content="telephone=no, date=no, address=no, email=no, url=no"
+    />
     <meta
       name="color-scheme"
       content="light dark"
@@ -41,6 +47,10 @@
     <link
       rel="apple-touch-icon"
       href="/apple-touch-icon.png"
+    />
+    <link
+      rel="manifest"
+      href="/site.webmanifest"
     />
     <link
       rel="sitemap"
@@ -174,6 +184,26 @@
           "name": "Indrajeet Patil",
           "url": "https://www.indrapatil.com/"
         }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Indrajeet Patil",
+            "item": "https://www.indrapatil.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Einbürgerungstest trainer",
+            "item": "https://www.indrapatil.com/einbuergerungstest/"
+          }
+        ]
       }
     </script>
     <script>

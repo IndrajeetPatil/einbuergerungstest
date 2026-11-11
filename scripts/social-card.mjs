@@ -1,20 +1,30 @@
 #!/usr/bin/env node
 /**
- * Renders the social sharing card (Open Graph and Twitter image) and the
- * Apple touch icon into public/ with Playwright's Chromium.
+ * Renders the social sharing card (Open Graph and Twitter image) and the app
+ * icons (Apple touch icon and web app manifest icons) into public/ with
+ * Playwright's Chromium.
  *
  * The card follows DESIGN.md: warm paper, Fraunces headings, Hanken Grotesk
  * text, the teal accent, hairline rules and no shadows. Run `make social-card`
- * after changing the copy or the design tokens, and commit both images.
+ * after changing the copy or the design tokens, and commit the images.
  */
 
 import { readFile } from "node:fs/promises";
 
 import { chromium } from "@playwright/test";
 
-// Open Graph's recommended 1.91:1 size, and Apple's touch icon size.
+// Open Graph's recommended 1.91:1 size.
 const CARD = { width: 1200, height: 630 };
-const TOUCH_ICON = { width: 180, height: 180 };
+
+// Maskable icons keep the mark inside the central 80% safe zone, since
+// launchers crop them to circles or rounded squares.
+const MASKABLE_SCALE = "80%";
+const ICONS = [
+  { path: "public/apple-touch-icon.png", size: 180, scale: "100%" },
+  { path: "public/icon-192.png", size: 192, scale: "100%" },
+  { path: "public/icon-512.png", size: 512, scale: "100%" },
+  { path: "public/icon-maskable-512.png", size: 512, scale: MASKABLE_SCALE },
+];
 
 const FONTS = "node_modules/@fontsource-variable";
 
@@ -100,12 +110,22 @@ const CARD_HTML = `<!doctype html>
   </p>
 </body></html>`;
 
-const ICON_HTML = `<!doctype html>
+/**
+ * A page that draws the favicon on a full-bleed paper background.
+ * @param scale - Size of the mark relative to the icon.
+ * @returns The icon page.
+ */
+function iconHtml(scale) {
+  return `<!doctype html>
 <html><head><style>
   * { margin: 0; }
-  body { background: #faf8f4; }
-  svg { display: block; width: 100vw; height: 100vh; }
+  body {
+    background: #faf8f4; width: 100vw; height: 100vh;
+    display: grid; place-items: center;
+  }
+  svg { display: block; width: ${scale}; height: ${scale}; }
 </style></head><body>${favicon}</body></html>`;
+}
 
 const browser = await chromium.launch();
 try {
@@ -116,10 +136,16 @@ try {
   });
   await page.screenshot({ path: "public/og-image.png" });
 
-  await page.setViewportSize(TOUCH_ICON);
-  await page.setContent(ICON_HTML);
-  await page.screenshot({ path: "public/apple-touch-icon.png" });
+  for (const { path, size, scale } of ICONS) {
+    // Each icon reuses the page, so they render one after another.
+    // oxlint-disable-next-line no-await-in-loop
+    await page.setViewportSize({ width: size, height: size });
+    // oxlint-disable-next-line no-await-in-loop
+    await page.setContent(iconHtml(scale));
+    // oxlint-disable-next-line no-await-in-loop
+    await page.screenshot({ path });
+  }
 } finally {
   await browser.close();
 }
-console.log("Wrote public/og-image.png and public/apple-touch-icon.png");
+console.log("Wrote the social card and app icons to public/");

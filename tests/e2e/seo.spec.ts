@@ -6,10 +6,22 @@ import { z } from "zod";
 
 const CANONICAL = "https://www.indrapatil.com/einbuergerungstest/";
 
-const StructuredData = z.object({
+const App = z.object({
   "@type": z.literal("WebApplication"),
   url: z.literal(CANONICAL),
   image: z.string(),
+});
+
+const Crumb = z.object({ item: z.string() });
+const Breadcrumbs = z.object({
+  "@type": z.literal("BreadcrumbList"),
+  itemListElement: z.array(Crumb),
+});
+
+const Icon = z.object({ src: z.string() });
+const Manifest = z.object({
+  start_url: z.literal("./"),
+  icons: z.array(Icon),
 });
 
 test("describes the page for search engines and social cards", async ({
@@ -39,11 +51,23 @@ test("describes the page for search engines and social cards", async ({
   expect(card.ok()).toBe(true);
   expect(card.headers()["content-type"]).toBe("image/png");
 
-  const json = await head
+  const [app, crumbs] = await head
     .locator('script[type="application/ld+json"]')
-    .textContent();
-  const data = StructuredData.parse(JSON.parse(json ?? ""));
-  expect(data.image).toBe(image);
+    .allTextContents();
+  expect(App.parse(JSON.parse(app ?? "")).image).toBe(image);
+  expect(
+    Breadcrumbs.parse(JSON.parse(crumbs ?? "")).itemListElement.at(-1)?.item,
+  ).toBe(CANONICAL);
+});
+
+test("serves the web app manifest and its icons", async ({ request }) => {
+  const manifest = await request.get("/site.webmanifest");
+  expect(manifest.ok()).toBe(true);
+  const { icons } = Manifest.parse(await manifest.json());
+  for (const { src } of icons) {
+    const icon = await request.get(`/${src}`);
+    expect(icon.ok(), src).toBe(true);
+  }
 });
 
 test("serves the sitemap and llms.txt", async ({ request }) => {
@@ -54,6 +78,19 @@ test("serves the sitemap and llms.txt", async ({ request }) => {
   const llms = await request.get("/llms.txt");
   expect(llms.ok()).toBe(true);
   expect(await llms.text()).toMatch(/^# Leben in Deutschland/u);
+});
+
+test("ships a noindex 404 page that links back to the app", async ({
+  page,
+}) => {
+  await page.goto("/404.html");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    "noindex, follow",
+  );
+  await expect(
+    page.getByRole("link", { name: "Zur App · Open the app" }),
+  ).toHaveAttribute("href", CANONICAL);
 });
 
 test.describe("without JavaScript", () => {

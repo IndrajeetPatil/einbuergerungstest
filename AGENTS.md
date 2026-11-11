@@ -35,7 +35,7 @@ Pages. Start with the [README](README.md).
 | `make fix` | Write formatting and safe lint fixes |
 | `make hooks` / `make hooks-push` | prek pre-commit / pre-push stages on all files |
 | `make data` | Rebuild `catalogue.json` and pictures (needs poppler) |
-| `make social-card` | Render `public/og-image.png` and the Apple touch icon |
+| `make social-card` | Render `public/og-image.png` and the app icons |
 
 Every gate is listed in [docs/development.md](docs/development.md#quality-gates).
 
