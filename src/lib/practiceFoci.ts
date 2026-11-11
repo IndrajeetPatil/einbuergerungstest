@@ -1,6 +1,7 @@
 // The practice focus choices shown on the dashboard.
-import { masteryOf, poolFor } from "./mastery.ts";
-import type { Focus, Question, QuestionStat, StateCode } from "./schemas.ts";
+import { masteryOf, needsReview, poolFor } from "./mastery.ts";
+import type { Stats } from "./mastery.ts";
+import type { Focus, Question, StateCode } from "./schemas.ts";
 
 interface FocusChoice {
   value: Exclude<Focus, "selected">;
@@ -75,17 +76,16 @@ function focusChoice(value: FocusChoice["value"]): FocusChoice {
 function focusCounts(
   questions: readonly Question[],
   state: StateCode,
-  stats: Readonly<Record<string, QuestionStat>>,
+  stats: Stats,
 ): Record<FocusChoice["value"], number> {
   const pool = poolFor(questions, state);
-  const masteries = pool.map((entry) => masteryOf(stats[entry.id]));
+  const count = (keep: (entry: Question) => boolean): number =>
+    pool.filter((entry) => keep(entry)).length;
   return {
     smart: pool.length,
-    new: masteries.filter((mastery) => mastery === "new").length,
-    mistakes: masteries.filter(
-      (mastery) => mastery === "missed" || mastery === "once",
-    ).length,
-    state: pool.filter((entry) => entry.state !== null).length,
+    new: count((entry) => masteryOf(stats[entry.id]) === "new"),
+    mistakes: count((entry) => needsReview(stats[entry.id])),
+    state: count((entry) => entry.state !== null),
     all: pool.length,
   };
 }

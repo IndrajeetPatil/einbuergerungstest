@@ -1,6 +1,5 @@
-// The progress API the app talks to. It keeps the shape of the former HTTP
-// client, but every call is a change to the progress document in this
-// browser's IndexedDB.
+// The progress API the app talks to. Every call reads or changes the progress
+// document in this browser's IndexedDB.
 import { fromBackup, replaceProgress, toBackup } from "./backup.ts";
 import {
   EMPTY_PROGRESS,
@@ -15,12 +14,26 @@ import { summary } from "./progressViews.ts";
 import type {
   AnswerInput,
   Backup,
+  Progress,
   SessionSummary,
   Settings,
   SettingsPatch,
   StartSessionInput,
   Summary,
 } from "./schemas.ts";
+
+/**
+ * Replaces the progress document in one transaction.
+ * @param change - Pure transformation of the current document.
+ */
+async function rewrite(
+  change: (progress: Progress) => Progress,
+): Promise<void> {
+  await changeProgress((progress) => ({
+    progress: change(progress),
+    result: null,
+  }));
+}
 
 const api = {
   summary: async (): Promise<Summary> => readProgress(summary),
@@ -52,33 +65,24 @@ const api = {
         input: { answers, durationMs },
       }),
     ),
-  discard: async (id: number): Promise<void> => {
-    await changeProgress((progress) => ({
-      progress: discardSession(progress, id),
-      result: null,
-    }));
-  },
+  discard: async (id: number): Promise<void> =>
+    rewrite((progress) => discardSession(progress, id)),
   exportBackup: async (): Promise<Backup> =>
     readProgress((progress) => toBackup(progress)),
   // Replaces all progress with a backup's, validated before anything is
   // written.
   importBackup: async (value: unknown): Promise<void> => {
     const imported = fromBackup(value);
-    await changeProgress((progress) => ({
-      progress: replaceProgress(progress, imported),
-      result: null,
-    }));
+    await rewrite((progress) => replaceProgress(progress, imported));
   },
   // Deletes every session and answer, keeping the settings.
-  resetProgress: async (): Promise<void> => {
-    await changeProgress((progress) => ({
-      progress: replaceProgress(progress, {
+  resetProgress: async (): Promise<void> =>
+    rewrite((progress) =>
+      replaceProgress(progress, {
         ...EMPTY_PROGRESS,
         settings: progress.settings,
       }),
-      result: null,
-    }));
-  },
+    ),
 };
 
 export { api };
