@@ -41,12 +41,11 @@ erDiagram
 ```
 
 The document is validated with `progressSchema` (`src/lib/schemas.ts`) every
-time it is read, and timestamps are ISO 8601 in UTC. Ids are one more than the
-highest in use, as SQLite's `INTEGER PRIMARY KEY` would choose them, except
-session ids, which come from `nextSessionId` and are never reused: after a reset
-or import, a session still open in another tab fails with "unknown session"
-instead of writing into a newer session with the same id. Documents written
-before the counter existed count from their highest session id.
+time it is read, and timestamps are ISO 8601 in UTC. Answer ids are one more
+than the highest in use. Session ids come from `nextSessionId` and are never
+reused: after a reset or import, a session still open in another tab fails
+with "unknown session" instead of writing into a newer session with the same
+id. Documents without `nextSessionId` count from their highest session id.
 
 ## How changes are applied
 

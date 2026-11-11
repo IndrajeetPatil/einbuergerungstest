@@ -56,8 +56,8 @@ out) it passes every answer to `api.finish`, stored in a single transaction.
 
 ## API
 
-`src/lib/api.ts` keeps the shape of the former HTTP API, so hooks and
-components do not know where progress lives.
+`src/lib/api.ts` is the app's only entry to progress, so hooks and components
+do not know where progress lives.
 
 | Call | Purpose |
 | --- | --- |
