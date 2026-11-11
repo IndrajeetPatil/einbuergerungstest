@@ -31,7 +31,6 @@ function CurrentAffairAnswers(
           german={optionText(question, fact.option, "de")}
           english={optionText(question, fact.option, "en")}
           showEnglish={showEnglish}
-          struck={false}
         />
       )}
     </>

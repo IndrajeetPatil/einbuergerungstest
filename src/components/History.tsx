@@ -29,6 +29,7 @@ function History(
   props: Readonly<{ stat: QuestionStat; label?: string }>,
 ): ReactElement {
   const { stat, label = "Your record" } = props;
+  const recent = marks(stat.recent);
   return (
     <span className="inline-flex items-center gap-2">
       <span>
@@ -36,15 +37,13 @@ function History(
       </span>
       <span className="sr-only">
         Recent answers, oldest first:{" "}
-        {marks(stat.recent)
-          .map((mark) => (mark.correct ? "right" : "wrong"))
-          .join(", ")}
+        {recent.map((mark) => (mark.correct ? "right" : "wrong")).join(", ")}
       </span>
       <span
         className="inline-flex items-center gap-0.5"
         aria-hidden="true"
       >
-        {marks(stat.recent).map((mark) => (
+        {recent.map((mark) => (
           <Icon
             key={mark.key}
             name={mark.correct ? "check" : "cross"}

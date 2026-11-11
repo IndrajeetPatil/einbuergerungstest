@@ -38,7 +38,7 @@ function CurrentQuestion(
     showEnglish: boolean;
   }>,
 ): ReactElement {
-  const { quiz, session, showEnglish } = props;
+  const { quiz, session, stat, showEnglish } = props;
   const revealed = !quiz.exam && quiz.item.checked;
   return (
     <>
@@ -61,7 +61,7 @@ function CurrentQuestion(
         <Feedback
           question={quiz.question}
           chosen={quiz.item.chosen}
-          stat={props.stat}
+          stat={stat}
           comesBack={comesBack(session, quiz)}
           showEnglish={showEnglish}
         />

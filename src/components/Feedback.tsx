@@ -23,7 +23,7 @@ interface Props {
  * @returns The feedback panel.
  */
 function Feedback(props: Readonly<Props>): ReactElement {
-  const { question, chosen, stat, showEnglish } = props;
+  const { question, chosen, stat, comesBack = false, showEnglish } = props;
   const correct = chosen === question.answer;
   return (
     <section
@@ -44,7 +44,7 @@ function Feedback(props: Readonly<Props>): ReactElement {
       <Explanation question={question} />
       <FeedbackRecord
         stat={stat}
-        comesBack={props.comesBack === true}
+        comesBack={comesBack}
       />
     </section>
   );
