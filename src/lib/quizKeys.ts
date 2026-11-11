@@ -19,12 +19,13 @@ const POSITIONS: Readonly<Record<string, number>> = {
   d: 3,
 };
 
-const ALWAYS: Readonly<Record<string, KeyAction>> = {
+const PRACTICE_KEYS: Readonly<Record<string, KeyAction>> = {
   enter: { kind: "enter" },
   e: { kind: "english" },
 };
 
-const EXAM_ONLY: Readonly<Record<string, KeyAction>> = {
+const EXAM_KEYS: Readonly<Record<string, KeyAction>> = {
+  ...PRACTICE_KEYS,
   arrowright: { kind: "next" },
   arrowleft: { kind: "previous" },
   f: { kind: "flag" },
@@ -42,7 +43,8 @@ function keyAction(key: string, exam: boolean): KeyAction | null {
   if (position !== undefined) {
     return { kind: "choose", position };
   }
-  return ALWAYS[lower] ?? (exam ? (EXAM_ONLY[lower] ?? null) : null);
+  const actions = exam ? EXAM_KEYS : PRACTICE_KEYS;
+  return actions[lower] ?? null;
 }
 
 type KeyInfo = Pick<
@@ -63,6 +65,7 @@ function modified(event: KeyInfo): boolean {
 }
 
 function within(target: EventTarget | null, selector: string): boolean {
+  // The null check comes first so DOM-free unit tests never touch `Element`.
   return (
     target !== null &&
     target instanceof Element &&

@@ -63,25 +63,15 @@ function usePersistedSession(): PersistedSession {
  * @returns The trainer controller.
  */
 function useTrainer(): Trainer {
-  const {
-    summary,
-    error: errorText,
-    setError,
-    refresh,
-    updateSettings,
-  } = useSummary();
+  const { summary, error, setError, refresh, updateSettings } = useSummary();
   const [view, setView] = useView();
-  const {
-    active,
-    persist: persistActive,
-    latest: latestActive,
-  } = usePersistedSession();
+  const { active, persist, latest } = usePersistedSession();
   const settings = summary?.settings;
 
   const start = useStarter({
     summary,
     onStarted: (session) => {
-      persistActive(session);
+      persist(session);
       setView({ name: "session" });
     },
     onError: setError,
@@ -91,24 +81,24 @@ function useTrainer(): Trainer {
     if (active === null) {
       return;
     }
-    persistActive(null);
+    persist(null);
     setView({ name: "dashboard" });
     try {
       await api.discard(active.id);
-    } catch (error) {
-      setError(`Could not discard the session: ${describeError(error)}`);
+    } catch (error_) {
+      setError(`Could not discard the session: ${describeError(error_)}`);
     }
     await refresh();
-  }, [active, persistActive, refresh, setError, setView]);
+  }, [active, persist, refresh, setError, setView]);
 
   return {
     summary,
     active,
     view,
-    error: errorText,
+    error,
     setView,
-    handleSessionChange: persistActive,
-    latestSession: latestActive,
+    handleSessionChange: persist,
+    latestSession: latest,
     handleDismissError: () => {
       setError(null);
     },
@@ -143,13 +133,13 @@ function useTrainer(): Trainer {
       void discard();
     },
     handleFinished: (result, session) => {
-      persistActive(null);
+      persist(null);
       setView({ name: "results", summary: result, session });
       void refresh();
     },
     handleProgressReplaced: () => {
       // The session in progress belongs to the progress just replaced.
-      persistActive(null);
+      persist(null);
       setView({ name: "dashboard" });
       void refresh();
     },

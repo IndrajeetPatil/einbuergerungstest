@@ -97,15 +97,22 @@ type Settings = zod.infer<typeof settingsSchema>;
 const settingsPatchSchema = zod.partial(settingsSchema);
 type SettingsPatch = zod.infer<typeof settingsPatchSchema>;
 
-const sessionSummarySchema = zod.object({
+/** A session as stored; open sessions have no `finishedAt` yet. */
+const storedSessionSchema = zod.object({
   id: zod.int(),
   mode: modeSchema,
   focus: zod.nullable(focusSchema),
   state: stateCodeSchema,
   questionCount: zod.int(),
   startedAt: zod.string(),
-  finishedAt: zod.string(),
+  finishedAt: nullableText,
   durationMs: zod.nullable(zod.int()),
+});
+type StoredSession = zod.infer<typeof storedSessionSchema>;
+
+/** A finished session with its score. */
+const sessionSummarySchema = zod.extend(storedSessionSchema, {
+  finishedAt: text,
   /** First attempts only; retries inside a practice session do not count. */
   answered: zod.int(),
   correct: zod.int(),
@@ -150,19 +157,6 @@ const finishInputSchema = zod.object({
   answers: zod.optional(zod.array(answerInputSchema)),
   durationMs: zod.optional(duration),
 });
-
-/** A session as stored; open sessions have no `finishedAt` yet. */
-const storedSessionSchema = zod.object({
-  id: zod.int(),
-  mode: modeSchema,
-  focus: zod.nullable(focusSchema),
-  state: stateCodeSchema,
-  questionCount: zod.int(),
-  startedAt: zod.string(),
-  finishedAt: nullableText,
-  durationMs: zod.nullable(zod.int()),
-});
-type StoredSession = zod.infer<typeof storedSessionSchema>;
 
 /** One answer as stored, judged against the official key when saved. */
 const storedAnswerSchema = zod.object({

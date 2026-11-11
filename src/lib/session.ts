@@ -50,6 +50,24 @@ function updateCurrent(
   };
 }
 
+/**
+ * Adds the time since the current question was shown to it and restarts the
+ * clock.
+ * @param session - The session.
+ * @param now - Current time in ms.
+ * @returns The updated session.
+ */
+function timed(session: ActiveSession, now: number): ActiveSession {
+  const spent = Math.max(0, now - session.shownAt);
+  return {
+    ...updateCurrent(session, (item) => ({
+      ...item,
+      timeMs: item.timeMs + spent,
+    })),
+    shownAt: now,
+  };
+}
+
 interface NewSession {
   id: number;
   mode: Mode;
@@ -100,13 +118,8 @@ function goTo(
   index: number,
   now: number = Date.now(),
 ): ActiveSession {
-  const spent = Math.max(0, now - session.shownAt);
-  const timed = updateCurrent(session, (item) => ({
-    ...item,
-    timeMs: item.timeMs + spent,
-  }));
   const clamped = Math.max(0, Math.min(index, session.items.length - 1));
-  return { ...timed, index: clamped, shownAt: now };
+  return { ...timed(session, now), index: clamped };
 }
 
 /**
@@ -181,19 +194,13 @@ function check(session: ActiveSession, options: CheckOptions): ActiveSession {
   if (!checkable(current)) {
     return session;
   }
-  const spent = Math.max(0, now - session.shownAt);
-  const checked = updateCurrent(session, (item) => ({
+  const checked = updateCurrent(timed(session, now), (item) => ({
     ...item,
     checked: true,
-    timeMs: item.timeMs + spent,
   }));
-  return {
-    ...checked,
-    items: isFirstMiss(current, options.question)
-      ? withRetry(checked, options, rng)
-      : checked.items,
-    shownAt: now,
-  };
+  return isFirstMiss(current, options.question)
+    ? { ...checked, items: withRetry(checked, options, rng) }
+    : checked;
 }
 
 type NextStep = "advance" | "confirm" | "finish";

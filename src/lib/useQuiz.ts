@@ -70,13 +70,13 @@ const BLANK_ITEM: Item = {
 
 async function submit(
   session: ActiveSession,
-  exam: boolean,
   options: Pick<QuizOptions, "onFinished" | "onError">,
 ): Promise<void> {
   const final = goTo(session, session.index);
-  const answers = exam
-    ? final.items.map((entry, index) => toAnswer(entry, index))
-    : [];
+  const answers =
+    final.mode === "exam"
+      ? final.items.map((entry, index) => toAnswer(entry, index))
+      : [];
   try {
     const summary = await api.finish(
       final.id,
@@ -116,8 +116,7 @@ function useSubmit(
       return;
     }
     setBusy(true);
-    const session = latest();
-    void submit(session, session.mode === "exam", {
+    void submit(latest(), {
       onFinished,
       onError: (message) => {
         onError(message);

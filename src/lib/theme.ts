@@ -1,8 +1,8 @@
 // Light or dark colours: the reader's stored choice, else the system setting.
 // The inline script in index.html applies the same rule before first paint,
 // so keep its storage key and media query in step with these.
-import { themeSchema } from "#lib/schemas.ts";
-import type { Theme } from "#lib/schemas.ts";
+import { themeSchema } from "./schemas.ts";
+import type { Theme } from "./schemas.ts";
 
 const STORAGE_KEY = "lid.theme";
 const DARK_QUERY = "(prefers-color-scheme: dark)";

@@ -85,7 +85,7 @@ function roundOrNull(value: number | null | undefined): number | null {
 }
 
 /**
- * The next free id, as SQLite's INTEGER PRIMARY KEY would choose it.
+ * The next free id: one more than the highest in use.
  * @param rows - Existing rows.
  * @returns One more than the highest id.
  */

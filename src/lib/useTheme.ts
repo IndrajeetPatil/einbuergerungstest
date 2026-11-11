@@ -2,7 +2,7 @@
 // the system setting until then.
 import { useCallback, useEffect, useState } from "react";
 
-import type { Theme } from "#lib/schemas.ts";
+import type { Theme } from "./schemas.ts";
 import {
   DARK_QUERY,
   otherTheme,
@@ -10,7 +10,7 @@ import {
   saveTheme,
   storedTheme,
   systemTheme,
-} from "#lib/theme.ts";
+} from "./theme.ts";
 
 /**
  * Switches the dark class and the browser's theme colour.

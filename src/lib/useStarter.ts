@@ -18,13 +18,23 @@ interface StartRequest {
   pick: (state: StateCode, stats: Summary["stats"]) => Question[];
 }
 
+/**
+ * Opens a session in the progress store, unless no Bundesland is set or
+ * nothing matches the request.
+ * @param summary - Settings and statistics, once loaded.
+ * @param request - Mode, focus and how to pick the questions.
+ * @returns The new session, or null when there is nothing to start.
+ */
 async function startSession(
-  summary: Summary,
+  summary: Summary | null,
   request: StartRequest,
 ): Promise<ActiveSession | null> {
+  if (summary === null || summary.settings.state === null) {
+    return null;
+  }
   const { state, shuffleOptions } = summary.settings;
-  const picked = state === null ? [] : request.pick(state, summary.stats);
-  if (state === null || picked.length === 0) {
+  const picked = request.pick(state, summary.stats);
+  if (picked.length === 0) {
     return null;
   }
   const { id } = await api.startSession({
@@ -49,16 +59,6 @@ interface StarterOptions {
   onError: (message: string) => void;
 }
 
-async function launch(
-  summary: Summary | null,
-  request: StartRequest,
-): Promise<ActiveSession | null> {
-  if (summary === null) {
-    return null;
-  }
-  return startSession(summary, request);
-}
-
 /**
  * Starts sessions one at a time: a second click or Enter while the first
  * request is in flight does not open a second session.
@@ -77,7 +77,7 @@ function useStarter(
       }
       starting.current = true;
       try {
-        const session = await launch(summary, request);
+        const session = await startSession(summary, request);
         if (session !== null) {
           onStarted(session);
         }

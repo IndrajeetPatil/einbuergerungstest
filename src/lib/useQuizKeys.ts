@@ -6,14 +6,16 @@ import type { KeyAction } from "./quizKeys.ts";
 import type { Quiz } from "./useQuiz.ts";
 
 function run(quiz: Quiz, action: KeyAction, toggleEnglish: () => void): void {
-  const handlers: Readonly<Record<KeyAction["kind"], () => void>> = {
-    choose: () => {
-      const option =
-        action.kind === "choose" ? quiz.item.order[action.position] : undefined;
-      if (option !== undefined) {
-        quiz.handleChoose(option);
-      }
-    },
+  if (action.kind === "choose") {
+    const option = quiz.item.order[action.position];
+    if (option !== undefined) {
+      quiz.handleChoose(option);
+    }
+    return;
+  }
+  const handlers: Readonly<
+    Record<Exclude<KeyAction["kind"], "choose">, () => void>
+  > = {
     enter: quiz.handleEnter,
     next: quiz.handleNext,
     previous: quiz.handlePrevious,
