@@ -72,3 +72,9 @@ Open a ready-for-review PR (not a draft) with `gh pr create`, titled as a
 Conventional Commit (`chore(deps): …`). List version changes in a table and
 refactorings as bullet points, and report local validation separately from
 hosted CI.
+
+Then follow [AGENTS.md](../../AGENTS.md#pull-requests) through completion:
+post verified screenshots for frontend source changes, fix CI until every
+workflow passes, iterate on Codex review until it approves the current head,
+and squash-merge only then. If Codex usage is exhausted, leave the PR open and
+report it.

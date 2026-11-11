@@ -71,3 +71,9 @@ Open a ready-for-review PR (not a draft) with `gh pr create`, titled as a
 Conventional Commit (`fix(security): …`). In the body, list each finding with
 its verdict in a table (fixed, not applicable and why, or deferred), then the
 validation you ran.
+
+Then follow [AGENTS.md](../../AGENTS.md#pull-requests) through completion:
+post verified screenshots for frontend source changes, fix CI until every
+workflow passes, iterate on Codex review until it approves the current head,
+and squash-merge only then. If Codex usage is exhausted, leave the PR open and
+report it.
