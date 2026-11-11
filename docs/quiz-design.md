@@ -112,4 +112,5 @@ without replacement):
 | `E`                | Show or hide the English column               |
 
 Hiding English in the last days before the exam checks that you can read the
-German alone.
+German alone. The results review still shows the correct and the chosen answer
+of every mistake in English, since that is where the translation helps most.
