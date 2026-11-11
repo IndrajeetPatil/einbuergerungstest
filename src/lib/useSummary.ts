@@ -1,4 +1,4 @@
-// The server summary (settings, sessions, statistics) and the error banner.
+// The progress summary (settings, sessions, statistics) and the error banner.
 import { useCallback, useEffect, useState } from "react";
 
 import { api } from "./api.ts";
@@ -24,7 +24,7 @@ function withSettings(
 }
 
 /**
- * Loads the summary once and keeps settings in sync with the server.
+ * Loads the summary once and keeps settings in sync with the store.
  * @returns Summary, error and actions.
  */
 function useSummary(): SummaryState {
@@ -34,9 +34,7 @@ function useSummary(): SummaryState {
     try {
       setSummary(await api.summary());
     } catch (error) {
-      setMessage(
-        `Could not reach the local progress database: ${describeError(error)}`,
-      );
+      setMessage(`Could not open your saved progress: ${describeError(error)}`);
     }
   }, []);
   useEffect(() => {
@@ -46,7 +44,7 @@ function useSummary(): SummaryState {
     })();
   }, [refresh]);
   const updateSettings = useCallback((patch: SettingsPatch) => {
-    // Show the change at once; the server's reply confirms it.
+    // Show the change at once; the store's reply confirms it.
     setSummary((current) => withSettings(current, patch));
     void (async (): Promise<void> => {
       try {

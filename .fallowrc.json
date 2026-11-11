@@ -1,6 +1,5 @@
 {
   "$schema": "./node_modules/fallow/schema.json",
-  "entry": ["server/cli.ts"],
   "rules": {
     "unused-files": "error",
     "unused-exports": "error",

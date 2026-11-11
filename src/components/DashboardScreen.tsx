@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import type { ReactElement } from "react";
 
+import { useBackup } from "#lib/useBackup.ts";
+
 import { Dashboard } from "./Dashboard.tsx";
 import type { DashboardActions } from "./dashboardActions.ts";
 import type { ScreenProps } from "./screenProps.ts";
@@ -12,6 +14,10 @@ import type { ScreenProps } from "./screenProps.ts";
  */
 function DashboardScreen(props: Readonly<ScreenProps>): ReactElement {
   const { trainer, summary } = props;
+  const backup = useBackup({
+    onReplaced: trainer.handleProgressReplaced,
+    onError: trainer.handleError,
+  });
   const actions = useMemo<DashboardActions>(
     () => ({
       handleResume: () => {
@@ -24,8 +30,9 @@ function DashboardScreen(props: Readonly<ScreenProps>): ReactElement {
         trainer.handleStartPractice("selected", ids.length, ids);
       },
       handleSettings: trainer.handleSettings,
+      backup,
     }),
-    [trainer],
+    [trainer, backup],
   );
   return (
     <Dashboard

@@ -1,9 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-import { expectAccessible, openDashboard, setSettings } from "./helpers.ts";
+import { expectAccessible, openDashboard } from "./helpers.ts";
 
 test("asks for the Bundesland on first launch", async ({ page }) => {
-  await setSettings(page, { state: null, examDate: null });
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "Wo wohnen Sie? · Where do you live?" }),
@@ -72,4 +71,42 @@ test("follows the system theme until dark mode is toggled", async ({
   await toggle.click();
   await expect(html).toHaveClass("dark");
   await expectAccessible(page);
+});
+
+test("exports, resets and imports a backup", async ({ page }) => {
+  await openDashboard(page);
+  await page.getByRole("button", { name: "Start mock exam" }).click();
+  await page.getByRole("button", { name: "Abgeben · Submit" }).first().click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Abgeben · Submit" })
+    .click();
+  await page.getByRole("link", { name: "Übersicht", exact: true }).click();
+  const history = page.getByRole("heading", {
+    name: "Verlauf · Session history",
+  });
+  await expect(history).toBeVisible();
+  await expectAccessible(page);
+
+  const saving = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Exportieren · Export backup" })
+    .click();
+  const download = await saving;
+  const backup = await download.path();
+  await expect(page.getByText("Exported 1 sessions.")).toBeVisible();
+
+  await page
+    .getByRole("button", { name: "Zurücksetzen · Reset progress" })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Löschen · Delete" })
+    .click();
+  await expect(history).toBeHidden();
+
+  await page.getByLabel("Backup file").setInputFiles(backup);
+  await expect(history).toBeVisible();
+  await page.reload();
+  await expect(history).toBeVisible();
 });

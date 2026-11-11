@@ -36,5 +36,5 @@
     "forceConsistentCasingInFileNames": true,
     "erasableSyntaxOnly": true
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "server", "tests"]
+  "include": ["vite.config.ts", "playwright.config.ts", "tests"]
 }

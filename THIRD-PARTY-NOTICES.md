@@ -10,12 +10,22 @@ sources below, each under its own terms.
 | [lezeroq/lebenindeutschland](https://github.com/lezeroq/lebenindeutschland) | Answer key, English translations, PDF parsing approach | MIT, Copyright (c) 2026 Artsiom Kaval |
 | [abdullahbutt/leben-in-deutschland-test](https://github.com/abdullahbutt/leben-in-deutschland-test) | Explanations | MIT, Copyright (c) 2026 Abdullah Butt |
 
-> [!WARNING]
-> Five pictures (`g55`, `g70`, `g181`, `g216`, `g235`) are photos the BAMF PDF
-> credits to third parties (Bundesregierung, Deutscher Bundestag). They are not
-> covered by this repository's licence. Replace them before publishing the
-> repository — for example with the matching photos from Anlage 1 of the
-> Einbürgerungstestverordnung, as lezeroq/lebenindeutschland does.
+## Photos
+
+The BAMF PDF credits five photos to the Bundesregierung or the Deutscher
+Bundestag. They are not used. Four are replaced by freely licensed photos from
+Wikimedia Commons, which keep their own licences (not MIT) and were resized
+and converted to WebP; `g70` has no free photo of the same scene and is shown
+without a picture. `scripts/photos.py` pins each file.
+
+| Question | Photo | Author | Licence | Changes |
+| --- | --- | --- | --- | --- |
+| `g55` | [West facade of the Reichstag building, Berlin](https://commons.wikimedia.org/wiki/File:West_facade_of_the_Reichstag_building,_Berlin.jpg) | Christian David | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | Resized |
+| `g181` | [Ghetto Heroes Monument, Warsaw](https://commons.wikimedia.org/wiki/File:Kniefall.jpg) | Raymond | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | Resized |
+| `g216` | [Plenarsaal des Bundestags mit dem Bundesadler](https://commons.wikimedia.org/wiki/File:Berlin,_Reichstagsgeb%C3%A4ude,_Plenarsaal_2014-07_(11).jpg) | HerrAdams | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | Resized |
+| `g235` | [Helmut Kohl – Kanzler der Europäischen Einigung](https://commons.wikimedia.org/wiki/File:KAS-Kohl,_Helmut-Bild-14083-2.jpg) (KAS/ACDP 10-001: 14083) | CDU, provided by the Konrad-Adenauer-Stiftung | [CC BY-SA 3.0 DE](https://creativecommons.org/licenses/by-sa/3.0/de/deed.en) | Cropped to the photo of Mitterrand and Kohl at Verdun |
+
+The edited pictures in `public/img/` are shared under the same licences.
 
 ## MIT licence text of the MIT-licensed sources
 

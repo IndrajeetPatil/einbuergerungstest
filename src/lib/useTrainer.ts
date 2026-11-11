@@ -35,6 +35,8 @@ interface Trainer {
   handleStartPractice: (focus: Focus, size: number, ids?: string[]) => void;
   handleDiscard: () => void;
   handleFinished: (summary: SessionSummary, session: ActiveSession) => void;
+  /** After an import or reset: drop the session in progress and reload. */
+  handleProgressReplaced: () => void;
 }
 
 interface PersistedSession {
@@ -143,6 +145,12 @@ function useTrainer(): Trainer {
     handleFinished: (result, session) => {
       persistActive(null);
       setView({ name: "results", summary: result, session });
+      void refresh();
+    },
+    handleProgressReplaced: () => {
+      // The session in progress belongs to the progress just replaced.
+      persistActive(null);
+      setView({ name: "dashboard" });
       void refresh();
     },
   };

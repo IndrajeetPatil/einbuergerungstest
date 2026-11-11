@@ -1,7 +1,10 @@
 # Security policy
 
-The app runs on your own computer: its server listens on `127.0.0.1` only and
-stores progress in a local SQLite file. Even so, please report problems.
+The app is a set of static files: it runs entirely in your browser, has no
+server or accounts, and stores progress only in the browser's IndexedDB. The
+published site loads Google Analytics, as described in the
+[privacy notice](https://www.indrapatil.com/privacy/). Even
+so, please report problems.
 
 ## Reporting a vulnerability
 
@@ -14,6 +17,6 @@ Please do not open a public issue for security problems.
 
 ## What is in scope
 
-- The local server and API (`server/`)
+- The app, including the progress store and backup import (`src/`)
 - The data pipeline's handling of downloaded sources (`scripts/`)
-- The GitHub workflows (`.github/workflows/`)
+- The GitHub workflows (`.github/workflows/`), including the Pages deployment

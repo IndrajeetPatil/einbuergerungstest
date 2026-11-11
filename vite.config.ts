@@ -1,9 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite-plus";
-import type { Plugin } from "vite-plus";
-
-import { createApi } from "./server/api.ts";
 
 // This file configures Vite+ as a whole: the dev and build servers, the
 // formatter (Oxfmt), the linter (Oxlint), the unit tests (Vitest) and the
@@ -39,31 +36,11 @@ const LINT_PLUGINS = [
 ] as const;
 
 const TEST_FILES = ["**/*.test.ts"];
-const NODE_FILES = ["server/**", "scripts/**", "tests/e2e/**", "*.config.ts"];
-
-/**
- * Mounts the local progress API on the dev and preview servers.
- * @returns The Vite plugin.
- */
-function progressApi(): Plugin {
-  return {
-    name: "progress-api",
-    configureServer(server) {
-      const api = createApi();
-      server.middlewares.use((req, res, next) => {
-        void api(req, res, next);
-      });
-    },
-    configurePreviewServer(server) {
-      const api = createApi();
-      server.middlewares.use((req, res, next) => {
-        void api(req, res, next);
-      });
-    },
-  };
-}
+const NODE_FILES = ["scripts/**", "tests/e2e/**", "*.config.ts"];
 
 export default defineConfig({
+  // GitHub Pages serves the site from /<repository>/; local runs use the root.
+  base: process.env["BASE_PATH"] ?? "/",
   server: { port: 5178, strictPort: true, host: "127.0.0.1" },
   preview: { port: 5179, strictPort: true, host: "127.0.0.1" },
   build: {
@@ -104,7 +81,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/*.test.ts", "server/**/*.test.ts"],
+    include: ["src/**/*.test.ts"],
     reporters: isCI ? ["dot", "github-actions"] : ["default"],
     // Undo `vi.spyOn` and module mocks before each test so they cannot leak.
     restoreMocks: true,
@@ -116,24 +93,22 @@ export default defineConfig({
       reportsDirectory: "coverage",
       // `json` writes coverage-final.json for fallow's CRAP scores.
       reporter: ["text", "html", "json"],
-      include: ["src/lib/**/*.ts", "server/**/*.ts"],
+      include: ["src/lib/**/*.ts"],
       exclude: [
         "**/*.test.*",
         "src/lib/testing.ts",
-        // React hooks and the fetch client run in the browser; the E2E suite
-        // exercises them end to end.
+        // React hooks and the IndexedDB layer run in the browser; the E2E
+        // suite exercises them end to end.
         "src/lib/use*.ts",
-        // Process entry points.
-        "server/serve.ts",
-        "server/cli.ts",
         "src/lib/api.ts",
+        "src/lib/progressDb.ts",
       ],
       // Floors sit just under current coverage, so it can only ratchet up.
       thresholds: {
-        statements: 97,
-        branches: 92,
-        functions: 98,
-        lines: 97,
+        statements: 99,
+        branches: 95,
+        functions: 100,
+        lines: 99,
       },
     },
   },
@@ -321,7 +296,7 @@ export default defineConfig({
       },
       {
         // Node-run code reads the environment, prints results, and uses
-        // node:sqlite and node:fs, whose APIs are synchronous by design.
+        // node:fs, whose APIs are synchronous by design.
         files: NODE_FILES,
         rules: {
           "node/no-top-level-await": "off",
@@ -354,5 +329,5 @@ export default defineConfig({
       },
     ],
   },
-  plugins: [react(), tailwindcss(), progressApi()],
+  plugins: [react(), tailwindcss()],
 });

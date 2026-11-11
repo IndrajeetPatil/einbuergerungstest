@@ -1,4 +1,4 @@
-// Starting a mock exam or practice session on the server.
+// Starting a mock exam or practice session in the progress store.
 import { useCallback, useRef } from "react";
 
 import { api } from "./api.ts";

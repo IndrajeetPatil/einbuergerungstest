@@ -12,6 +12,8 @@ NODE ?= node
 UV ?= uv
 PORT ?= 5179
 URL := http://localhost:$(PORT)/
+# GitHub Pages serves the site from /<repository>/.
+PAGES_BASE ?= /einbuergerungstest/
 
 include makefiles/app.mk
 include makefiles/quality.mk

@@ -18,6 +18,8 @@ exclude = [
   # Private repository links resolve only for signed-in collaborators.
   "^https://github\\.com/IndrajeetPatil/einbuergerungstest",
   "^https://github\\.com/IndrajeetPatil/indrajeetpatil\\.github\\.io",
+  # The published app exists only once the Pages workflow has deployed main.
+  "^https://www\\.indrapatil\\.com/einbuergerungstest",
 ]
 
 # GitHub returns 429 without a token; lychee reads GITHUB_TOKEN when set.

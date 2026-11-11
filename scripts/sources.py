@@ -7,6 +7,8 @@ lazy from dataclasses import dataclass
 lazy from pathlib import Path
 lazy from typing import Final
 
+lazy from photos import REPLACEMENTS, cache_name
+
 ROOT: Final = Path(__file__).resolve().parent.parent
 CACHE: Final = ROOT / ".cache" / "sources"
 
@@ -122,7 +124,9 @@ def _download(url: str, path: Path) -> None:
     if not url.startswith("https://"):
         msg = f"refusing to download from a non-HTTPS URL: {url}"
         raise SourceError(msg)
-    request = urllib.request.Request(url, headers={"User-Agent": "einbuergerungstest-trainer"})
+    # Wikimedia asks automated clients for a descriptive User-Agent with a contact URL.
+    agent = "einbuergerungstest-trainer (https://github.com/IndrajeetPatil/einbuergerungstest)"
+    request = urllib.request.Request(url, headers={"User-Agent": agent})
     with urllib.request.urlopen(request, timeout=DOWNLOAD_TIMEOUT) as response:
         path.write_bytes(response.read())
 
@@ -137,15 +141,28 @@ def verify_pdf(pdf: Path, expected: str = PDF_SHA256) -> None:
         raise SourceError(msg)
 
 
+def verify_photo(qid: str, path: Path, expected: str) -> None:
+    """Stop when a replacement photo is not the pinned file."""
+    if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+        msg = (
+            f"{qid}: the replacement photo changed (SHA-256 mismatch). Check it still shows "
+            "the scene and carries the same licence, then update its hash in photos.py."
+        )
+        raise SourceError(msg)
+
+
 def fetch(*, refresh: bool) -> None:
-    """Download missing (or, with refresh, all) sources and verify the PDF."""
+    """Download missing (or, with refresh, all) sources and verify the pinned files."""
     CACHE.mkdir(parents=True, exist_ok=True)
-    for name, url in SOURCES.items():
+    downloads = {**SOURCES, **{cache_name(qid): p.url for qid, p in REPLACEMENTS.items()}}
+    for name, url in downloads.items():
         path = CACHE / name
         if refresh or not path.exists():
             print(f"downloading {name}")
             _download(url, path)
     verify_pdf(CACHE / "katalog.pdf")
+    for qid, photo in REPLACEMENTS.items():
+        verify_photo(qid, CACHE / cache_name(qid), photo.sha256)
 
 
 def read_json(name: str) -> object:

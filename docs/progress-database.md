@@ -1,120 +1,115 @@
 # Progress database
 
-Every answer is stored in `data/progress.sqlite`, a single SQLite file opened
-through Node's built-in `node:sqlite`. The file is git-ignored: it is your
-personal progress.
+Your progress lives in this browser's IndexedDB: database `einbuergerungstest`,
+object store `progress`, one document under the key `progress`. Progress is
+never sent anywhere. Each browser (and each device) keeps its own progress; export a
+backup to keep it safe or move it.
 
-## Schema
+## Document
 
 ```mermaid
 erDiagram
-  sessions ||--o{ answers : contains
+  progress ||--o{ sessions : holds
+  progress ||--o{ answers : holds
+  sessions ||--o{ answers : "sessionId"
+  progress {
+    int version "1"
+    object settings "partial: state, examDate, showEnglish, shuffleOptions"
+    int nextSessionId "optional; never decreases"
+  }
   sessions {
-    int id PK
+    int id
     text mode "exam | practice"
     text focus "smart, new, mistakes, state, all, selected"
     text state "Bundesland code"
-    int question_count
-    text started_at
-    text finished_at "null while open"
-    int duration_ms
+    int questionCount
+    text startedAt
+    text finishedAt "null while open"
+    int durationMs
   }
   answers {
-    int id PK
-    int session_id FK "ON DELETE CASCADE"
-    text question_id "g1..g300, BE1..BE10"
+    int id
+    int sessionId
+    text questionId "g1..g300, BE1..BE10"
     int position
     int chosen "0-3, null = unanswered"
-    int correct "0 or 1"
-    int retry "second try in practice"
-    int time_ms
-    text answered_at
-  }
-  settings {
-    text key PK
-    text value "JSON"
+    bool correct
+    bool retry "second try in practice"
+    int timeMs
+    text answeredAt
   }
 ```
 
-| Table      | Holds                                                                    |
-| ---------- | ------------------------------------------------------------------------ |
-| `sessions` | One row per mock exam or practice session                                |
-| `answers`  | One row per answer, including second tries and unanswered exam questions |
-| `settings` | Bundesland, exam date, English column, option shuffling                  |
+The document is validated with `progressSchema` (`src/lib/schemas.ts`) every
+time it is read, and timestamps are ISO 8601 in UTC. Ids are one more than the
+highest in use, as SQLite's `INTEGER PRIMARY KEY` would choose them, except
+session ids, which come from `nextSessionId` and are never reused: after a reset
+or import, a session still open in another tab fails with "unknown session"
+instead of writing into a newer session with the same id. Documents written
+before the counter existed count from their highest session id.
 
-`CHECK` constraints guard `mode`, `chosen`, `correct` and `retry`; foreign keys
-are enforced, and timestamps are ISO 8601 in UTC.
+## How changes are applied
+
+| Layer | File | Role |
+| --- | --- | --- |
+| Changes | `src/lib/progress.ts` | Pure functions from one document to the next; validation and answer judging |
+| Views | `src/lib/progressViews.ts` | Settings with defaults, session scores, per-question statistics |
+| Storage | `src/lib/progressDb.ts` | Reads the document, applies a change and writes it in one `readwrite` transaction |
+| API | `src/lib/api.ts` | The calls the app makes: summary, settings, sessions, answers, backups |
+
+Because each change runs inside one transaction, two open tabs cannot overwrite
+each other's answers, and a change that throws (an unknown question, a
+finished session, a malformed value) aborts the transaction and writes nothing.
+The app asks the browser to keep the data persistent
+(`navigator.storage.persist()`), so it is not evicted under storage pressure.
 
 ## How results are derived
 
-| Figure              | Rule                                                                                                                                                        |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Correct             | Decided by the server from the official answer key, never by the browser                                                                                    |
-| Session score       | First tries only (`retry = 0`); unanswered exam questions count as wrong                                                                                    |
-| Session accuracy    | Mock exam: correct / 33. Practice: correct / answered                                                                                                       |
-| Question statistics | All answers, including second tries: attempts, correct, last answered, and the last five results newest first (window function plus ordered `GROUP_CONCAT`) |
-| Mastery             | Derived in the app from the last five results — see [Quiz design](quiz-design.md#mastery)                                                                   |
+| Figure              | Rule                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| Correct             | Judged in `progress.ts` against the official answer key, never taken from the caller or a backup file      |
+| Session score       | First tries only (`retry = false`); unanswered exam questions count as wrong                              |
+| Session accuracy    | Mock exam: correct / 33. Practice: correct / answered                                                     |
+| Question statistics | All answers, including second tries: attempts, correct, last answered, and the last five results newest first |
+| Mastery             | Derived in the app from the last five results — see [Quiz design](quiz-design.md#mastery)                 |
 
 ## Lifecycle
 
-| Event              | Effect                                                               |
-| ------------------ | -------------------------------------------------------------------- |
-| Start              | `sessions` row with `finished_at = null`                             |
-| Practice answer    | `answers` row written immediately                                    |
-| Mock exam submit   | All answers and `finished_at` written in one transaction             |
-| End practice early | Session closed; answers so far count                                 |
+| Event              | Effect                                                         |
+| ------------------ | -------------------------------------------------------------- |
+| Start              | Session with `finishedAt = null`                               |
+| Practice answer    | Answer stored immediately                                      |
+| Mock exam submit   | All answers and `finishedAt` stored in one transaction         |
+| End practice early | Session closed; answers so far count                           |
 | Discard            | Deleted if it has no answers, otherwise closed with its elapsed time |
 
 Only finished sessions appear on the dashboard.
 
-## Migrations
+## Backups
 
-`MIGRATIONS` in `server/migrations.ts` is an ordered list of SQL scripts.
-`PRAGMA user_version` records how many have run; each new one runs in a
-transaction when the store opens. Never edit an applied migration — append a
-new one.
+The dashboard's **Ihre Daten · Your data** section exports, imports and resets
+progress.
 
-## Backups and maintenance
+| Action | Does |
+| --- | --- |
+| Export backup | Downloads `einbuergerungstest-YYYY-MM-DD.json`: `{ app, exportedAt, progress }` |
+| Import backup | Validates the file, checks every answer has its session, judges every answer again, closes its open sessions, then replaces all progress |
+| Reset progress | Deletes every session and answer after a confirmation; settings stay |
 
-| Command                           | Does                                                   |
-| --------------------------------- | ------------------------------------------------------ |
-| `make backup`                     | Consistent snapshot (`VACUUM INTO`) in `data/backups/` |
-| `make export`                     | Everything as JSON in `data/exports/`                  |
-| `make stats`                      | Recent mock-exam scores in the terminal                |
-| `make reset-progress CONFIRM=yes` | Backs up, then deletes all progress                    |
+Import and reset are disabled while a session is in progress. Clearing the
+browser's site data deletes the progress, so export a backup now and then.
 
-`backup`, `export` and `stats` work while the app is running: the database uses
-WAL mode with a busy timeout, so a second process can read and write safely.
-Stop the app before `reset-progress`, which deletes the file.
+## Schema changes
 
-Set `LID_DB=/path/file.sqlite` to use another file. Tests use `:memory:`, and
-screenshots and manual checks use a throwaway file, so your real progress is
-never touched.
+`progress.version` and the IndexedDB version (`DB_VERSION` in
+`progressDb.ts`) are the places for future migrations: bump the version,
+convert old documents in the `upgradeneeded` handler or when decoding, and
+keep reading backups of every earlier version. Never change the meaning of
+an existing field in place.
 
-## Why `node:sqlite` and not Turso
+## Tests
 
-> [!NOTE]
-> [Turso](https://github.com/tursodatabase/turso), the Rust rewrite of SQLite,
-> was evaluated on 31 October 2026 (`@tursodatabase/database` 0.8.3) by running
-> this store's own code against it. Most of it worked, but not all of it:
->
-> - `GROUP_CONCAT(... ORDER BY ...)`, which builds each question's recent
->   results, fails with _"ORDER BY clause is not supported yet in aggregate
->   functions"_.
-> - `VACUUM INTO ?`, used by `make backup`, rejects a bound path; it needs the
->   path spliced into the SQL text.
-> - By default Turso locks the file to one process, so `make backup`,
->   `export` and `stats` fail while the app is running. Only the experimental
->   `multiprocess_wal` option avoids that.
-> - Turso is pre-1.0, and its own FAQ advises keeping independent backups.
-> - It adds a native npm package with per-platform binaries, where
->   `node:sqlite` is built into Node.
->
-> Its strengths (concurrent writers, async I/O, vector search, change feeds,
-> cloud sync, encryption) don't help a single-user app writing a few hundred
-> rows a day, so switching would only add compromises.
->
-> Switching later is cheap: Turso reads and writes ordinary SQLite files, so it
-> would be a driver change rather than a data migration. Reconsider at Turso
-> 1.0, once ordered aggregates and multi-process access are stable — or if
-> progress should sync across devices.
+Unit tests run the pure changes and views (`progress.test.ts`,
+`backup.test.ts`) without a browser. The end-to-end suite covers the
+IndexedDB layer: every test starts with an empty database of its own, and one
+test exports, resets and imports a backup.

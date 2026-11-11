@@ -39,7 +39,17 @@ function SourcesFooter(): ReactElement {
           abdullahbutt/leben-in-deutschland-test
         </a>{" "}
         (both MIT). This app is MIT-licensed open-source software; your progress
-        stays on your computer in <code>data/progress.sqlite</code>.
+        stays in this browser and is never uploaded. The published site counts
+        visits with Google Analytics, as described in the{" "}
+        <a
+          className="link"
+          href="https://www.indrapatil.com/privacy/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          privacy notice
+        </a>
+        .
       </p>
     </footer>
   );

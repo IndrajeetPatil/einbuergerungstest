@@ -19,7 +19,7 @@ Run `make` for the full list with descriptions.
 
 | Group | Targets |
 | --- | --- |
-| App | `start`, `serve`, `open`, `dev`, `build`, `stats`, `backup`, `export`, `reset-progress CONFIRM=yes` |
+| App | `start`, `serve`, `open`, `dev`, `build`, `build-pages` |
 | Quality | `qa`, `qa-js`, `qa-python`, `lint`, `typecheck`, `fallow`, `css-quality`, `file-naming`, `lint-markdown`, `spell-check`, `link-check`, `format`, `fix`, `ci` |
 | Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `test-e2e-docker` |
 | Security | `security`, `secret-scan`, `workflow-lint`, `workflow-audit`, `audit-js`, `audit-python` |
@@ -31,7 +31,7 @@ Run `make` for the full list with descriptions.
 | --- | --- |
 | 5178 | `make dev` (hot reload) |
 | 5179 | `make start` / `make serve` (production build) |
-| 5199 | End-to-end tests and screenshots (throwaway database) |
+| 5199 | End-to-end tests and screenshots (fresh browser storage per test) |
 
 ## Quality gates
 
@@ -44,7 +44,7 @@ with narrow exceptions explained next to their configuration.
 | Formatting | Oxfmt (80 columns, sorted imports); Ruff format | `lint`, `lint-python` |
 | TypeScript lint | Oxlint, type-aware, **every category as errors**, 12 plugins, complexity ≤ 5, warnings fail | `lint` |
 | Types | TypeScript 7 with the strictest options (`exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, …) | `typecheck` |
-| Boundaries | Zod schemas validate the catalogue, API bodies, SQLite rows and `localStorage` | — |
+| Boundaries | Zod schemas validate the catalogue, store inputs, IndexedDB documents, backup files and `localStorage` | — |
 | Unit tests | Vitest, shuffled order, coverage floors that only rise | `test-unit` |
 | Dead code and health | fallow: unused files, exports and dependencies, duplication, cyclomatic and cognitive ≤ 5, CRAP ≤ 21 | `fallow` |
 | CSS | Project Wallace: maintainability ≥ 98, complexity 100 | `css-quality` |
@@ -82,7 +82,7 @@ flowchart LR
 | --- | --- |
 | Commit messages and PR titles | Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`, …) |
 | `main` | `protected-main` ruleset: pull requests, squash merges only, every workflow's check required, no deletion or force-push |
-| Workflows | Pull requests only; actions pinned to full commit SHAs; read-only token; no persisted credentials |
+| Workflows | Pull requests only, except `Pages`, which deploys `main` to GitHub Pages; actions pinned to full commit SHAs; least-privilege tokens; no persisted credentials |
 | Merge settings | Squash only, auto-merge allowed, branches deleted after merge |
 
 ## Versions
@@ -117,3 +117,21 @@ The interface follows [DESIGN.md](../DESIGN.md), which extends the
 [indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md):
 warm paper background, Fraunces headings, Hanken Grotesk text, one teal accent
 for interaction, flat surfaces without shadows, in light and dark modes.
+
+## Publishing
+
+`.github/workflows/pages.yml` deploys every push to `main` (or a manual run) to
+GitHub Pages: it builds with `make build-pages`, which sets `BASE_PATH` to
+`/<repository>/`, and deploys `dist/` with the official Pages actions. The
+account's custom domain serves it at
+<https://www.indrapatil.com/einbuergerungstest/>. `index.html` loads the same
+Google Analytics tag as the rest of that site, except on `localhost` and
+`127.0.0.1`, so local runs and tests send nothing. Turn it
+on once under **Settings → Pages → Source: GitHub Actions**.
+
+To check a Pages build locally:
+
+```sh
+make build-pages
+BASE_PATH=/einbuergerungstest/ vp preview   # http://localhost:5179/einbuergerungstest/
+```

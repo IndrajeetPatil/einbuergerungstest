@@ -45,9 +45,9 @@ rumdl, zizmor, actionlint and gitleaks versions in `makefiles/`.
   questions with no data problems, and `git diff --stat src/data public/img`
   should be empty.
 - `vp pm audit` for known vulnerabilities.
-- Start the app with a throwaway database
-  (`LID_DB=/tmp/check.sqlite node server/serve.ts --port 5199`) and click
-  through a practice question and a mock exam.
+- Start the app (`make start`) in a fresh browser profile and click through a
+  practice question and a mock exam, then check `make build-pages` still
+  builds.
 
 ## Simplify
 

@@ -12,16 +12,42 @@ const WCAG_TAGS = [
 ];
 
 /**
- * Sets the settings through the API, so each test starts from a known state.
- * @param page - The page whose request context to use.
+ * Stores settings straight in the app's IndexedDB, then reloads, so each test
+ * starts from a known state without clicking through the settings.
+ * @param page - A page that has loaded the app.
  * @param patch - Settings to change.
  */
 async function setSettings(
   page: Page,
   patch: Record<string, unknown>,
 ): Promise<void> {
-  const response = await page.request.put("/api/settings", { data: patch });
-  expect(response.ok()).toBe(true);
+  await page.evaluate(async (settings) => {
+    const request = indexedDB.open("einbuergerungstest");
+    const opened = Promise.withResolvers<IDBDatabase>();
+    request.addEventListener("success", () => {
+      opened.resolve(request.result);
+    });
+    request.addEventListener("error", () => {
+      opened.reject(request.error ?? new Error("could not open IndexedDB"));
+    });
+    const db = await opened.promise;
+    const transaction = db.transaction("progress", "readwrite");
+    transaction
+      .objectStore("progress")
+      .put({ version: 1, settings, sessions: [], answers: [] }, "progress");
+    const written = Promise.withResolvers<undefined>();
+    transaction.addEventListener("complete", () => {
+      written.resolve(undefined);
+    });
+    transaction.addEventListener("abort", () => {
+      written.reject(
+        transaction.error ?? new Error("could not write settings"),
+      );
+    });
+    await written.promise;
+    db.close();
+  }, patch);
+  await page.reload();
 }
 
 /**
@@ -71,24 +97,26 @@ async function expectAccessible(page: Page): Promise<void> {
 }
 
 /**
- * Opens the dashboard with Berlin chosen and no session in progress.
+ * Opens the dashboard with Berlin chosen.
  * @param page - The page.
+ * @param patch - Settings to use instead of the defaults.
  */
-async function openDashboard(page: Page): Promise<void> {
+async function openDashboard(
+  page: Page,
+  patch: Record<string, unknown> = {},
+): Promise<void> {
+  await page.goto("/");
+  await expect(page.getByLabel("Bundesland")).toBeVisible();
   await setSettings(page, {
     state: "BE",
     examDate: "2030-11-11",
     showEnglish: true,
     shuffleOptions: true,
+    ...patch,
   });
-  await page.goto("/");
-  await page.evaluate(() => {
-    localStorage.clear();
-  });
-  await page.reload();
   await expect(
     page.getByRole("button", { name: "Start mock exam" }),
   ).toBeVisible();
 }
 
-export { expectAccessible, openDashboard, setSettings };
+export { expectAccessible, openDashboard };
