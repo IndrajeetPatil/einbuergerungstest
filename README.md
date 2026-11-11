@@ -3,7 +3,10 @@
 A personal study app for the German citizenship test (_Einbürgerungstest_ /
 _Leben in Deutschland_). Every question is shown in German and English side by
 side, so the exam language and your own build a direct correspondence. Your
-results are saved locally, so you can watch your score climb towards exam day.
+results stay in your browser, so you can watch your score climb towards exam
+day.
+
+**Use it online:** <https://indrajeetpatil.github.io/einbuergerungstest/>
 
 ## What you can do
 
@@ -20,7 +23,7 @@ results are saved locally, so you can watch your score climb towards exam day.
   take the test (Chancellor, head of state, Bundestag, population, EU), with
   the latest facts, their sources and when they were last checked.
 
-## Quick start
+## Run it locally
 
 ```sh
 make install   # once: locked JavaScript and Python dependencies
@@ -36,14 +39,15 @@ your own exam.
 ```mermaid
 flowchart LR
   BAMF["Official BAMF<br/>question catalogue"] -- "make data" --> Catalogue[["Bilingual question<br/>catalogue"]]
-  Catalogue --> App["Browser app<br/>(React)"]
-  App <-- "answers, scores" --> Server["Local server<br/>(Node)"]
-  Server <--> DB[("Your progress<br/>(SQLite file)")]
+  Catalogue --> App["Browser app<br/>(React, static files)"]
+  App <-- "answers, scores" --> DB[("Your progress<br/>(IndexedDB)")]
 ```
 
 The questions are built once from the official catalogue, then everything runs
-on your machine: the browser app asks the questions, and a small local server
-checks each answer against the official key and stores it.
+in your browser: the app asks the questions, checks each answer against the
+official key and stores it in the browser's IndexedDB. There is no server, so
+the same static files run locally and on GitHub Pages. Export a backup from the
+dashboard to keep your progress or move it to another browser.
 
 ```mermaid
 flowchart LR
@@ -58,8 +62,8 @@ flowchart LR
 
 | Layer      | Tools                                                                   |
 | ---------- | ----------------------------------------------------------------------- |
-| App        | React 19, Tailwind CSS 4, TypeScript 7                                  |
-| Server     | Node 26 with its built-in SQLite (`node:sqlite`)                        |
+| App        | React 19, Tailwind CSS 4, TypeScript 7, IndexedDB                       |
+| Hosting    | GitHub Pages, deployed from `main`                                      |
 | Toolchain  | [Vite+](https://viteplus.dev): Vite 8 / Rolldown, Oxlint, Oxfmt, Vitest |
 | Data build | Python 3.15 (uv, Ruff, ty, pyrefly, pytest), poppler                    |
 | Testing    | Vitest, Playwright with axe accessibility audits                        |
@@ -75,7 +79,7 @@ run on every pull request.
 | ---------------------------------------------- | -------------------------------------------------------- |
 | [Quiz design](docs/quiz-design.md)             | Exam rules, questionnaire practices, smart mix, mastery  |
 | [Architecture](docs/architecture.md)           | Components, request flow, API                            |
-| [Progress database](docs/progress-database.md) | Schema, scoring, backups, and why `node:sqlite`          |
+| [Progress database](docs/progress-database.md) | Stored document, scoring, transactions, backups          |
 | [Question data](docs/question-data.md)         | Sources, cross-validation, pictures, new BAMF editions   |
 | [Development](docs/development.md)             | Commands, checks, git hooks, CI, versions, agent tooling |
 | [DESIGN.md](DESIGN.md)                         | Visual design: tokens, state colours, components         |

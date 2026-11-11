@@ -1,8 +1,9 @@
 # Architecture
 
-A React single-page app talks to a small Node server on `localhost`, which
-stores progress in a SQLite file. The question catalogue is a static JSON file
-built ahead of time (see [Question data](question-data.md)).
+A static React single-page app. Questions come from a JSON file built ahead of
+time (see [Question data](question-data.md)); progress is kept in the
+browser's IndexedDB. There is no server: the same files run on `localhost` and
+on GitHub Pages.
 
 ## Components
 
@@ -13,23 +14,20 @@ flowchart LR
     Logic["lib/quiz.ts<br/>sampling, shuffling, mastery"]
     Session["lib/session.ts<br/>session state"]
     Local[("localStorage<br/>active session, theme")]
+    API["lib/api.ts<br/>progress API"]
+    Store["lib/progress.ts<br/>changes, judging"]
+    IDB[("IndexedDB<br/>progress document")]
     UI --> Logic
     UI --> Session
     Session <--> Local
-  end
-
-  subgraph Server["Node 26 · 127.0.0.1"]
-    API["server/api.ts<br/>JSON API"]
-    Store["server/db.ts<br/>ProgressStore"]
-    DB[("data/progress.sqlite<br/>node:sqlite")]
-    CLI["server/cli.ts<br/>backup · export · stats · reset"]
-    API --> Store --> DB
-    CLI --> Store
+    UI --> API --> Store
+    API <--> IDB
   end
 
   Catalogue[["src/data/catalogue.json<br/>public/img/*.webp"]]
+  Pages["GitHub Pages<br/>or vp preview"]
 
-  UI -- "fetch /api/*" --> API
+  Pages -- "static files" --> Browser
   Catalogue --> UI
   Catalogue -- "answer key" --> Store
 ```
@@ -41,13 +39,11 @@ flowchart LR
 | Current affairs | `src/lib/currentAffairs.ts` | Time-dependent questions with the latest facts, sources and check date |
 | Session state | `src/lib/session.ts` | Option order, answers, flags, retry queue, timing; persisted to `localStorage` |
 | Theme | `src/lib/theme.ts`, `useTheme.ts`, `index.html` | Light or dark: the stored choice, else the system setting; applied before first paint |
-| Hooks | `src/lib/use*.ts` | Summary, view, trainer and quiz controllers; quiz actions read the latest session |
-| Schemas | `src/lib/schemas.ts` | Zod schemas and inferred types, shared by browser and server |
-| API client | `src/lib/api.ts` | `fetch` wrapper that validates every response |
-| API | `server/api.ts` | Connect-style route table with input validation |
-| Store | `server/db.ts`, `queries.ts`, `migrations.ts`, `validation.ts` | Migrations, answer judging, statistics, backup — see [Progress database](progress-database.md) |
-| Servers | `vite.config.ts`, `server/serve.ts` | The same API mounted in `vp dev`, `vp preview` and the production server |
-| CLI | `server/cli.ts` | `make backup`, `export`, `stats`, `reset-progress` |
+| Hooks | `src/lib/use*.ts` | Summary, view, trainer, quiz and backup controllers; quiz actions read the latest session |
+| Schemas | `src/lib/schemas.ts` | Zod schemas and inferred types for every value that crosses a boundary |
+| API | `src/lib/api.ts` | The app's only entry to progress: summary, settings, sessions, answers, backups |
+| Store | `src/lib/progress.ts`, `progressViews.ts`, `progressDb.ts`, `backup.ts` | Pure changes and answer judging, statistics, the IndexedDB transaction, backup files — see [Progress database](progress-database.md) |
+| Hosting | `vite.config.ts`, `.github/workflows/pages.yml` | `vp preview` locally; GitHub Pages with `BASE_PATH=/<repository>/` |
 
 ## Request flow
 
@@ -58,64 +54,65 @@ sequenceDiagram
   actor You
   participant UI as React app
   participant LS as localStorage
-  participant API as server/api.ts
-  participant DB as ProgressStore (SQLite)
+  participant API as lib/api.ts
+  participant DB as IndexedDB
 
   You->>UI: press 2, then Enter
   UI->>UI: check(): lock answer, queue a retry if wrong
   UI->>LS: save session
   UI-->>You: bilingual feedback and explanation
-  UI->>API: POST /api/sessions/:id/answers
-  API->>DB: recordAnswer() judges against the official key
-  DB-->>API: correct = true / false
-  API-->>UI: 201 { correct }
+  UI->>API: api.answer(id, answer)
+  API->>DB: one readwrite transaction
+  DB-->>API: progress document
+  API->>API: recordAnswer() judges against the official key
+  API->>DB: write the new document
+  API-->>UI: { correct }
 ```
 
-A mock exam sends nothing per question. On submit (or when the timer runs out)
-it posts every answer in one `finish` request, stored in a single transaction.
+A mock exam stores nothing per question. On submit (or when the timer runs
+out) it passes every answer to `api.finish`, stored in a single transaction.
 
 ## API
 
-| Method   | Path                        | Purpose                                                 |
-| -------- | --------------------------- | ------------------------------------------------------- |
-| `GET`    | `/api/summary`              | Settings, finished sessions and per-question statistics |
-| `PUT`    | `/api/settings`             | Bundesland, exam date, English column, option shuffling |
-| `POST`   | `/api/sessions`             | Start a session; returns its id                         |
-| `POST`   | `/api/sessions/:id/answers` | Record one practice answer                              |
-| `POST`   | `/api/sessions/:id/finish`  | Close a session; mock exams include all their answers   |
-| `DELETE` | `/api/sessions/:id`         | Abandon a session (deleted if empty, otherwise closed)  |
-| `GET`    | `/api/export`               | Full JSON dump                                          |
+`src/lib/api.ts` keeps the shape of the former HTTP API, so hooks and
+components do not know where progress lives.
 
-| Status | When                                                                                |
-| ------ | ----------------------------------------------------------------------------------- |
-| `400`  | Validation failed (unknown question or state, option outside 0–3, finished session) |
-| `415`  | A write without `Content-Type: application/json`                                    |
-| `404`  | Unknown route                                                                       |
+| Call | Purpose |
+| --- | --- |
+| `summary()` | Settings, finished sessions and per-question statistics |
+| `updateSettings(patch)` | Bundesland, exam date, English column, option shuffling |
+| `startSession(input)` | Start a session; returns its id |
+| `answer(id, input)` | Record one practice answer; returns whether it was correct |
+| `finish(id, answers, durationMs)` | Close a session; mock exams include all their answers |
+| `discard(id)` | Abandon a session (deleted if empty, otherwise closed) |
+| `exportBackup()` / `importBackup(file)` / `resetProgress()` | The **Your data** section |
+
+Invalid input (an unknown question or state, an option outside 0–3, a
+finished session) throws a `ValidationError` and changes nothing; the app
+shows it in the error banner.
 
 ## Design decisions
 
-| Decision                                            | Reason                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------- |
-| The server judges correctness                       | The stored result never depends on what the browser claims    |
-| One API handler for every server                    | Dev, preview and production cannot drift apart                |
-| Active session in `localStorage`, results in SQLite | Reloads resume instantly; only finished evidence is permanent |
-| Server binds `127.0.0.1` only                       | Single-user local app; nothing is exposed to the network      |
-| JSON-only writes, 256 KB body cap                   | Blocks cross-site form posts and oversized requests           |
-| Catalogue bundled as its own chunk                  | App code and question data cache independently                |
-| Node 26 runs `server/*.ts` directly                 | No build step for the server; erasable TypeScript syntax only |
-| Hand-drawn SVG chart                                | One small chart does not justify a charting library           |
+| Decision | Reason |
+| --- | --- |
+| No server; progress in IndexedDB | The app can be hosted as static files, and nothing leaves the browser |
+| One document, changed by pure functions | Validation, judging and statistics are unit-tested without a browser; each change is one transaction |
+| Answers judged in the store, against the bundled key | Stored results and imported backups never depend on what the caller claims |
+| Active session in `localStorage`, results in IndexedDB | Reloads resume instantly; only finished evidence is permanent |
+| Hash routes (`#katalog`, `#aktuell`) | Work on GitHub Pages' subpath without a 404 fallback |
+| Base path from `BASE_PATH` | `/` locally, `/<repository>/` on Pages; pictures use `import.meta.env.BASE_URL` |
+| Catalogue bundled as its own chunk | App code and question data cache independently |
+| Hand-drawn SVG chart | One small chart does not justify a charting library |
 
 ## Files
 
 ```text
-server/    API, SQLite store, static server, maintenance CLI
 src/       React app
-  lib/     quiz logic, session state, API client, shared types
+  lib/     quiz logic, session state, progress store, shared types
   data/    generated question catalogue
 public/    favicon and generated question pictures
 scripts/   data pipeline (uv project with pytest suite)
 tests/e2e/ Playwright end-to-end and accessibility tests
 makefiles/ Make targets by topic
 docs/      this documentation
-data/      your progress database, backups and exports (git-ignored)
 ```

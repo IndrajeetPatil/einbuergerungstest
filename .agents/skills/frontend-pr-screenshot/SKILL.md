@@ -22,8 +22,8 @@ storage** with `gh pr comment --attach` (gh ≥ 2.99.0).
 - Never commit screenshots or host them on a branch, gist, release asset or
   external image host. `gh pr comment --attach` is the only destination.
 - Screenshots live in a temporary directory only.
-- **Never point the server at the user's real progress** (`data/progress.sqlite`).
-  Always set `LID_DB` to a throwaway file, as below.
+- **Never capture the user's real progress.** Progress lives in the browser's
+  IndexedDB, so always use a fresh agent-browser profile, never a personal one.
 
 ## Workflow
 
@@ -36,31 +36,28 @@ REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
 
 If this fails, open the PR for the current branch first.
 
-### Step 2 - Build and start a throwaway server on port 5199
+### Step 2 - Build and serve the app on port 5199
 
 ```bash
 make build
 SHOT_DIR=$(mktemp -d /tmp/pr-screenshots.XXXXXX)
-LID_DB="$SHOT_DIR/screenshots.sqlite" node server/serve.ts --port 5199 > "$SHOT_DIR/server.log" 2>&1 &
+vp preview --port 5199 > "$SHOT_DIR/server.log" 2>&1 &
 SERVER_PID=$!
 READY=0
 for i in $(seq 1 30); do
-  curl -sf http://127.0.0.1:5199/api/summary > /dev/null 2>&1 && READY=1 && break
+  curl -sf http://127.0.0.1:5199/ > /dev/null 2>&1 && READY=1 && break
   sleep 1
 done
-[ "$READY" -eq 1 ] || { echo "Server did not start; see $SHOT_DIR/server.log"; exit 1; }
+[ "$READY" -eq 1 ] || { echo "Preview did not start; see $SHOT_DIR/server.log"; exit 1; }
 ```
 
 The dashboard needs a Bundesland before it shows anything beyond the picker:
+choose one in the **Bundesland** select on first load.
 
-```bash
-curl -sf -X PUT http://127.0.0.1:5199/api/settings \
-  -H 'Content-Type: application/json' -d '{"state":"BE"}' > /dev/null
-```
-
-For realistic charts, answer a few sessions through the UI first, or seed the
-throwaway database with `ProgressStore` from `server/db.ts` (its methods accept
-a `now` argument for back-dated sessions).
+For realistic charts, answer a few sessions through the UI first, or import a
+backup file under **Ihre Daten · Your data** (build one with `toBackup` from
+`src/lib/backup.ts`; the store functions in `src/lib/progress.ts` accept a
+`now` for back-dated sessions).
 
 ### Step 3 - Capture screenshots
 
@@ -149,6 +146,6 @@ kill "$SERVER_PID" 2>/dev/null || true
 | `unknown flag: --attach`                   | Upgrade GitHub CLI to ≥ 2.99.0 (`gh --version`).                                                                           |
 | Image missing from the table               | The body path did not match the `--attach` path exactly.                                                                   |
 | Server exits immediately                   | Port 5199 is taken (`lsof -ti:5199`); pick another port everywhere.                                                        |
-| Dashboard shows only the state picker      | Run the `PUT /api/settings` call from Step 2.                                                                              |
-| `No build found` page                      | Run `make build` before starting the server.                                                                               |
+| Dashboard shows only the state picker      | Choose a Bundesland first, as in Step 2.                                                                                   |
+| Blank page or missing assets               | Run `make build` before starting the preview.                                                                              |
 | `wait --text` times out on a visible label | It matches rendered text, so CSS-uppercased labels (`Warum · Why`) read as `WARUM · WHY`; wait for a button label instead. |

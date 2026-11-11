@@ -105,10 +105,10 @@ export default defineConfig({
       ],
       // Floors sit just under current coverage, so it can only ratchet up.
       thresholds: {
-        statements: 97,
-        branches: 92,
-        functions: 98,
-        lines: 97,
+        statements: 99,
+        branches: 95,
+        functions: 100,
+        lines: 99,
       },
     },
   },
