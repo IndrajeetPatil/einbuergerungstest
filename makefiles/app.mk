@@ -11,11 +11,11 @@ install: ## Install JavaScript and Python dependencies from the lockfiles
 
 .PHONY: start
 start: build ## Build, serve on localhost:5179 and open the browser
-	$(NODE) server/serve.ts --port $(PORT) --open
+	$(VP) preview --port $(PORT) --open
 
 .PHONY: serve
-serve: ## Serve the existing build on localhost:5179 (no rebuild)
-	$(NODE) server/serve.ts --port $(PORT)
+serve: node_modules ## Serve the existing build on localhost:5179 (no rebuild)
+	$(VP) preview --port $(PORT)
 
 .PHONY: open
 open: ## Open the running app in the browser
@@ -29,22 +29,9 @@ dev: node_modules ## Start the Vite+ dev server with hot reload (port 5178)
 build: node_modules ## Production build into dist/
 	$(VP) build
 
-.PHONY: stats
-stats: ## Print recent mock-exam scores in the terminal
-	$(NODE) server/cli.ts stats
-
-.PHONY: backup
-backup: ## Snapshot the progress database into data/backups/
-	$(NODE) server/cli.ts backup
-
-.PHONY: export
-export: ## Export all sessions and answers as JSON into data/exports/
-	$(NODE) server/cli.ts export
-
-.PHONY: reset-progress
-reset-progress: ## Delete all progress, keeping a backup (needs CONFIRM=yes; stop the app first)
-	@if [ "$(CONFIRM)" != "yes" ]; then echo "Refusing: run 'make reset-progress CONFIRM=yes'"; exit 1; fi
-	$(NODE) server/cli.ts reset --yes
+.PHONY: build-pages
+build-pages: node_modules ## Build for GitHub Pages, served from $(PAGES_BASE)
+	BASE_PATH=$(PAGES_BASE) $(VP) build
 
 .PHONY: outdated
 outdated: ## List outdated JavaScript dependencies
@@ -66,9 +53,9 @@ doctor: ## Show toolchain versions
 	@printf "poppler "; pdftotext -v 2>&1 | head -1
 
 .PHONY: clean
-clean: ## Remove build output, reports and caches (keeps your progress)
+clean: ## Remove build output, reports and caches
 	rm -rf dist coverage .fallow playwright-report test-results .cache node_modules/.vite node_modules/.tmp
 
 .PHONY: distclean
-distclean: clean ## Also remove node_modules and the Python environment (keeps your progress)
+distclean: clean ## Also remove node_modules and the Python environment
 	rm -rf node_modules scripts/.venv

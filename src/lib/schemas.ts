@@ -1,6 +1,7 @@
 // Runtime schemas for every value that crosses a trust boundary: the bundled
-// catalogue, API requests and responses, SQLite rows and localStorage. Types
-// are inferred from them, so validation and typing cannot drift apart.
+// catalogue, progress-store inputs, IndexedDB records, backup files and
+// localStorage. Types are inferred from them, so validation and typing cannot
+// drift apart.
 import { z as zod } from "zod/mini";
 
 const OPTION_COUNT = 4;
@@ -150,9 +151,49 @@ const finishInputSchema = zod.object({
   durationMs: zod.optional(duration),
 });
 
-const startedSchema = zod.object({ id: zod.int() });
-const answerResultSchema = zod.object({ correct: zod.boolean() });
-const errorBodySchema = zod.object({ error: zod.string() });
+/** A session as stored; open sessions have no `finishedAt` yet. */
+const storedSessionSchema = zod.object({
+  id: zod.int(),
+  mode: modeSchema,
+  focus: zod.nullable(focusSchema),
+  state: stateCodeSchema,
+  questionCount: zod.int(),
+  startedAt: zod.string(),
+  finishedAt: nullableText,
+  durationMs: zod.nullable(zod.int()),
+});
+type StoredSession = zod.infer<typeof storedSessionSchema>;
+
+/** One answer as stored, judged against the official key when saved. */
+const storedAnswerSchema = zod.object({
+  id: zod.int(),
+  sessionId: zod.int(),
+  questionId: zod.string(),
+  position: count,
+  chosen: zod.nullable(optionIndexSchema),
+  correct: zod.boolean(),
+  retry: zod.boolean(),
+  timeMs: zod.nullable(zod.int()),
+  answeredAt: zod.string(),
+});
+type StoredAnswer = zod.infer<typeof storedAnswerSchema>;
+
+/** Everything the browser keeps about your progress, as one document. */
+const progressSchema = zod.object({
+  version: zod.literal(1),
+  settings: settingsPatchSchema,
+  sessions: zod.array(storedSessionSchema),
+  answers: zod.array(storedAnswerSchema),
+});
+type Progress = zod.infer<typeof progressSchema>;
+
+/** An exported backup file. */
+const backupSchema = zod.object({
+  app: zod.literal("einbuergerungstest"),
+  exportedAt: zod.string(),
+  progress: progressSchema,
+});
+type Backup = zod.infer<typeof backupSchema>;
 
 const itemSchema = zod.object({
   qid: zod.string(),
@@ -191,17 +232,12 @@ export {
   stateCodeSchema,
   catalogueSchema,
   isoDateSchema,
-  settingsSchema,
   settingsPatchSchema,
-  sessionSummarySchema,
-  questionStatSchema,
-  summarySchema,
   answerInputSchema,
   startSessionInputSchema,
   finishInputSchema,
-  startedSchema,
-  answerResultSchema,
-  errorBodySchema,
+  progressSchema,
+  backupSchema,
   activeSessionSchema,
   themeSchema,
 };
@@ -218,6 +254,10 @@ export type {
   Summary,
   AnswerInput,
   StartSessionInput,
+  StoredSession,
+  StoredAnswer,
+  Progress,
+  Backup,
   Item,
   ActiveSession,
   Theme,

@@ -68,7 +68,7 @@ function CatalogueEntry(
       </div>
       {question.image === null ? null : (
         <img
-          src={`/${question.image}`}
+          src={`${import.meta.env.BASE_URL}${question.image}`}
           alt={`Abbildung zu ${question.de.q}`}
           loading="lazy"
           decoding="async"

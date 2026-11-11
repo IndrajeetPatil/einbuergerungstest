@@ -8,11 +8,10 @@
   "imports": {
     "#components/*": "./src/components/*",
     "#lib/*": "./src/lib/*",
-    "#data/*": "./src/data/*",
-    "#server/*": "./server/*"
+    "#data/*": "./src/data/*"
   },
   "scripts": {
-    "start": "node server/serve.ts --open",
+    "start": "vp build && vp preview --open",
     "file-naming": "ls-lint",
     "css-quality": "node scripts/css-quality.mjs"
   },

@@ -4,6 +4,7 @@ import type { StateCode, Summary } from "#lib/schemas.ts";
 
 import { CoverageSection } from "./CoverageSection.tsx";
 import type { DashboardActions } from "./dashboardActions.ts";
+import { DataSection } from "./DataSection.tsx";
 import { ProgressSection } from "./ProgressSection.tsx";
 import { SessionHistory } from "./SessionHistory.tsx";
 import { SettingsSection } from "./SettingsSection.tsx";
@@ -51,6 +52,10 @@ function DashboardOverview(
       <SettingsSection
         settings={settings}
         onChange={actions.handleSettings}
+      />
+      <DataSection
+        backup={actions.backup}
+        disabled={hasActive}
       />
     </>
   );

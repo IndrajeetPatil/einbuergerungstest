@@ -39,7 +39,7 @@ function SourcesFooter(): ReactElement {
           abdullahbutt/leben-in-deutschland-test
         </a>{" "}
         (both MIT). This app is MIT-licensed open-source software; your progress
-        stays on your computer in <code>data/progress.sqlite</code>.
+        stays in this browser and is never uploaded.
       </p>
     </footer>
   );

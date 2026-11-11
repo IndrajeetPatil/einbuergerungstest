@@ -20,7 +20,7 @@ function QuestionImage(
           on the page colours. */}
       <div className="rounded-md border border-line bg-white p-3">
         <img
-          src={`/${question.image}`}
+          src={`${import.meta.env.BASE_URL}${question.image}`}
           alt={`Abbildung zu ${question.de.q}`}
           className="mx-auto max-h-[22rem] w-auto object-contain"
           decoding="async"

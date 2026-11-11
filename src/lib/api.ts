@@ -1,16 +1,20 @@
-// Typed client for the local progress API; every response is validated.
-import { z as zod } from "zod/mini";
-
+// The progress API the app talks to. It keeps the shape of the former HTTP
+// client, but every call is a change to the progress document in this
+// browser's IndexedDB.
+import { fromBackup, toBackup } from "./backup.ts";
 import {
-  answerResultSchema,
-  errorBodySchema,
-  sessionSummarySchema,
-  settingsSchema,
-  startedSchema,
-  summarySchema,
-} from "./schemas.ts";
+  EMPTY_PROGRESS,
+  discardSession,
+  finishSession,
+  recordAnswer,
+  startSession,
+  updateSettings,
+} from "./progress.ts";
+import { changeProgress, readProgress } from "./progressDb.ts";
+import { summary } from "./progressViews.ts";
 import type {
   AnswerInput,
+  Backup,
   SessionSummary,
   Settings,
   SettingsPatch,
@@ -18,83 +22,56 @@ import type {
   Summary,
 } from "./schemas.ts";
 
-interface Call {
-  method: "GET" | "PUT" | "POST" | "DELETE";
-  path: string;
-  body?: unknown;
-}
-
-const NO_CONTENT = 204;
-
-async function failure(response: Response, call: Call): Promise<Error> {
-  const body: unknown = await response.json().catch(() => null);
-  const parsed = errorBodySchema.safeParse(body);
-  return new Error(
-    parsed.success
-      ? parsed.data.error
-      : `${call.method} ${call.path} failed with ${response.status}`,
-  );
-}
-
-function init(call: Call): RequestInit {
-  if (call.method === "GET") {
-    return { method: call.method };
-  }
-  return {
-    method: call.method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(call.body ?? {}),
-  };
-}
-
-async function send(call: Call): Promise<Response> {
-  const response = await fetch(`/api${call.path}`, init(call));
-  if (!response.ok) {
-    throw await failure(response, call);
-  }
-  return response;
-}
-
-async function request<Schema extends zod.ZodMiniType>(
-  schema: Schema,
-  call: Call,
-): Promise<zod.infer<Schema>> {
-  const response = await send(call);
-  const data: unknown = await response.json();
-  return zod.parse(schema, data);
-}
-
 const api = {
-  summary: async (): Promise<Summary> =>
-    request(summarySchema, { method: "GET", path: "/summary" }),
+  summary: async (): Promise<Summary> => readProgress(summary),
   updateSettings: async (patch: SettingsPatch): Promise<Settings> =>
-    request(settingsSchema, { method: "PUT", path: "/settings", body: patch }),
-  startSession: async (input: StartSessionInput): Promise<{ id: number }> =>
-    request(startedSchema, { method: "POST", path: "/sessions", body: input }),
+    changeProgress((progress) => updateSettings(progress, patch)),
+  startSession: async (input: StartSessionInput): Promise<{ id: number }> => {
+    const id = await changeProgress((progress) =>
+      startSession(progress, input),
+    );
+    return { id };
+  },
   answer: async (
     id: number,
     input: AnswerInput,
-  ): Promise<{ correct: boolean }> =>
-    request(answerResultSchema, {
-      method: "POST",
-      path: `/sessions/${id}/answers`,
-      body: input,
-    }),
+  ): Promise<{ correct: boolean }> => {
+    const correct = await changeProgress((progress) =>
+      recordAnswer(progress, { sessionId: id, input }),
+    );
+    return { correct };
+  },
   finish: async (
     id: number,
     answers: AnswerInput[],
     durationMs: number,
   ): Promise<SessionSummary> =>
-    request(sessionSummarySchema, {
-      method: "POST",
-      path: `/sessions/${id}/finish`,
-      body: { answers, durationMs },
-    }),
+    changeProgress((progress) =>
+      finishSession(progress, {
+        sessionId: id,
+        input: { answers, durationMs },
+      }),
+    ),
   discard: async (id: number): Promise<void> => {
-    const response = await send({ method: "DELETE", path: `/sessions/${id}` });
-    if (response.status !== NO_CONTENT) {
-      throw new Error(`DELETE /sessions/${id} returned ${response.status}`);
-    }
+    await changeProgress((progress) => ({
+      progress: discardSession(progress, id),
+      result: null,
+    }));
+  },
+  exportBackup: async (): Promise<Backup> =>
+    readProgress((progress) => toBackup(progress)),
+  // Replaces all progress with a backup's, validated before anything is
+  // written.
+  importBackup: async (value: unknown): Promise<void> => {
+    const imported = fromBackup(value);
+    await changeProgress(() => ({ progress: imported, result: null }));
+  },
+  // Deletes every session and answer, keeping the settings.
+  resetProgress: async (): Promise<void> => {
+    await changeProgress((progress) => ({
+      progress: { ...EMPTY_PROGRESS, settings: progress.settings },
+      result: null,
+    }));
   },
 };
 
