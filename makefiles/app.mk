@@ -34,7 +34,7 @@ build-pages: node_modules ## Build for GitHub Pages, served from $(PAGES_BASE)
 	BASE_PATH=$(PAGES_BASE) $(VP) build
 
 .PHONY: social-card
-social-card: node_modules ## Render the social sharing card and Apple touch icon into public/
+social-card: node_modules ## Render the social sharing card and app icons into public/
 	$(VP) run social-card
 
 .PHONY: outdated
