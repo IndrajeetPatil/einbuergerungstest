@@ -33,6 +33,7 @@ function CatalogueEntry(
     <li className="py-6">
       <div className="flex flex-wrap items-center gap-2">
         <span className="folio-mark">{label(question)}</span>
+        <span className="folio-mark normal-case">ID {question.id}</span>
         <span className={`chip ${CHIP[mastery]}`}>
           {MASTERY_LABEL[mastery].en}
         </span>

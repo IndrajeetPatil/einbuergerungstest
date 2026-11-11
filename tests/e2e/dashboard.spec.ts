@@ -34,6 +34,15 @@ test("searches the catalogue in German or English", async ({ page }) => {
   await expectAccessible(page);
 });
 
+test("finds a catalogue question by the id a backup uses", async ({ page }) => {
+  await openDashboard(page);
+  await page.getByRole("link", { name: "Fragenkatalog · catalogue" }).click();
+  await page.getByLabel("Search questions").fill("g107");
+  await expect(page.getByText("1 shown")).toBeVisible();
+  await expect(page.getByText("ID g107", { exact: true })).toBeVisible();
+  await expectAccessible(page);
+});
+
 test("lists time-dependent answers with the last check", async ({ page }) => {
   await openDashboard(page);
   await page
