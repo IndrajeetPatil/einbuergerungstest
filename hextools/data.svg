@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 252 136" width="504" height="272">
+  <!-- Bilingual question card: a German card with its English twin behind -->
+  <rect x="62" y="6" width="182" height="118" rx="12" fill="#f2efe8" stroke="#5d574c" stroke-width="5"/>
+  <rect x="8" y="16" width="182" height="114" rx="12" fill="#fdfcf9" stroke="#201d18" stroke-width="6"/>
+  <!-- Three-stripe motif from the app's favicon -->
+  <rect x="24" y="31" width="32" height="7" rx="2" fill="#201d18"/>
+  <rect x="24" y="41" width="32" height="7" rx="2" fill="#9a3d2e"/>
+  <rect x="24" y="51" width="32" height="7" rx="2" fill="#7a5410"/>
+  <!-- Question text -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M 68 36 H 172" stroke="#201d18" stroke-width="7"/>
+    <path d="M 68 53 H 146" stroke="#5d574c" stroke-width="6"/>
+  </g>
+  <!-- Answer options, the correct one ticked -->
+  <g fill="none" stroke="#5d574c" stroke-width="4">
+    <circle cx="33" cy="81" r="7"/>
+    <circle cx="33" cy="109" r="7"/>
+  </g>
+  <circle cx="111" cy="81" r="9" fill="#14584d"/>
+  <path d="M 106 81 L 110 85 L 117 77" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="111" cy="109" r="7" fill="none" stroke="#5d574c" stroke-width="4"/>
+  <g fill="none" stroke="#e3ded2" stroke-width="6" stroke-linecap="round">
+    <path d="M 48 81 H 90"/>
+    <path d="M 48 109 H 86"/>
+    <path d="M 128 109 H 172"/>
+  </g>
+  <path d="M 128 81 H 174" fill="none" stroke="#14584d" stroke-width="6" stroke-linecap="round"/>
+</svg>
