@@ -1,4 +1,4 @@
-# Leben in Deutschland — Einbürgerungstest trainer
+# Leben in Deutschland — Einbürgerungstest trainer <img src="docs/images/logo.png" align="right" width="240" alt="einbuergerungstest hex sticker" />
 
 A personal study app for the German citizenship test (_Einbürgerungstest_ /
 _Leben in Deutschland_). Every question is shown in German and English side by

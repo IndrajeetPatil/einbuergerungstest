@@ -18,3 +18,8 @@ exclude = [
 # reads it as the document title and flags the real `# DESIGN.md` heading as a
 # duplicate H1, so front-matter title detection is off.
 front-matter-title = ""
+
+[MD033]
+# The README header floats the hex sticker right at a fixed width, which
+# Markdown image syntax cannot express.
+allowed-elements = ["img"]
