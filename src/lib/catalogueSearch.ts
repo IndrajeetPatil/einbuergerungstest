@@ -19,10 +19,19 @@ function fold(text: string): string {
 
 function haystack(entry: Question): string {
   return fold(
-    [entry.de.q, entry.en.q, ...entry.de.o, ...entry.en.o, label(entry)].join(
-      " ",
-    ),
+    [
+      entry.de.q,
+      entry.en.q,
+      ...entry.de.o,
+      ...entry.en.o,
+      label(entry),
+      entry.id,
+    ].join(" "),
   );
+}
+
+function matches(entry: Question, needle: string, byId: boolean): boolean {
+  return byId ? fold(entry.id) === needle : haystack(entry).includes(needle);
 }
 
 interface CatalogueFilter {
@@ -31,7 +40,8 @@ interface CatalogueFilter {
 }
 
 /**
- * Questions matching a search and a mastery filter.
+ * Questions matching a search and a mastery filter. A query that is exactly a
+ * question id, such as `g107` in a backup file, finds that question alone.
  * @param pool - Questions to search.
  * @param stats - Per-question statistics.
  * @param filter - Query text and mastery filter.
@@ -43,11 +53,12 @@ function searchCatalogue(
   filter: CatalogueFilter,
 ): Question[] {
   const needle = fold(filter.query.trim());
+  const byId = pool.some((entry) => fold(entry.id) === needle);
   return pool.filter(
     (entry) =>
       (filter.mastery === "all" ||
         masteryOf(stats[entry.id]) === filter.mastery) &&
-      haystack(entry).includes(needle),
+      matches(entry, needle, byId),
   );
 }
 

@@ -96,6 +96,12 @@ progress.
 | Import backup | Validates the file, checks every answer has its session, judges every answer again, closes its open sessions, then replaces all progress |
 | Reset progress | Deletes every session and answer after a confirmation; settings stay |
 
+Answers name their question by `questionId`: `g1` to `g300` for the general
+questions and the state code plus number (`BE1` to `BE10`) for state
+questions. The catalogue shows each question's ID, and searching it for an
+exact ID finds that question alone, so a backup can be traced back to the
+questions it records.
+
 Import and reset are disabled while a session is in progress. Clearing the
 browser's site data deletes the progress, so export a backup now and then.
 

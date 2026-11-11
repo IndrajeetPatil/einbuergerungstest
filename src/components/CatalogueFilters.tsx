@@ -34,7 +34,7 @@ function CatalogueFilters(
       <input
         type="search"
         className="input min-w-0 flex-1"
-        placeholder="Suchen · Search (German or English)"
+        placeholder="Suchen · Search (German, English or ID such as g107)"
         value={filter.query}
         onChange={(event) => {
           onChange({ ...filter, query: event.target.value });

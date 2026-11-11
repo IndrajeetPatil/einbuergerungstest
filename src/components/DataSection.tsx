@@ -25,6 +25,18 @@ function DataSection(
         and then. Importing a backup replaces the progress here, so you can
         carry on in another browser.
       </p>
+      <p className="mt-3 max-w-prose text-muted">
+        A backup is a JSON file that names each question by its ID, such as g107
+        for general question 107 or BE3 for Berlin question 3. Every question in
+        the{" "}
+        <a
+          className="link"
+          href="#katalog"
+        >
+          Fragenkatalog · catalogue
+        </a>{" "}
+        shows its ID, and searching for an ID there finds that question.
+      </p>
       <div className="mt-5 flex flex-wrap gap-3">
         <button
           type="button"
