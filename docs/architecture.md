@@ -49,25 +49,7 @@ flowchart LR
 
 A practice answer, from key press to saved result:
 
-```mermaid
-sequenceDiagram
-  actor You
-  participant UI as React app
-  participant LS as localStorage
-  participant API as lib/api.ts
-  participant DB as IndexedDB
-
-  You->>UI: press 2, then Enter
-  UI->>UI: check(): lock answer, queue a retry if wrong
-  UI->>LS: save session
-  UI-->>You: bilingual feedback and explanation
-  UI->>API: api.answer(id, answer)
-  API->>DB: one readwrite transaction
-  DB-->>API: progress document
-  API->>API: recordAnswer() judges against the official key
-  API->>DB: write the new document
-  API-->>UI: { correct }
-```
+![From answer to saved progress: the learner's choice reaches the React screen and session state, then the local API and progress store validate and judge it against the official answer key before saving in one IndexedDB transaction. Session state stays in localStorage, and the server never receives answers or progress.](images/answer-flow.webp)
 
 A mock exam stores nothing per question. On submit (or when the timer runs
 out) it passes every answer to `api.finish`, stored in a single transaction.
