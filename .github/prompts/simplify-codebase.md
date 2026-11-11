@@ -63,7 +63,8 @@ eliminate duplicated logic. Do not refactor for aesthetics alone.
 
 ## Pull request
 
-Create a draft PR with `gh pr create --draft`. In the body, explain as bullet
+Open a ready-for-review PR (not a draft) with `gh pr create`, titled as a
+Conventional Commit (`refactor: …`). In the body, explain as bullet
 points:
 
 - what liability was removed;

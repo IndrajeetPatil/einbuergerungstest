@@ -19,7 +19,6 @@ class OfficialQuestion:
     """One question as printed in the PDF."""
 
     qid: str
-    section: str
     num: int
     page: int
     question: str
@@ -76,10 +75,8 @@ def _finish(draft: _Draft) -> OfficialQuestion:
     lines = [line for line in draft.lines if not re.fullmatch(r"(?:Bild \d\s*)+", line)]
     credit = " ".join(line for line in lines if line.startswith(CREDIT_PREFIXES))
     body = " ".join(line for line in lines if not line.startswith(CREDIT_PREFIXES))
-    prefix = "g" if draft.section == "g" else draft.section
     return OfficialQuestion(
-        qid=f"{prefix}{draft.num}",
-        section=draft.section,
+        qid=f"{draft.section}{draft.num}",
         num=draft.num,
         page=draft.page,
         question=clean(re.sub(rf"^{draft.num}\.\s*", "", body)),

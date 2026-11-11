@@ -7,6 +7,7 @@ lazy import pytest
 
 lazy from sources import (
     PDF_SHA256,
+    STATES,
     SourceError,
     Translation,
     answer_key,
@@ -32,27 +33,7 @@ def test_answer_key_rejects_another_edition() -> None:
 
 def test_answer_key_reads_general_questions() -> None:
     entry = {"id": "g1", "q": "Frage?", "o": ["a", "b", "c", "d"], "a": 3, "img": None}
-    states = {
-        code: {"questions": []}
-        for code in ([
-            "BW",
-            "BY",
-            "BE",
-            "BB",
-            "HB",
-            "HH",
-            "HE",
-            "MV",
-            "NI",
-            "NW",
-            "RP",
-            "SL",
-            "SN",
-            "ST",
-            "SH",
-            "TH",
-        ])
-    }
+    states = {code: {"questions": []} for code, _, _ in STATES}
     key = answer_key({"source": {"pdf_sha256": PDF_SHA256}, "general": [entry], "states": states})
     assert [(item.qid, item.answer, item.has_picture) for item in key] == [("g1", 3, False)]
 
@@ -71,25 +52,8 @@ def test_explanations_record_the_correct_option() -> None:
         "options": [{"de": "nein"}, {"de": "ja"}],
         "correct": 1,
     }
-    slugs = [
-        "baden-wuerttemberg",
-        "bayern",
-        "berlin",
-        "brandenburg",
-        "bremen",
-        "hamburg",
-        "hessen",
-        "mecklenburg-vorpommern",
-        "niedersachsen",
-        "nordrhein-westfalen",
-        "rheinland-pfalz",
-        "saarland",
-        "sachsen",
-        "sachsen-anhalt",
-        "schleswig-holstein",
-        "thueringen",
-    ]
-    data = {"general": [general], "states": {slug: {"questions": []} for slug in slugs}}
+    states = {slug: {"questions": []} for _, _, slug in STATES}
+    data = {"general": [general], "states": states}
     assert explanations(data)["g7"].correct_option == "ja"
 
 

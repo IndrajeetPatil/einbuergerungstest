@@ -73,7 +73,7 @@ run on every pull request.
 | ---------------------------------------------- | -------------------------------------------------------- |
 | [Quiz design](docs/quiz-design.md)             | Exam rules, questionnaire practices, smart mix, mastery  |
 | [Architecture](docs/architecture.md)           | Components, request flow, API                            |
-| [Illustrations](docs/illustrations.md)           | Generated architecture diagrams and their prompts        |
+| [Illustrations](docs/illustrations.md)         | Generated architecture diagrams and their prompts        |
 | [Progress database](docs/progress-database.md) | Stored document, scoring, transactions, backups          |
 | [Question data](docs/question-data.md)         | Sources, cross-validation, pictures, new BAMF editions   |
 | [Development](docs/development.md)             | Commands, checks, git hooks, CI, versions, agent tooling |

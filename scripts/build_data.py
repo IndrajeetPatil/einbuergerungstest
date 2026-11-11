@@ -141,13 +141,9 @@ def explanation_texts(qid: str, note: ExplanationEntry) -> tuple[str, str | None
 
 def picture_problems(entry: KeyEntry, official: OfficialQuestion, *, found: bool) -> list[str]:
     """Detection must agree with the answer key; third-party photos need a replacement."""
-    problems = (
-        []
-        if found == entry.has_picture
-        else [
-            f"{entry.qid}: picture detection disagrees with the answer key",
-        ]
-    )
+    problems: list[str] = []
+    if found != entry.has_picture:
+        problems.append(f"{entry.qid}: picture detection disagrees with the answer key")
     if unreplaced(entry.qid, official.credit):
         problems.append(
             f"{entry.qid}: third-party photo ({official.credit}) has no entry in photos.py"
@@ -177,7 +173,9 @@ def credit(qid: str, official: OfficialQuestion) -> str | None:
     if qid in WITHOUT_PICTURE:
         return None
     replacement = REPLACEMENTS.get(qid)
-    return official.credit or None if replacement is None else replacement.credit
+    if replacement is None:
+        return official.credit or None
+    return replacement.credit
 
 
 def record(entry: KeyEntry, inputs: Inputs) -> tuple[Record, list[str]]:
