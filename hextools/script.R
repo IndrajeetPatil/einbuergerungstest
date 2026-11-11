@@ -24,9 +24,8 @@ sticker(
     h_color = "#14584d",
     filename = "docs/images/logo.png",
     h_fill = "white",
-    url = "github.com/IndrajeetPatil/einbuergerungstest",
-    u_x = 0.99,
-    u_size = 6.5,
+    url = "indrapatil.com/einbuergerungstest",
+    u_size = 8,
     u_color = "grey",
     dpi = 600
 )
