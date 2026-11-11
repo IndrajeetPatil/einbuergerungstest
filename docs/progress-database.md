@@ -15,6 +15,7 @@ erDiagram
   progress {
     int version "1"
     object settings "partial: state, examDate, showEnglish, shuffleOptions"
+    int nextSessionId "optional; never decreases"
   }
   sessions {
     int id
@@ -41,7 +42,11 @@ erDiagram
 
 The document is validated with `progressSchema` (`src/lib/schemas.ts`) every
 time it is read, and timestamps are ISO 8601 in UTC. Ids are one more than the
-highest in use, as SQLite's `INTEGER PRIMARY KEY` would choose them.
+highest in use, as SQLite's `INTEGER PRIMARY KEY` would choose them, except
+session ids, which come from `nextSessionId` and are never reused: after a reset
+or import, a session still open in another tab fails with "unknown session"
+instead of writing into a newer session with the same id. Documents written
+before the counter existed count from their highest session id.
 
 ## How changes are applied
 
@@ -88,7 +93,7 @@ progress.
 | Action | Does |
 | --- | --- |
 | Export backup | Downloads `einbuergerungstest-YYYY-MM-DD.json`: `{ app, exportedAt, progress }` |
-| Import backup | Validates the file, checks every answer has its session, judges every answer again, then replaces all progress |
+| Import backup | Validates the file, checks every answer has its session, judges every answer again, closes its open sessions, then replaces all progress |
 | Reset progress | Deletes every session and answer after a confirmation; settings stay |
 
 Import and reset are disabled while a session is in progress. Clearing the

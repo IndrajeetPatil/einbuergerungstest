@@ -93,6 +93,16 @@ function nextId(rows: readonly { id: number }[]): number {
   return Math.max(0, ...rows.map((row) => row.id)) + 1;
 }
 
+/**
+ * The id the next session gets: never one used before, even if the session
+ * holding it was reset or replaced by an import.
+ * @param progress - Current document.
+ * @returns The next session id.
+ */
+function nextSessionId(progress: Progress): number {
+  return Math.max(progress.nextSessionId ?? 0, nextId(progress.sessions));
+}
+
 function updateSettings(progress: Progress, patch: unknown): Change<Settings> {
   const next = {
     ...progress,
@@ -108,7 +118,7 @@ function startSession(
 ): Change<number> {
   const valid = parse(startSessionInputSchema, input);
   const session: StoredSession = {
-    id: nextId(progress.sessions),
+    id: nextSessionId(progress),
     mode: valid.mode,
     focus: valid.focus,
     state: valid.state,
@@ -118,7 +128,11 @@ function startSession(
     durationMs: null,
   };
   return {
-    progress: { ...progress, sessions: [...progress.sessions, session] },
+    progress: {
+      ...progress,
+      sessions: [...progress.sessions, session],
+      nextSessionId: session.id + 1,
+    },
     result: session.id,
   };
 }
@@ -263,6 +277,7 @@ export {
   finishSession,
   judge,
   parse,
+  nextSessionId,
   recordAnswer,
   startSession,
   updateSettings,

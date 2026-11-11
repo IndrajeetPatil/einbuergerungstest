@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 
+import { replaceProgress } from "./backup.ts";
 import { question } from "./catalogue.ts";
 import {
   EMPTY_PROGRESS,
@@ -248,5 +249,36 @@ describe("progress", () => {
       "sessions",
       "stats",
     ]);
+  });
+});
+
+describe("replacing progress", () => {
+  test("never reuses a session id after a reset", () => {
+    const { progress, id } = opened(PRACTICE_START);
+    const reset = replaceProgress(progress, EMPTY_PROGRESS, at(5));
+    const next = startSession(reset, PRACTICE_START);
+    expect(next.result).toBe(id + 1);
+    expect(() =>
+      recordAnswer(next.progress, { sessionId: id, input: answer("g1", 0) }),
+    ).toThrow(/unknown session/u);
+  });
+
+  test("continues after the imported ids and closes imported open sessions", () => {
+    const local = opened(PRACTICE_START);
+    let imported = EMPTY_PROGRESS;
+    for (const second of [1, 2, 3]) {
+      ({ progress: imported } = startSession(imported, EXAM_START, at(second)));
+    }
+    imported = answered(imported, [{ sessionId: 3, input: answer("g1", 0) }]);
+    const replaced = replaceProgress(local.progress, imported, at(9));
+    expect(replaced.sessions.map((session) => session.id)).toStrictEqual([3]);
+    expect(replaced.sessions[0]?.finishedAt).toBe(at(9).toISOString());
+    expect(startSession(replaced, PRACTICE_START).result).toBe(4);
+  });
+
+  test("counts from the highest id in documents written before the counter", () => {
+    const { progress } = opened(PRACTICE_START);
+    const { nextSessionId: _dropped, ...older } = progress;
+    expect(startSession(older, PRACTICE_START).result).toBe(2);
   });
 });

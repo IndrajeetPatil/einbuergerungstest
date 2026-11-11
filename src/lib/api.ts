@@ -1,7 +1,7 @@
 // The progress API the app talks to. It keeps the shape of the former HTTP
 // client, but every call is a change to the progress document in this
 // browser's IndexedDB.
-import { fromBackup, toBackup } from "./backup.ts";
+import { fromBackup, replaceProgress, toBackup } from "./backup.ts";
 import {
   EMPTY_PROGRESS,
   discardSession,
@@ -64,12 +64,18 @@ const api = {
   // written.
   importBackup: async (value: unknown): Promise<void> => {
     const imported = fromBackup(value);
-    await changeProgress(() => ({ progress: imported, result: null }));
+    await changeProgress((progress) => ({
+      progress: replaceProgress(progress, imported),
+      result: null,
+    }));
   },
   // Deletes every session and answer, keeping the settings.
   resetProgress: async (): Promise<void> => {
     await changeProgress((progress) => ({
-      progress: { ...EMPTY_PROGRESS, settings: progress.settings },
+      progress: replaceProgress(progress, {
+        ...EMPTY_PROGRESS,
+        settings: progress.settings,
+      }),
       result: null,
     }));
   },

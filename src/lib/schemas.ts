@@ -184,6 +184,12 @@ const progressSchema = zod.object({
   settings: settingsPatchSchema,
   sessions: zod.array(storedSessionSchema),
   answers: zod.array(storedAnswerSchema),
+  /**
+   * The next session id. Ids are never reused, even after a reset or import,
+   * so a session still open in another tab cannot write into a newer one.
+   * Older documents lack it and count from their highest id.
+   */
+  nextSessionId: zod.optional(zod.int().check(atLeastOne)),
 });
 type Progress = zod.infer<typeof progressSchema>;
 

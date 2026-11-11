@@ -1,6 +1,12 @@
-// Backup files: the whole progress document as JSON, to keep it safe or move
-// it to another browser.
-import { ValidationError, judge, parse } from "./progress.ts";
+// Backup files (the whole progress document as JSON, to keep it safe or move
+// it to another browser) and replacing all progress on import or reset.
+import {
+  ValidationError,
+  discardSession,
+  judge,
+  nextSessionId,
+  parse,
+} from "./progress.ts";
 import { backupSchema } from "./schemas.ts";
 import type { Backup, Progress } from "./schemas.ts";
 
@@ -32,4 +38,30 @@ function fromBackup(value: unknown): Progress {
   return progress;
 }
 
-export { fromBackup, toBackup };
+/**
+ * Replaces all progress (an import or a reset) without ever reusing a
+ * session id, and closes the replacement's open sessions: their state lived
+ * in another browser, so they can never be resumed here.
+ * @param current - The document being replaced.
+ * @param replacement - The new progress.
+ * @param now - Time of the replacement.
+ * @returns The new document.
+ */
+function replaceProgress(
+  current: Progress,
+  replacement: Progress,
+  now: Date = new Date(),
+): Progress {
+  let next = replacement;
+  for (const session of replacement.sessions) {
+    if (session.finishedAt === null) {
+      next = discardSession(next, session.id, now);
+    }
+  }
+  return {
+    ...next,
+    nextSessionId: Math.max(nextSessionId(current), nextSessionId(replacement)),
+  };
+}
+
+export { fromBackup, replaceProgress, toBackup };
