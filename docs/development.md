@@ -19,7 +19,7 @@ Run `make` for the full list with descriptions.
 
 | Group | Targets |
 | --- | --- |
-| App | `start`, `serve`, `open`, `dev`, `build`, `build-pages` |
+| App | `start`, `serve`, `open`, `dev`, `build`, `build-pages`, `social-card` |
 | Quality | `qa`, `qa-js`, `qa-python`, `lint`, `typecheck`, `fallow`, `css-quality`, `file-naming`, `lint-markdown`, `spell-check`, `link-check`, `format`, `fix`, `ci` |
 | Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `test-e2e-docker` |
 | Security | `security`, `secret-scan`, `workflow-lint`, `workflow-audit`, `audit-js`, `audit-python` |
@@ -135,3 +135,30 @@ To check a Pages build locally:
 make build-pages
 BASE_PATH=/einbuergerungstest/ vp preview   # http://localhost:5179/einbuergerungstest/
 ```
+
+## Search, AI and social sharing
+
+The app renders in the browser, so everything crawlers, AI assistants and
+social networks read is static and lives in `index.html` and `public/`.
+`tests/e2e/seo.spec.ts` checks it.
+
+| What | Where |
+| --- | --- |
+| Title, description, canonical URL, `robots` | `index.html` head |
+| Open Graph and Twitter card (`summary_large_image`) | `index.html` head, image `public/og-image.png` (1200 × 630) |
+| `WebApplication` structured data (JSON-LD) | `index.html` head |
+| Summary for readers and crawlers without JavaScript | `<noscript>` in `index.html` |
+| [llms.txt](https://llmstxt.org/) for AI assistants | `public/llms.txt`, linked with `rel="describedby"` |
+| Sitemap | `public/sitemap.xml`, one URL: views are hash routes |
+| Apple touch icon | `public/apple-touch-icon.png` |
+
+`make social-card` renders the card and the touch icon from
+`scripts/social-card.mjs` with Playwright's Chromium; rerun it and commit both
+images after changing their copy or the design tokens. Keep the head, the
+`<noscript>` summary and `llms.txt` in step with the README's feature list.
+Absolute URLs in the head point at <https://www.indrapatil.com/einbuergerungstest/>;
+Vite prefixes root-relative links with the base path.
+
+Crawlers read `robots.txt` only at the domain root, which
+[indrajeetpatil.github.io](https://github.com/IndrajeetPatil/indrajeetpatil.github.io)
+publishes, so this app ships none.
