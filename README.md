@@ -39,12 +39,7 @@ your own exam.
 
 ## How it works
 
-```mermaid
-flowchart LR
-  BAMF["Official BAMF<br/>question catalogue"] -- "make data" --> Catalogue[["Bilingual question<br/>catalogue"]]
-  Catalogue --> App["Browser app<br/>(React, static files)"]
-  App <-- "answers, scores" --> DB[("Your progress<br/>(IndexedDB)")]
-```
+![How the study app works: the built question catalogue feeds the static React app in the browser, where quiz logic and the local progress API use IndexedDB and localStorage. GitHub Pages or a local preview serves static files; answers and progress stay in the browser.](docs/images/app-architecture.webp)
 
 The questions are built once from the official catalogue, then everything runs
 in your browser: the app asks the questions, checks each answer against the
@@ -55,14 +50,7 @@ site counts visits with Google Analytics, like the rest of
 [indrapatil.com](https://www.indrapatil.com/privacy/); your answers and
 progress are never sent.
 
-```mermaid
-flowchart LR
-  Practise["Practise or<br/>mock exam"] --> Feedback["Bilingual feedback<br/>and explanation"]
-  Feedback --> Retry["Missed questions<br/>come back"]
-  Retry --> Mastery["Two in a row<br/>= mastered"]
-  Mastery --> Dashboard["Dashboard:<br/>score over time"]
-  Dashboard --> Practise
-```
+![From source to study session: Vite+ builds static files for GitHub Pages or local preview. Pull requests run prek and CI checks; the Pages workflow deploys from main. Configuration is in Vite+, package.json, and GitHub Actions.](docs/images/build-deployment.webp)
 
 ## Tech stack
 
@@ -85,6 +73,7 @@ run on every pull request.
 | ---------------------------------------------- | -------------------------------------------------------- |
 | [Quiz design](docs/quiz-design.md)             | Exam rules, questionnaire practices, smart mix, mastery  |
 | [Architecture](docs/architecture.md)           | Components, request flow, API                            |
+| [Illustrations](docs/illustrations.md)           | Generated architecture diagrams and their prompts        |
 | [Progress database](docs/progress-database.md) | Stored document, scoring, transactions, backups          |
 | [Question data](docs/question-data.md)         | Sources, cross-validation, pictures, new BAMF editions   |
 | [Development](docs/development.md)             | Commands, checks, git hooks, CI, versions, agent tooling |
