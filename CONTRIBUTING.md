@@ -5,7 +5,7 @@ most contributions are fixes to the quiz, the data pipeline or the docs.
 
 ## Use it for your own exam
 
-Open the [published app](https://indrajeetpatil.github.io/einbuergerungstest/),
+Open the [published app](https://www.indrapatil.com/einbuergerungstest/),
 or run it yourself:
 
 1. Fork or clone the repository.
@@ -13,7 +13,9 @@ or run it yourself:
 3. Run `make install`, then `make start`.
 4. Pick your Bundesland and set your exam date in **Einstellungen · Settings**.
 
-Your progress lives in your browser's IndexedDB; nothing leaves your machine.
+Your progress lives in your browser's IndexedDB and never leaves it. A local
+run (`make start`) loads no analytics; the published site counts visits with
+Google Analytics.
 Export a backup under **Ihre Daten · Your data** now and then.
 
 ## Make a change

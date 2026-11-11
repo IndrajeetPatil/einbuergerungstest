@@ -1,7 +1,9 @@
 # Security policy
 
 The app is a set of static files: it runs entirely in your browser, has no
-server or accounts, and stores progress only in the browser's IndexedDB. Even
+server or accounts, and stores progress only in the browser's IndexedDB. The
+published site loads Google Analytics, as described in the
+[privacy notice](https://www.indrapatil.com/privacy/). Even
 so, please report problems.
 
 ## Reporting a vulnerability

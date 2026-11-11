@@ -122,7 +122,11 @@ for interaction, flat surfaces without shadows, in light and dark modes.
 
 `.github/workflows/pages.yml` deploys every push to `main` (or a manual run) to
 GitHub Pages: it builds with `make build-pages`, which sets `BASE_PATH` to
-`/<repository>/`, and deploys `dist/` with the official Pages actions. Turn it
+`/<repository>/`, and deploys `dist/` with the official Pages actions. The
+account's custom domain serves it at
+<https://www.indrapatil.com/einbuergerungstest/>. `index.html` loads the same
+Google Analytics tag as the rest of that site, except on `localhost` and
+`127.0.0.1`, so local runs and tests send nothing. Turn it
 on once under **Settings → Pages → Source: GitHub Actions**.
 
 To check a Pages build locally:

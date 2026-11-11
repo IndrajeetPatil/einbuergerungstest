@@ -9,7 +9,7 @@ day.
 I built this app to practise for my own Einbürgerungstest, and I'm sharing it
 so that anyone preparing for theirs can use it too.
 
-**Use it online:** <https://indrajeetpatil.github.io/einbuergerungstest/>
+**Use it online:** <https://www.indrapatil.com/einbuergerungstest/>
 
 ## What you can do
 
@@ -50,7 +50,10 @@ The questions are built once from the official catalogue, then everything runs
 in your browser: the app asks the questions, checks each answer against the
 official key and stores it in the browser's IndexedDB. There is no server, so
 the same static files run locally and on GitHub Pages. Export a backup from the
-dashboard to keep your progress or move it to another browser.
+dashboard to keep your progress or move it to another browser. The published
+site counts visits with Google Analytics, like the rest of
+[indrapatil.com](https://www.indrapatil.com/privacy/); your answers and
+progress are never sent.
 
 ```mermaid
 flowchart LR

@@ -95,7 +95,8 @@ shows it in the error banner.
 
 | Decision | Reason |
 | --- | --- |
-| No server; progress in IndexedDB | The app can be hosted as static files, and nothing leaves the browser |
+| No server; progress in IndexedDB | The app can be hosted as static files, and progress never leaves the browser |
+| Google Analytics in `index.html`, skipped on `localhost` and `127.0.0.1` | Visits are counted like on every page of the indrapatil.com website; local runs and tests send nothing |
 | One document, changed by pure functions | Validation, judging and statistics are unit-tested without a browser; each change is one transaction |
 | Answers judged in the store, against the bundled key | Stored results and imported backups never depend on what the caller claims |
 | Active session in `localStorage`, results in IndexedDB | Reloads resume instantly; only finished evidence is permanent |

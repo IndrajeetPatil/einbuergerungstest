@@ -39,11 +39,11 @@ is real and reachable. Judge it against this app's actual threat model:
 
 | Surface | Reality |
 | --- | --- |
-| Hosting | Static files on GitHub Pages; no server, accounts or network calls at runtime |
+| Hosting | Static files on GitHub Pages; no server or accounts; the only runtime requests besides the site's own files go to Google Analytics |
 | Progress (IndexedDB) | Personal study progress in the visitor's own browser; no credentials or secrets |
 | Backup import | A file the visitor picks; parsed as JSON, validated with Zod, answers re-judged before anything is written |
 | Question data | Built offline from pinned, SHA-256-checked sources by `scripts/build_data.py` |
-| Frontend | React escapes all text; no `dangerouslySetInnerHTML`; no third-party scripts |
+| Frontend | React escapes all text; no `dangerouslySetInnerHTML`; the only third-party script is Google Analytics (`index.html`), skipped on localhost |
 | CI | Pull requests only, read-only token, SHA-pinned actions, `persist-credentials: false`; `Pages` deploys `main` with `pages: write` and `id-token: write` in its deploy job only |
 
 Findings that assume a server, multiple users or untrusted catalogue data

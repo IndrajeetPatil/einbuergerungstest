@@ -65,6 +65,9 @@ Every gate is listed in [docs/development.md](docs/development.md#quality-gates)
 - Keep the build static and base-path aware: no absolute `/…` URLs in the app
   (use `import.meta.env.BASE_URL`), hash routes only, and no feature that needs
   a server.
+- `index.html` carries the same Google Analytics tag as every page of the
+  indrapatil.com website and skips it on `localhost`/`127.0.0.1`; keep it in step
+  with that site. Answers and progress are never sent anywhere.
 - Third-party ("©") photos from the BAMF PDF never ship: add a free stand-in
   or a `WITHOUT_PICTURE` entry in `scripts/photos.py` and credit it in
   `THIRD-PARTY-NOTICES.md`.

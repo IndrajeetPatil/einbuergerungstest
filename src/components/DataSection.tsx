@@ -20,8 +20,8 @@ function DataSection(
     <section className="mt-16 border-t border-line pt-8">
       <h2 className="text-heading">Ihre Daten · Your data</h2>
       <p className="mt-3 max-w-prose text-muted">
-        Your progress stays in this browser on this device; nothing is sent
-        anywhere. Clearing your browser data deletes it, so export a backup now
+        Your progress stays in this browser on this device and is never
+        uploaded. Clearing your browser data deletes it, so export a backup now
         and then. Importing a backup replaces the progress here, so you can
         carry on in another browser.
       </p>

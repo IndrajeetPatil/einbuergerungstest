@@ -1,8 +1,8 @@
 # Progress database
 
 Your progress lives in this browser's IndexedDB: database `einbuergerungstest`,
-object store `progress`, one document under the key `progress`. Nothing is
-sent anywhere. Each browser (and each device) keeps its own progress; export a
+object store `progress`, one document under the key `progress`. Progress is
+never sent anywhere. Each browser (and each device) keeps its own progress; export a
 backup to keep it safe or move it.
 
 ## Document
