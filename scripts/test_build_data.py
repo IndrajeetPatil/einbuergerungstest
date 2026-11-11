@@ -3,9 +3,11 @@
 lazy from typing import Final
 
 lazy from build_data import (
+    credit,
     document,
     explanation_problems,
     explanation_texts,
+    picture_problems,
     wording_problems,
 )
 lazy from pdf_text import OfficialQuestion
@@ -42,3 +44,20 @@ def test_document_lists_all_sixteen_states() -> None:
     states = document([])["states"]
     assert isinstance(states, list)
     assert len(states) == 16
+
+
+def test_third_party_photos_need_a_free_replacement() -> None:
+    credited = OfficialQuestion("g9", "g", 9, 3, "Was zeigt das Bild?", "© Agentur", KEY.options)
+    pictured = KeyEntry("g9", "g", KEY.question, KEY.options, 0, has_picture=True)
+    assert picture_problems(pictured, credited, found=True) == [
+        "g9: third-party photo (© Agentur) has no entry in photos.py",
+    ]
+    assert picture_problems(pictured, OFFICIAL, found=False) == [
+        "g9: picture detection disagrees with the answer key",
+    ]
+
+
+def test_credits_follow_the_replacement() -> None:
+    assert credit("g9", OFFICIAL) is None
+    assert credit("g70", OFFICIAL) is None
+    assert credit("g216", OFFICIAL) == "HerrAdams / Wikimedia Commons, CC BY-SA 4.0"

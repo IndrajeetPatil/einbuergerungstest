@@ -87,7 +87,5 @@ The code is released under the [MIT licence](LICENSE). The question data
 combines the official BAMF catalogue with MIT-licensed translations and
 explanations; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
-> [!IMPORTANT]
-> Five pictures are photos the BAMF catalogue credits to third parties and are
-> not covered by the MIT licence. Replace them before publishing the
-> repository (see the notices).
+Photos the BAMF catalogue credits to third parties are replaced by freely
+licensed Wikimedia Commons photos under their own CC BY-SA licences.

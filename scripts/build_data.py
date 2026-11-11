@@ -8,6 +8,7 @@ Sources (all pinned, so the build is reproducible; see sources.py):
 * lezeroq/lebenindeutschland (MIT): the answer key, taken from the BAMF Online-Testcenter, and
   English translations aligned to the PDF's option order.
 * abdullahbutt/leben-in-deutschland-test (MIT): English (and some German) explanations.
+* Wikimedia Commons: freely licensed stand-ins for the PDF's third-party press photos (photos.py).
 
 The build stops, listing every problem, when the sources disagree.
 
@@ -25,7 +26,8 @@ lazy from typing import Final
 
 lazy from pdf_layout import Page, picture_region, read_layout, tool
 lazy from pdf_text import OfficialQuestion, parse_catalogue
-lazy from pictures import render
+lazy from photos import REPLACEMENTS, WITHOUT_PICTURE, cache_name, unreplaced
+lazy from pictures import convert, render
 lazy from sources import (
     CACHE,
     EDITION,
@@ -137,23 +139,45 @@ def explanation_texts(qid: str, note: ExplanationEntry) -> tuple[str, str | None
     return clean(english), clean(german) or None
 
 
-def picture(
-    entry: KeyEntry, official: OfficialQuestion, inputs: Inputs
-) -> tuple[str | None, list[str]]:
-    """Render the question's picture, if it has one, and check detection."""
-    region = picture_region(inputs.pages, official)
+def picture_problems(entry: KeyEntry, official: OfficialQuestion, *, found: bool) -> list[str]:
+    """Detection must agree with the answer key; third-party photos need a replacement."""
     problems = (
         []
-        if (region is not None) == entry.has_picture
+        if found == entry.has_picture
         else [
             f"{entry.qid}: picture detection disagrees with the answer key",
         ]
     )
-    if region is None:
+    if unreplaced(entry.qid, official.credit):
+        problems.append(
+            f"{entry.qid}: third-party photo ({official.credit}) has no entry in photos.py"
+        )
+    return problems
+
+
+def picture(
+    entry: KeyEntry, official: OfficialQuestion, inputs: Inputs
+) -> tuple[str | None, list[str]]:
+    """Render the question's picture, or its free replacement, and check detection."""
+    region = picture_region(inputs.pages, official)
+    problems = picture_problems(entry, official, found=region is not None)
+    if region is None or entry.qid in WITHOUT_PICTURE:
         return None, problems
     name = f"{entry.qid}.webp"
-    render(inputs.pdf, region, OUT_IMG / name)
+    replacement = REPLACEMENTS.get(entry.qid)
+    if replacement is None:
+        render(inputs.pdf, region, OUT_IMG / name)
+    else:
+        convert(CACHE / cache_name(entry.qid), replacement.crop, OUT_IMG / name)
     return f"img/{name}", problems
+
+
+def credit(qid: str, official: OfficialQuestion) -> str | None:
+    """The credit shown under the picture: the replacement's, or the catalogue's."""
+    if qid in WITHOUT_PICTURE:
+        return None
+    replacement = REPLACEMENTS.get(qid)
+    return official.credit or None if replacement is None else replacement.credit
 
 
 def record(entry: KeyEntry, inputs: Inputs) -> tuple[Record, list[str]]:
@@ -176,7 +200,7 @@ def record(entry: KeyEntry, inputs: Inputs) -> tuple[Record, list[str]]:
         "en": {"q": clean(english.question), "o": [clean(o) for o in english.options]},
         "answer": entry.answer,
         "image": image,
-        "credit": official.credit or None,
+        "credit": credit(entry.qid, official),
         "explanation": {"en": explanation_en, "de": explanation_de},
         "keepOrder": keep_order(list(official.options)),
     }, problems

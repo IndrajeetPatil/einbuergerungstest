@@ -1,4 +1,4 @@
-"""Render a picture region of the catalogue PDF to a trimmed WebP."""
+"""Render a picture region of the catalogue PDF, or a replacement photo, to a WebP."""
 
 lazy import subprocess
 lazy import tempfile
@@ -67,11 +67,22 @@ def trim(image: Image.Image) -> Image.Image:
     ))
 
 
+def _save(image: Image.Image, out: Path) -> None:
+    image.thumbnail((MAX_SIZE, MAX_SIZE))
+    image.save(out, "WEBP", quality=WEBP_QUALITY, method=WEBP_METHOD)
+
+
 def render(pdf: Path, region: Region, out: Path) -> None:
     """Render, trim and save a picture region as WebP."""
     with tempfile.TemporaryDirectory() as tmp:
         png = _rasterise(pdf, region, Path(tmp) / "crop")
         with Image.open(png) as source:
             image = trim(source.convert("RGB"))
-    image.thumbnail((MAX_SIZE, MAX_SIZE))
-    image.save(out, "WEBP", quality=WEBP_QUALITY, method=WEBP_METHOD)
+    _save(image, out)
+
+
+def convert(photo: Path, crop: tuple[int, int, int, int] | None, out: Path) -> None:
+    """Crop a photo, if asked, and save it as WebP."""
+    with Image.open(photo) as source:
+        image = source.convert("RGB")
+    _save(image if crop is None else image.crop(crop), out)
