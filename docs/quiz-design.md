@@ -16,7 +16,10 @@ covered by unit tests.
 
 The real test: 33 questions, 60 minutes, at least 17 correct, drawn from 300
 general questions plus the 10 for the Bundesland of your main residence. These
-numbers live in one constant, `EXAM`.
+numbers live in one constant, `EXAM`. The catalogue words a few questions
+identically with different options (for example, twice _Für wie viele Jahre
+wird der Bundestag in Deutschland gewählt?_); a mock exam asks each wording at
+most once.
 
 ## Questionnaire practices
 

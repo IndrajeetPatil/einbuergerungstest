@@ -94,6 +94,13 @@ describe(drawExam, () => {
     ).toBe(true);
   });
 
+  test("never asks the same wording twice", () => {
+    for (let run = 1; run <= 200; run += 1) {
+      const exam = drawExam(questions, "BE", seeded(run));
+      expect(new Set(exam.map((entry) => entry.de.q)).size).toBe(EXAM.total);
+    }
+  });
+
   test("differs between draws", () => {
     const first = drawExam(questions, "BY", seeded(1));
     const second = drawExam(questions, "BY", seeded(2));
