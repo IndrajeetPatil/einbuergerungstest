@@ -113,8 +113,8 @@ addition below.
 
 The tokens above mirror `src/index.css` (`@theme` for light mode, `.dark` for
 the `-dark` counterparts), which is normative; when either changes, update the
-other in the same commit. Both sets are the base values unchanged. When the base changes,
-bring this app in line and move the reconciled reference forward.
+other in the same commit. Both sets are the base values unchanged. When the
+base changes, bring this app in line and move the reconciled reference forward.
 
 ## Overview
 
