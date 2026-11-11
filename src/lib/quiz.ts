@@ -84,8 +84,24 @@ function weightedSample<Item>(sample: Sample<Item>): Item[] {
 }
 
 /**
+ * Keeps the first question of each wording. The official catalogue words some
+ * questions identically with different options (for example, twice
+ * "Für wie viele Jahre wird der Bundestag in Deutschland gewählt?").
+ * @param questions - Questions in draw order.
+ * @returns The questions without repeated wordings.
+ */
+function distinctWordings(questions: readonly Question[]): Question[] {
+  const seen = new Set<string>();
+  return questions.filter((entry) => {
+    const repeated = seen.has(entry.de.q);
+    seen.add(entry.de.q);
+    return !repeated;
+  });
+}
+
+/**
  * Draws a mock exam like the real paper: 30 general questions followed by 3
- * about the state, each block in random order.
+ * about the state, each block in random order, with no wording asked twice.
  * @param questions - The whole catalogue.
  * @param state - Federal state of main residence.
  * @param rng - Random number generator in [0, 1).
@@ -99,8 +115,8 @@ function drawExam(
   const general = questions.filter((entry) => entry.state === null);
   const local = questions.filter((entry) => entry.state === state);
   return [
-    ...shuffle(general, rng).slice(0, EXAM.general),
-    ...shuffle(local, rng).slice(0, EXAM.state),
+    ...distinctWordings(shuffle(general, rng)).slice(0, EXAM.general),
+    ...distinctWordings(shuffle(local, rng)).slice(0, EXAM.state),
   ];
 }
 
