@@ -1,8 +1,8 @@
 // Searching and filtering the catalogue view.
 import { label } from "./catalogue.ts";
 import { masteryOf } from "./mastery.ts";
-import type { Mastery } from "./mastery.ts";
-import type { Question, QuestionStat } from "./schemas.ts";
+import type { Mastery, Stats } from "./mastery.ts";
+import type { Question } from "./schemas.ts";
 
 /**
  * Lower-cases and strips accents so "Burger" finds "Bürger".
@@ -49,7 +49,7 @@ interface CatalogueFilter {
  */
 function searchCatalogue(
   pool: readonly Question[],
-  stats: Readonly<Record<string, QuestionStat>>,
+  stats: Stats,
   filter: CatalogueFilter,
 ): Question[] {
   const needle = fold(filter.query.trim());
