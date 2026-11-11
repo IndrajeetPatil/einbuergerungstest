@@ -8,6 +8,7 @@ import {
   optionOrder,
   passed,
   practiceQuestions,
+  scoredOutOf,
   shuffle,
   weightedSample,
 } from "./quiz.ts";
@@ -214,6 +215,15 @@ describe(accuracy, () => {
     },
   ])("is $expected for $session.mode", ({ session, expected }) => {
     expect(accuracy(session)).toBeCloseTo(expected);
+  });
+});
+
+describe(scoredOutOf, () => {
+  test("counts exams out of every question, practice out of answered", () => {
+    expect([
+      scoredOutOf(sessionOf({ correct: 11, answered: 20 })),
+      scoredOutOf(sessionOf({ mode: "practice", correct: 10, answered: 20 })),
+    ]).toStrictEqual([EXAM.general + EXAM.state, 20]);
   });
 });
 

@@ -4,6 +4,7 @@ import type { CSSProperties, ReactElement } from "react";
 import { CHART, MARK } from "#lib/chartModel.ts";
 import type { ChartPoint } from "#lib/chartModel.ts";
 import { dateTime, percent } from "#lib/format.ts";
+import { scoredOutOf } from "#lib/quiz.ts";
 
 function position(point: ChartPoint, width: number): CSSProperties {
   // Beside the point, never on top of it.
@@ -37,7 +38,7 @@ function ChartTooltip(
       style={style}
     >
       <p className="font-semibold tabular-nums">
-        {session.correct}/{exam ? session.questionCount : session.answered}{" "}
+        {session.correct}/{scoredOutOf(session)}{" "}
         <span className="font-normal text-muted">({percent(point.share)})</span>
       </p>
       <p className="flex items-center gap-2 text-muted">

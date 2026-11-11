@@ -216,19 +216,27 @@ function passed(correct: number): boolean {
   return correct >= EXAM.passMark;
 }
 
+type Scored = Pick<
+  SessionSummary,
+  "correct" | "answered" | "questionCount" | "mode"
+>;
+
 /**
- * Share of correct answers: out of 33 for exams, of answered for practice.
+ * What a session's score counts out of: 33 for exams, answered for practice.
+ * @param session - A finished session.
+ * @returns The number of questions the score is out of.
+ */
+function scoredOutOf(session: Scored): number {
+  return session.mode === "exam" ? session.questionCount : session.answered;
+}
+
+/**
+ * Share of correct answers, out of {@link scoredOutOf}.
  * @param session - A finished session.
  * @returns A number between 0 and 1.
  */
-function accuracy(
-  session: Pick<
-    SessionSummary,
-    "correct" | "answered" | "questionCount" | "mode"
-  >,
-): number {
-  const denominator =
-    session.mode === "exam" ? session.questionCount : session.answered;
+function accuracy(session: Scored): number {
+  const denominator = scoredOutOf(session);
   return denominator === 0 ? 0 : session.correct / denominator;
 }
 
@@ -239,6 +247,7 @@ export {
   optionOrder,
   passed,
   practiceQuestions,
+  scoredOutOf,
   shuffle,
   weightedSample,
 };
