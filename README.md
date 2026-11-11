@@ -41,9 +41,20 @@ your own exam.
 
 ```mermaid
 flowchart LR
-  BAMF["Official BAMF<br/>question catalogue"] -- "make data" --> Catalogue[["Bilingual question<br/>catalogue"]]
-  Catalogue --> App["Browser app<br/>(React, static files)"]
-  App <-- "answers, scores" --> DB[("Your progress<br/>(IndexedDB)")]
+  subgraph Build["Build time · Python 3.15 + uv"]
+    BAMF["BAMF source PDFs"] --> Data["make data<br/>extract · validate · translate"]
+    Data --> Catalogue[["catalogue.json<br/>question images"]]
+  end
+
+  subgraph Browser["Browser · React + TypeScript"]
+    Screens["Screens<br/>dashboard · exam · practice · catalogue"] --> Rules["Quiz and progress logic"]
+    Rules --> API["Local API"] --> IDB[("IndexedDB<br/>saved progress")]
+    Session[("localStorage<br/>active session · preferences")]
+    Catalogue --> Screens
+    Catalogue --> Rules
+  end
+
+  Static["Static site<br/>GitHub Pages or local preview"] --> Browser
 ```
 
 The questions are built once from the official catalogue, then everything runs
@@ -57,11 +68,13 @@ progress are never sent.
 
 ```mermaid
 flowchart LR
-  Practise["Practise or<br/>mock exam"] --> Feedback["Bilingual feedback<br/>and explanation"]
-  Feedback --> Retry["Missed questions<br/>come back"]
-  Retry --> Mastery["Two in a row<br/>= mastered"]
-  Mastery --> Dashboard["Dashboard:<br/>score over time"]
-  Dashboard --> Practise
+  Source["Source files<br/>src/ · public/ · index.html"] --> VP["Vite+ build<br/>Vite · TypeScript · Tailwind"]
+  VP --> Dist["dist/<br/>static assets"]
+  Dist --> Pages["GitHub Pages<br/>BASE_PATH-aware"]
+  PR["Pull request"] --> Gates["CI quality gates<br/>lint · types · unit · data"] --> VP
+  Main["main"] --> Gates
+  Pages --> Browser["Browser only<br/>no application server"]
+  Browser --> Local["Progress stays local<br/>IndexedDB · localStorage"]
 ```
 
 ## Tech stack
