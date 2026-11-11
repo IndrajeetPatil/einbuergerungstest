@@ -190,7 +190,9 @@ both.
   square fills with the state hue and carries the focus ring for the hidden
   radio.
 - **Feedback:** a 2px leading rule in the verdict hue, the verdict line with
-  its icon, and an explanation under a "Warum · Why" folio mark.
+  its icon, and an explanation under a "Warum · Why" folio mark. In the
+  results review of wrong answers, the correct and the chosen answer always
+  show their English, even with the English column hidden.
 - **Official pictures:** question images sit on a white mat (`bg-white`,
   hairline, 6px radius, inner padding). This is the one pure-white surface, in
   both modes, because the official BAMF pictures are drawn on white and look

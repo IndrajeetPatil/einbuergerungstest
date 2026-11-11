@@ -14,7 +14,8 @@ function allTime(stat: QuestionStat | undefined): string {
 }
 
 /**
- * Questions answered wrongly, each with its correction and explanation.
+ * Questions answered wrongly, each with its correction and explanation. The
+ * correct and the chosen answer always show their English translation.
  * @param props - Entries to review, settings and statistics.
  * @returns The review section.
  */
@@ -52,10 +53,12 @@ function ReviewList(
               onChoose={undefined}
               headingId={`review-${position}`}
             />
+            {/* A mistake is easier to learn from with both answers in
+                English, so the review shows them whatever the toggle says. */}
             <Feedback
               question={question}
               chosen={item.chosen}
-              showEnglish={settings.showEnglish}
+              showEnglish
             />
             <p className="mt-3 text-sm text-muted">
               {allTime(stats[question.id])}
