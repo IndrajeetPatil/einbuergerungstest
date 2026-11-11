@@ -1,10 +1,13 @@
 # Leben in Deutschland — Einbürgerungstest trainer <img src="docs/images/logo.png" align="right" width="240" alt="einbuergerungstest hex sticker" />
 
-A personal study app for the German citizenship test (_Einbürgerungstest_ /
+A free study app for the German citizenship test (_Einbürgerungstest_ /
 _Leben in Deutschland_). Every question is shown in German and English side by
 side, so the exam language and your own build a direct correspondence. Your
 results stay in your browser, so you can watch your score climb towards exam
 day.
+
+I built this app to practise for my own Einbürgerungstest, and I'm sharing it
+so that anyone preparing for theirs can use it too.
 
 **Use it online:** <https://indrajeetpatil.github.io/einbuergerungstest/>
 
