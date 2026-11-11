@@ -81,7 +81,7 @@ flowchart LR
 | Rule | Detail |
 | --- | --- |
 | Commit messages and PR titles | Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`, …) |
-| `main` | `protected-main` ruleset: pull requests, squash merges only, every workflow's check required, no deletion or force-push |
+| `main` | `protected-main` ruleset: pull requests, squash merges only, every workflow's check required on a branch up to date with `main`, no deletion or force-push |
 | Workflows | Pull requests only, except `Pages`, which deploys `main` to GitHub Pages; actions pinned to full commit SHAs; least-privilege tokens; no persisted credentials |
 | Merge settings | Squash only, auto-merge allowed, branches deleted after merge |
 

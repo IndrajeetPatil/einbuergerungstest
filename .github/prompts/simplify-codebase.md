@@ -71,3 +71,9 @@ points:
 - whether it came from a newer dependency capability or a proven dependency;
 - what code was deleted or collapsed;
 - how you showed the change is regression-free.
+
+Then follow [AGENTS.md](../../AGENTS.md#pull-requests) through completion:
+post verified screenshots for frontend source changes, fix CI until every
+workflow passes, iterate on Codex review until it approves the current head,
+and squash-merge only then. If Codex usage is exhausted, leave the PR open and
+report it.

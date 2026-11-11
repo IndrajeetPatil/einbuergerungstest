@@ -51,9 +51,38 @@ Every gate is listed in [docs/development.md](docs/development.md#quality-gates)
   `refactor`, `test`, `build`, `ci`, `chore`, …). The commit-msg hook and the
   `Conventional Commits` workflow check structure only.
 - `main` is protected by the `protected-main` ruleset: squash-merged pull
-  requests with every workflow passing. Workflows run on pull requests only,
-  except `Pages`, which deploys `main` to GitHub Pages.
+  requests with every workflow passing on a branch that is up to date with
+  `main`. Workflows run on pull requests only, except `Pages`, which deploys
+  `main` to GitHub Pages.
 - Keep the PR title and body in sync with the net diff. Never rewrite `main`.
+
+## Pull requests
+
+- Publish every pull request ready for review (`gh pr create` without
+  `--draft`), never as a draft.
+- For every PR that changes frontend source (`src/`, `index.html`), including
+  behaviour-only refactors, run the
+  [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md)
+  and check that the posted images render on the PR; a local capture is not
+  evidence. Developer-tooling-only changes need no screenshots.
+- After opening or pushing to a PR, wait for every workflow to finish. Fix the
+  cause of each failure, rerun the local checks, push and repeat until all
+  pass; opening the PR is not the end of the task.
+- Wait for Codex to review the current head. Fix merited findings, reply to
+  and resolve the threads you addressed, and comment `@codex review` after
+  each push, until Codex gives the current head a thumbs-up with no
+  unresolved findings. An approval of an older commit does not count.
+- If Codex reports exhausted usage, stop requesting reviews, leave the PR open
+  and report it; never substitute another reviewer or treat silence as
+  approval.
+- Once every workflow passes and Codex has approved the current head,
+  squash-merge with `gh pr merge --squash --match-head-commit <sha>`.
+  Recheck the head, checks and review threads just before merging, and never
+  bypass the ruleset.
+- Bring a branch that is behind `main` up to date by rebasing onto
+  `origin/main` and force-pushing with `--force-with-lease`. GitHub's "Update
+  branch" adds a merge commit that fails the `Conventional Commits` workflow.
+  The new head then needs green checks and a fresh Codex approval.
 
 ## Gotchas
 

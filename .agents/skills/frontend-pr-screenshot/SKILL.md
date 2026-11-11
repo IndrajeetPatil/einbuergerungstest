@@ -2,9 +2,10 @@
 name: frontend-pr-screenshot
 description: >
   Capture screenshots of the Einbürgerungstest trainer and post them to the
-  current GitHub pull request. Use when a user asks to post a PR screenshot,
-  show the UI in a PR comment, verify visual changes in a PR, or include
-  visual evidence after UI work.
+  current GitHub pull request. Use for every PR that changes frontend source,
+  including behaviour-only refactors (developer-tooling-only changes are
+  exempt), and when a user asks to post a PR screenshot, show the UI in a PR
+  comment or verify visual changes in a PR.
 allowed-tools: >
   Bash(gh:*), Bash(curl:*), Bash(agent-browser:*), Bash(lsof:*),
   Bash(node:*), Bash(make:*), Bash(sleep:*), Bash(seq:*), Bash(kill:*),
