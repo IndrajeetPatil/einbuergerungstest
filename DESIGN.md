@@ -105,9 +105,7 @@ components:
 # DESIGN.md
 
 The visual design of the Einbürgerungstest trainer. It extends the
-[indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md)
-(the base), last reconciled with
-[indrajeetpatil.github.io#386](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/pull/386).
+design of [indrapatil.com](https://www.indrapatil.com/) (the base).
 Everything the base says applies here unless this file records a choice or an
 addition below.
 
