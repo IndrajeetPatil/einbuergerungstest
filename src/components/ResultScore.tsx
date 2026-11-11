@@ -1,16 +1,16 @@
 import type { ReactElement } from "react";
 
 import { minutes, percent } from "#lib/format.ts";
-import { EXAM } from "#lib/quiz.ts";
+import { EXAM, accuracy, scoredOutOf } from "#lib/quiz.ts";
 import type { SessionSummary } from "#lib/schemas.ts";
 
 import { PassChip } from "./PassChip.tsx";
 
-function note(summary: SessionSummary, total: number): string {
+function note(summary: SessionSummary): string {
   const main =
     summary.mode === "exam"
       ? `${EXAM.passMark} correct answers needed to pass.`
-      : `${percent(summary.correct / Math.max(total, 1))} correct on first try.`;
+      : `${percent(accuracy(summary))} correct on first try.`;
   return `${main} Time: ${minutes(summary.durationMs)}.`;
 }
 
@@ -24,16 +24,15 @@ function ResultScore(
 ): ReactElement {
   const { summary } = props;
   const exam = summary.mode === "exam";
-  const total = exam ? summary.questionCount : summary.answered;
   return (
     <div className="mt-8 flex flex-wrap items-end gap-x-10 gap-y-4">
       <p className="text-[4rem] leading-none font-semibold">
         {summary.correct}
-        <span className="text-2xl text-muted"> / {total}</span>
+        <span className="text-2xl text-muted"> / {scoredOutOf(summary)}</span>
       </p>
       <div className="space-y-2 pb-1">
         {exam ? <PassChip correct={summary.correct} /> : null}
-        <p className="text-sm text-muted">{note(summary, total)}</p>
+        <p className="text-sm text-muted">{note(summary)}</p>
       </div>
     </div>
   );

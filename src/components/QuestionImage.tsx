@@ -2,6 +2,8 @@ import type { ReactElement } from "react";
 
 import type { Question } from "#lib/schemas.ts";
 
+import { QuestionPicture } from "./QuestionPicture.tsx";
+
 /**
  * The picture of a picture question, with its credit.
  * @param props - The question.
@@ -19,11 +21,10 @@ function QuestionImage(
       {/* The white mat stays white in dark mode, so the credit sits below it,
           on the page colours. */}
       <div className="rounded-md border border-line bg-white p-3">
-        <img
-          src={`${import.meta.env.BASE_URL}${question.image}`}
-          alt={`Abbildung zu ${question.de.q}`}
-          className="mx-auto max-h-[22rem] w-auto object-contain"
-          decoding="async"
+        <QuestionPicture
+          image={question.image}
+          question={question.de.q}
+          size="full"
         />
       </div>
       {question.credit === null ? null : (

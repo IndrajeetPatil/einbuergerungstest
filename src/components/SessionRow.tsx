@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import { dateTime, minutes, percent } from "#lib/format.ts";
 import { FOCI } from "#lib/practiceFoci.ts";
-import { accuracy } from "#lib/quiz.ts";
+import { accuracy, scoredOutOf } from "#lib/quiz.ts";
 import type { SessionSummary } from "#lib/schemas.ts";
 
 function typeLabel(session: SessionSummary): string {
@@ -34,7 +34,7 @@ function SessionRow(
         </span>
       </td>
       <td className="py-2 pr-4 text-right font-semibold">
-        {session.correct}/{exam ? session.questionCount : session.answered}
+        {session.correct}/{scoredOutOf(session)}
       </td>
       <td className="py-2 pr-4 text-right">{percent(accuracy(session))}</td>
       <td className="py-2 text-right text-muted">
