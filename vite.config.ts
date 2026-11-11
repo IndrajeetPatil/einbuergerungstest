@@ -46,6 +46,8 @@ export default defineConfig({
   build: {
     target: "es2024",
     rolldownOptions: {
+      // The app, and the not-found page GitHub Pages serves for unknown paths.
+      input: ["index.html", "404.html"],
       output: {
         // Keep the question catalogue apart from app code so each caches on
         // its own.

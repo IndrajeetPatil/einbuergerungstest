@@ -151,7 +151,7 @@ social networks read is static and lives in `index.html` and `public/`.
 | [llms.txt](https://llmstxt.org/) for AI assistants | `public/llms.txt`, linked with `rel="describedby"` |
 | Sitemap | `public/sitemap.xml`, one URL: views are hash routes |
 | Web app manifest and icons | `public/site.webmanifest`, `public/icon-*.png`, `public/apple-touch-icon.png` |
-| Not-found page (`noindex`, links back to the app, `llms.txt` and the sitemap) | `public/404.html`, which GitHub Pages serves with a 404 status |
+| Not-found page (`noindex`, links back to the app, `llms.txt` and the sitemap) | `404.html`, a second Vite entry with the app's stylesheet, which GitHub Pages serves with a 404 status |
 
 `make social-card` renders the card and the icons from
 `scripts/social-card.mjs` with Playwright's Chromium; rerun it and commit the
@@ -159,7 +159,8 @@ images after changing their copy, the favicon or the design tokens. Keep the hea
 `<noscript>` summary and `llms.txt` in step with the README's feature list.
 Absolute URLs in the head point at <https://www.indrapatil.com/einbuergerungstest/>;
 Vite prefixes root-relative links with the base path. `public/` is copied
-verbatim, so `404.html` uses absolute URLs and the manifest relative ones. The
+verbatim, so the manifest uses relative URLs; `404.html` links to the app by
+its absolute URL, since it answers for any path. The
 structured data follows indrapatil.com's: the author is its `#person` node and
 the page has no `dateModified`.
 

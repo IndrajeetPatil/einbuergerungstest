@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <meta
+      name="robots"
+      content="noindex, follow"
+    />
+    <meta
+      name="color-scheme"
+      content="light dark"
+    />
+    <meta
+      name="theme-color"
+      content="#faf8f4"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg"
+    />
+    <title>Seite nicht gefunden · Page not found – Leben in Deutschland</title>
+    <!-- GitHub Pages serves this page with a real 404 status for any unknown
+         path under the app. Vite builds it with the app's stylesheet. -->
+    <link
+      rel="stylesheet"
+      href="/src/index.css"
+    />
+    <script>
+      // Dark mode before first paint, by the same rule as index.html.
+      const theme = localStorage.getItem("lid.theme");
+      document.documentElement.classList.toggle(
+        "dark",
+        theme === "dark" ||
+          (theme !== "light" &&
+            matchMedia("(prefers-color-scheme: dark)").matches),
+      );
+    </script>
+  </head>
+  <body>
+    <main class="mx-auto max-w-2xl px-6 pt-14 pb-20">
+      <p class="field-mark">Einbürgerungstest</p>
+      <h1 class="mt-2 text-title">
+        Seite nicht gefunden
+        <span class="block text-heading text-muted">Page not found</span>
+      </h1>
+      <p class="mt-4 text-lg text-muted">
+        Diese Adresse gibt es nicht. This address does not exist. The
+        Einbürgerungstest trainer is a single page; its views are reached from
+        its menu.
+      </p>
+      <ul class="mt-6 list-disc space-y-1 pl-6">
+        <li>
+          <a
+            class="text-accent underline underline-offset-4"
+            href="https://www.indrapatil.com/einbuergerungstest/"
+            >Zur App · Open the app</a
+          >
+        </li>
+        <li>
+          <a
+            class="text-accent underline underline-offset-4"
+            href="https://www.indrapatil.com/einbuergerungstest/llms.txt"
+            >llms.txt</a
+          >
+          – summary for AI assistants
+        </li>
+        <li>
+          <a
+            class="text-accent underline underline-offset-4"
+            href="https://www.indrapatil.com/einbuergerungstest/sitemap.xml"
+            >sitemap.xml</a
+          >
+        </li>
+        <li>
+          <a
+            class="text-accent underline underline-offset-4"
+            href="https://www.indrapatil.com/"
+            >indrapatil.com</a
+          >
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>

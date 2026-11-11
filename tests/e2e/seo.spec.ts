@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { z } from "zod";
 
+import { expectAccessible } from "./helpers.ts";
+
 // Search engines, AI assistants and social networks read the page without
 // running the app, so these check the static HTML and files they fetch.
 
@@ -91,6 +93,7 @@ test("ships a noindex 404 page that links back to the app", async ({
   await expect(
     page.getByRole("link", { name: "Zur App · Open the app" }),
   ).toHaveAttribute("href", CANONICAL);
+  await expectAccessible(page);
 });
 
 test.describe("without JavaScript", () => {
