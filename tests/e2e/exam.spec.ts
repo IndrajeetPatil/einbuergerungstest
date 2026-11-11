@@ -1,8 +1,27 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 import { expectAccessible, openDashboard } from "./helpers.ts";
 
 const QUESTIONS = 33;
+
+/**
+ * Answers every mock-exam question by key, cycling through the options.
+ * @param page - A page showing the first question.
+ * @param flagged - The index of a question to flag on the way, if any.
+ */
+async function answerEveryQuestion(
+  page: Page,
+  flagged?: number,
+): Promise<void> {
+  for (let index = 0; index < QUESTIONS; index += 1) {
+    await page.keyboard.press(String((index % 4) + 1));
+    if (index === flagged) {
+      await page.keyboard.press("f");
+    }
+    await page.keyboard.press("ArrowRight");
+  }
+}
 
 test("runs a mock exam from start to result", async ({ page }) => {
   await openDashboard(page);
@@ -11,13 +30,7 @@ test("runs a mock exam from start to result", async ({ page }) => {
   await expect(page.getByText("Frage 1 von 33")).toBeVisible();
   await expectAccessible(page);
 
-  for (let index = 0; index < QUESTIONS; index += 1) {
-    await page.keyboard.press(String((index % 4) + 1));
-    if (index === 2) {
-      await page.keyboard.press("f");
-    }
-    await page.keyboard.press("ArrowRight");
-  }
+  await answerEveryQuestion(page, 2);
 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toContainText("33 of 33 questions answered, 1 flagged");
@@ -47,10 +60,7 @@ test("shows wrong answers in English with the English column hidden", async ({
   await openDashboard(page, { showEnglish: false });
   await page.getByRole("button", { name: "Start mock exam" }).click();
   await expect(page.getByText("Frage 1 von 33")).toBeVisible();
-  for (let index = 0; index < QUESTIONS; index += 1) {
-    await page.keyboard.press(String((index % 4) + 1));
-    await page.keyboard.press("ArrowRight");
-  }
+  await answerEveryQuestion(page);
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Abgeben · Submit" })
