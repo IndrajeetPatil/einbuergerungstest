@@ -2,7 +2,8 @@ import type { ReactElement } from "react";
 
 /**
  * One option in German and English, as used in feedback.
- * @param props - Caption, texts, language toggle and whether it was wrong.
+ * @param props - Caption, texts, language toggle and whether to strike it
+ * through.
  * @returns The labelled pair.
  */
 function AnswerPair(
@@ -11,10 +12,10 @@ function AnswerPair(
     german: string;
     english: string;
     showEnglish: boolean;
-    struck: boolean;
+    struck?: boolean;
   }>,
 ): ReactElement {
-  const { caption, german, english, showEnglish, struck } = props;
+  const { caption, german, english, showEnglish, struck = false } = props;
   return (
     <div className="mt-3">
       <p className="folio-mark">{caption}</p>

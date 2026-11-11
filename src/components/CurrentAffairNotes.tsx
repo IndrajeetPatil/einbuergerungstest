@@ -20,7 +20,6 @@ function CurrentAffairNotes(
         german={fact.latest.de}
         english={fact.latest.en}
         showEnglish={showEnglish}
-        struck={false}
       />
       {fact.outlook === null ? null : (
         <AnswerPair
@@ -28,7 +27,6 @@ function CurrentAffairNotes(
           german={fact.outlook.de}
           english={fact.outlook.en}
           showEnglish={showEnglish}
-          struck={false}
         />
       )}
       <p className="mt-3 text-sm text-muted">

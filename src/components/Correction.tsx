@@ -26,7 +26,6 @@ function Correction(
         german={optionText(question, question.answer, "de")}
         english={optionText(question, question.answer, "en")}
         showEnglish={showEnglish}
-        struck={false}
       />
       {chosen === null ? null : (
         <AnswerPair
