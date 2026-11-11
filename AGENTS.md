@@ -17,6 +17,7 @@ Pages. Start with the [README](README.md).
 | Time-dependent answers (Aktuelles page)    | [Question data](docs/question-data.md#time-dependent-answers), `src/lib/currentAffairs.ts`                                   |
 | Quiz rules (exam draw, smart mix, mastery) | [Quiz design](docs/quiz-design.md), `src/lib/quiz.ts`, `src/lib/session.ts`                                                  |
 | Dependency, hook or Action upgrades        | [`update-deps` prompt](.github/prompts/update-deps.md)                                                                       |
+| Search, AI and social metadata             | [Development](docs/development.md#search-ai-and-social-sharing)                                                              |
 | Screenshots for a PR                       | [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md)                                             |
 
 ## Commands
@@ -34,6 +35,7 @@ Pages. Start with the [README](README.md).
 | `make fix` | Write formatting and safe lint fixes |
 | `make hooks` / `make hooks-push` | prek pre-commit / pre-push stages on all files |
 | `make data` | Rebuild `catalogue.json` and pictures (needs poppler) |
+| `make social-card` | Render `public/og-image.png` and the app icons |
 
 Every gate is listed in [docs/development.md](docs/development.md#quality-gates).
 

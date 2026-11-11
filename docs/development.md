@@ -19,7 +19,7 @@ Run `make` for the full list with descriptions.
 
 | Group | Targets |
 | --- | --- |
-| App | `start`, `serve`, `open`, `dev`, `build`, `build-pages` |
+| App | `start`, `serve`, `open`, `dev`, `build`, `build-pages`, `social-card` |
 | Quality | `qa`, `qa-js`, `qa-python`, `lint`, `typecheck`, `fallow`, `css-quality`, `file-naming`, `lint-markdown`, `spell-check`, `link-check`, `format`, `fix`, `ci` |
 | Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `test-e2e-docker` |
 | Security | `security`, `secret-scan`, `workflow-lint`, `workflow-audit`, `audit-js`, `audit-python` |
@@ -135,3 +135,35 @@ To check a Pages build locally:
 make build-pages
 BASE_PATH=/einbuergerungstest/ vp preview   # http://localhost:5179/einbuergerungstest/
 ```
+
+## Search, AI and social sharing
+
+The app renders in the browser, so everything crawlers, AI assistants and
+social networks read is static and lives in `index.html` and `public/`.
+`tests/e2e/seo.spec.ts` checks it.
+
+| What | Where |
+| --- | --- |
+| Title, description, canonical URL, `robots`, `format-detection` | `index.html` head |
+| Open Graph and Twitter card (`summary_large_image`) | `index.html` head, image `public/og-image.png` (1200 × 630) |
+| `WebApplication` and `BreadcrumbList` structured data (JSON-LD) | `index.html` head |
+| Summary for readers and crawlers without JavaScript | `<noscript>` in `index.html` |
+| [llms.txt](https://llmstxt.org/) for AI assistants | `public/llms.txt`, linked with `rel="describedby"` |
+| Sitemap | `public/sitemap.xml`, one URL: views are hash routes |
+| Web app manifest and icons | `public/site.webmanifest`, `public/icon-*.png`, `public/apple-touch-icon.png` |
+| Not-found page (`noindex`, links back to the app, `llms.txt` and the sitemap) | `404.html`, a second Vite entry with the app's stylesheet, which GitHub Pages serves with a 404 status |
+
+`make social-card` renders the card and the icons from
+`scripts/social-card.mjs` with Playwright's Chromium; rerun it and commit the
+images after changing their copy, the favicon or the design tokens. Keep the head, the
+`<noscript>` summary and `llms.txt` in step with the README's feature list.
+Absolute URLs in the head point at <https://www.indrapatil.com/einbuergerungstest/>;
+Vite prefixes root-relative links with the base path. `public/` is copied
+verbatim, so the manifest uses relative URLs; `404.html` links to the app by
+its absolute URL, since it answers for any path. The
+structured data follows indrapatil.com's: the author is its `#person` node and
+the page has no `dateModified`.
+
+Crawlers read `robots.txt` only at the domain root, which
+[indrajeetpatil.github.io](https://github.com/IndrajeetPatil/indrajeetpatil.github.io)
+publishes, so this app ships none.

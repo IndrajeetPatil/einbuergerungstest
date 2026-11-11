@@ -9,6 +9,7 @@ exclude_path = [
   "src/data",
   # Vite resolves its root-relative asset links at build time.
   "index.html",
+  "404.html",
 ]
 
 exclude = [
@@ -16,7 +17,6 @@ exclude = [
   "^http://localhost",
   "^http://127\\.0\\.0\\.1",
   # Private repository links resolve only for signed-in collaborators.
-  "^https://github\\.com/IndrajeetPatil/einbuergerungstest",
   "^https://github\\.com/IndrajeetPatil/indrajeetpatil\\.github\\.io",
   # The published app exists only once the Pages workflow has deployed main.
   "^https://www\\.indrapatil\\.com/einbuergerungstest",
