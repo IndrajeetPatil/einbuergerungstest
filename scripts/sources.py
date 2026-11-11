@@ -131,9 +131,13 @@ def _download(url: str, path: Path) -> None:
         path.write_bytes(response.read())
 
 
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def verify_pdf(pdf: Path, expected: str = PDF_SHA256) -> None:
     """Stop when the catalogue PDF is not the pinned edition."""
-    if hashlib.sha256(pdf.read_bytes()).hexdigest() != expected:
+    if _sha256(pdf) != expected:
         msg = (
             "The BAMF PDF changed (SHA-256 mismatch): a new catalogue edition was probably "
             "published. Review it, then update EDITION, PDF_SHA256 and the pinned sources."
@@ -143,7 +147,7 @@ def verify_pdf(pdf: Path, expected: str = PDF_SHA256) -> None:
 
 def verify_photo(qid: str, path: Path, expected: str) -> None:
     """Stop when a replacement photo is not the pinned file."""
-    if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+    if _sha256(path) != expected:
         msg = (
             f"{qid}: the replacement photo changed (SHA-256 mismatch). Check it still shows "
             "the scene and carries the same licence, then update its hash in photos.py."

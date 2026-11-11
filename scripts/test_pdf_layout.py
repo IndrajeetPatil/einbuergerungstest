@@ -20,7 +20,7 @@ LAYOUT = """<html xmlns="http://www.w3.org/1999/xhtml"><body><doc>
 
 
 def question(num: int, text: str) -> OfficialQuestion:
-    return OfficialQuestion(f"g{num}", "g", num, 1, text, "", ("a", "b", "c", "d"))
+    return OfficialQuestion(f"g{num}", num, 1, text, "", ("a", "b", "c", "d"))
 
 
 def test_parses_lines_sorted_from_top() -> None:

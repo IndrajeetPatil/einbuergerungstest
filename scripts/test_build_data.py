@@ -13,7 +13,7 @@ lazy from build_data import (
 lazy from pdf_text import OfficialQuestion
 lazy from sources import ExplanationEntry, KeyEntry
 
-OFFICIAL: Final = OfficialQuestion("g9", "g", 9, 3, "Was gilt?", "", ("ja", "nein", "nie", "oft"))
+OFFICIAL: Final = OfficialQuestion("g9", 9, 3, "Was gilt?", "", ("ja", "nein", "nie", "oft"))
 KEY: Final = KeyEntry("g9", "g", "Was gilt?", ("ja", "nein", "nie", "oft"), 0, has_picture=False)
 
 
@@ -47,7 +47,7 @@ def test_document_lists_all_sixteen_states() -> None:
 
 
 def test_third_party_photos_need_a_free_replacement() -> None:
-    credited = OfficialQuestion("g9", "g", 9, 3, "Was zeigt das Bild?", "© Agentur", KEY.options)
+    credited = OfficialQuestion("g9", 9, 3, "Was zeigt das Bild?", "© Agentur", KEY.options)
     pictured = KeyEntry("g9", "g", KEY.question, KEY.options, 0, has_picture=True)
     assert picture_problems(pictured, credited, found=True) == [
         "g9: third-party photo (© Agentur) has no entry in photos.py",

@@ -34,7 +34,6 @@ def test_parses_general_and_state_questions_with_pages() -> None:
     assert parsed == {
         "g1": OfficialQuestion(
             qid="g1",
-            section="g",
             num=1,
             page=1,
             question=(
@@ -50,7 +49,6 @@ def test_parses_general_and_state_questions_with_pages() -> None:
         ),
         "BE1": OfficialQuestion(
             qid="BE1",
-            section="BE",
             num=1,
             page=2,
             question="Welches Wappen gehört zum Bundesland Berlin?",
