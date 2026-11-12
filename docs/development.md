@@ -4,7 +4,7 @@
 
 | Tool | Why |
 | --- | --- |
-| Node 26 and [Vite+](https://viteplus.dev) (`vp`) | Runtime and toolchain; `vp` provisions pnpm |
+| Node 26 and [Vite+](https://viteplus.dev) (`vp`) | Runtime and toolchain; `scripts/install-vp.sh` installs the pinned `vp`, which provisions Node and pnpm |
 | [uv](https://docs.astral.sh/uv/) | Python data pipeline and its tools (Ruff, ty, pyrefly, pytest) |
 | poppler (`pdftotext`, `pdftoppm`) | Only for `make data` |
 | [prek](https://github.com/j178/prek) | Git hooks (run through `uv tool run`) |
