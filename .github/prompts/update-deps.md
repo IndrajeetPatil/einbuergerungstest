@@ -29,29 +29,18 @@ rumdl, zizmor, actionlint and gitleaks versions in `makefiles/`.
 
 ## Agent browser CLI and skill
 
-Update the globally installed `agent-browser` CLI and its project skill as one
-item. These agent tools stay out of `make setup`, `package.json` and the
-lockfiles. Run the Skills CLI through `vp dlx`: `npx` refuses to run here
-because `devEngines` requires pnpm.
+The `agent-browser` CLI and its vendored skill are agent tools, kept out of the
+project dependencies and lockfiles:
 
-- Compare `agent-browser --version` and `command -v agent-browser` with
-  `npm view agent-browser version`. If the CLI is behind, run
-  `npm install --global agent-browser@<version>` and verify the resolved
-  command and version. If another package manager's older binary shadows it,
-  update or unlink that copy so the intended version resolves first on `PATH`.
-- Check for skill updates with `vp dlx skills@1.8.1 check`. Keep the Skills CLI
-  pinned to a reviewed version in every command, never a mutable `latest` tag.
-  If `npm view skills version` reports a newer release, review its official
-  changelog and update every `skills@<version>` reference in this prompt
-  together.
-- If `agent-browser` has an upstream update, review any local edits first, then
-  install it with `vp dlx skills@1.8.1 update agent-browser --project --yes`;
-  if it is current, leave its files and lock entry unchanged. Never edit the
-  `skills-lock.json` hash by hand. Confirm `check` reports the project skills
-  current, `vp dlx skills@1.8.1 list --json` reports `agent-browser` as
-  tracked, and review `agent-browser skills list` after updating the CLI.
-- Keep the locked `SKILL.md` byte-for-byte aligned with upstream; `.rumdl.toml`
-  excludes it for that reason, so never reformat it.
+- Update the CLI with `vp update -g agent-browser`; `vp list -g` shows its
+  version.
+- Run the Skills CLI as `vp dlx skills@1.8.1` (`npx` fails where `devEngines`
+  requires pnpm). If `npm view skills version` is newer, review its changelog
+  and bump the pin here.
+- If `check` reports an upstream update, review any local edits, then run
+  `update agent-browser --project --yes`; never edit `skills-lock.json` by hand.
+  Keep `SKILL.md` byte-for-byte upstream: if rumdl flags it, exclude it in
+  `.rumdl.toml` rather than reformat it.
 
 ## Rules
 
