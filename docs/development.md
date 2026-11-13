@@ -35,7 +35,7 @@ Run `make` for the full list with descriptions.
 
 ## Quality gates
 
-The bar matches [indrajeetpatil.github.io](https://github.com/IndrajeetPatil/indrajeetpatil.github.io): every rule on,
+The bar matches the [indrapatil.com](https://www.indrapatil.com/) website's: every rule on,
 with narrow exceptions explained next to their configuration.
 
 | Gate | Tool and policy | Make target |
@@ -114,7 +114,7 @@ upgrading all of them.
 ## Design
 
 The interface follows [DESIGN.md](../DESIGN.md), which extends the
-[indrapatil.com DESIGN.md](https://github.com/IndrajeetPatil/indrajeetpatil.github.io/blob/main/DESIGN.md):
+design of [indrapatil.com](https://www.indrapatil.com/):
 warm paper background, Fraunces headings, Hanken Grotesk text, one teal accent
 for interaction, flat surfaces without shadows, in light and dark modes.
 
@@ -165,5 +165,5 @@ structured data follows indrapatil.com's: the author is its `#person` node and
 the page has no `dateModified`.
 
 Crawlers read `robots.txt` only at the domain root, which
-[indrajeetpatil.github.io](https://github.com/IndrajeetPatil/indrajeetpatil.github.io)
+[indrapatil.com](https://www.indrapatil.com/)
 publishes, so this app ships none.

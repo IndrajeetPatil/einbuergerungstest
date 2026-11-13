@@ -4,7 +4,7 @@ import { defineConfig } from "vite-plus";
 
 // This file configures Vite+ as a whole: the dev and build servers, the
 // formatter (Oxfmt), the linter (Oxlint), the unit tests (Vitest) and the
-// task runner. The lint policy mirrors indrajeetpatil.github.io: every Oxlint
+// task runner. The lint policy mirrors the indrapatil.com website: every Oxlint
 // category is an error, with narrow, explained exceptions only.
 
 const isCI = Boolean(process.env["CI"]);

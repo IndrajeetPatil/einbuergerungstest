@@ -93,6 +93,9 @@ These are not caught by the gates, or the reason matters when they fire.
   up, rebase onto `origin/main` and push with `--force-with-lease`; GitHub's
   "Update branch" adds a merge commit that fails the commit check.
 - Open pull requests ready for review, not as drafts.
+- This repository is public. Never name or link a private repository in PR
+  titles, bodies or comments, commit messages, code or docs; describe what
+  changed, not where it came from.
 - A PR that changes frontend source (`src/`, `index.html`), even a
   behaviour-only refactor, needs screenshots from the
   [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md),
