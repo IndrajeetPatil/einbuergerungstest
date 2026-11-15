@@ -7,6 +7,7 @@ type View =
   | { name: "dashboard" }
   | { name: "catalogue" }
   | { name: "current" }
+  | { name: "privacy" }
   | { name: "session" }
   | { name: "results"; summary: SessionSummary; session: ActiveSession };
 
@@ -14,6 +15,7 @@ type View =
 const HASH_VIEWS: Readonly<Partial<Record<string, View>>> = {
   "#katalog": { name: "catalogue" },
   "#aktuell": { name: "current" },
+  "#datenschutz": { name: "privacy" },
 };
 
 function viewFromHash(): View {

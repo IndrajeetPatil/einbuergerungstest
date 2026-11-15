@@ -48,7 +48,8 @@ the same static files run locally and on GitHub Pages. Export a backup from the
 dashboard to keep your progress or move it to another browser. The published
 site counts visits with Google Analytics, like the rest of
 [indrapatil.com](https://www.indrapatil.com/privacy/); your answers and
-progress are never sent.
+progress are never sent. The app's **Datenschutz · Privacy** page explains
+this in plain words.
 
 ![From source to study session: Vite+ builds static files for GitHub Pages or local preview. Pull requests run prek and CI checks; the Pages workflow deploys from main. Configuration is in Vite+, package.json, and GitHub Actions.](docs/images/build-deployment.webp)
 

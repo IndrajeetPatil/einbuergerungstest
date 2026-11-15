@@ -61,6 +61,23 @@ test("lists time-dependent answers with the last check", async ({ page }) => {
   await expectAccessible(page);
 });
 
+test("explains where progress is kept", async ({ page }) => {
+  await openDashboard(page);
+  await page
+    .getByRole("link", { name: "Datenschutz · Privacy" })
+    .first()
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Datenschutz · Privacy" }),
+  ).toBeVisible();
+  await expect(page.getByText(/never uploaded/u)).toBeVisible();
+  await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+    "href",
+    "https://github.com/IndrajeetPatil/einbuergerungstest/issues",
+  );
+  await expectAccessible(page);
+});
+
 test("follows the system theme until dark mode is toggled", async ({
   page,
 }) => {

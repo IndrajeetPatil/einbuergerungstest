@@ -2,6 +2,8 @@ import type { ReactElement } from "react";
 
 import { catalogue } from "#lib/catalogue.ts";
 
+import { ExternalLink } from "./ExternalLink.tsx";
+
 /**
  * Credits for the question data and the licence.
  * @returns The footer.
@@ -11,45 +13,26 @@ function SourcesFooter(): ReactElement {
     <footer className="mt-16 border-t border-line pt-6 text-sm text-muted">
       <p>
         Questions and answers:{" "}
-        <a
-          className="link"
-          href={catalogue.source.url}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <ExternalLink href={catalogue.source.url}>
           BAMF Gesamtfragenkatalog
-        </a>
+        </ExternalLink>
         , edition {catalogue.source.edition}. English translations and answer
         key via{" "}
-        <a
-          className="link"
-          href="https://github.com/lezeroq/lebenindeutschland"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <ExternalLink href="https://github.com/lezeroq/lebenindeutschland">
           lezeroq/lebenindeutschland
-        </a>
+        </ExternalLink>
         ; explanations via{" "}
-        <a
-          className="link"
-          href="https://github.com/abdullahbutt/leben-in-deutschland-test"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <ExternalLink href="https://github.com/abdullahbutt/leben-in-deutschland-test">
           abdullahbutt/leben-in-deutschland-test
-        </a>{" "}
-        (both MIT). This app is MIT-licensed open-source software; your progress
-        stays in this browser and is never uploaded. The published site counts
-        visits with Google Analytics, as described in the{" "}
+        </ExternalLink>{" "}
+        (both MIT). This app is free, MIT-licensed open-source software; see{" "}
         <a
           className="link"
-          href="https://www.indrapatil.com/privacy/"
-          target="_blank"
-          rel="noreferrer"
+          href="#datenschutz"
         >
-          privacy notice
-        </a>
-        .
+          Datenschutz · Privacy
+        </a>{" "}
+        for what happens to your data.
       </p>
     </footer>
   );
