@@ -1,10 +1,11 @@
-// The colour theme: applied to <html>, remembered once chosen, and following
-// the system setting until then.
+// The colour theme: applied to <html>, remembered once chosen, following the
+// system setting until then and kept in step across open tabs.
 import { useCallback, useEffect, useState } from "react";
 
 import type { Theme } from "./schemas.ts";
 import {
   DARK_QUERY,
+  STORAGE_KEY,
   otherTheme,
   preferredTheme,
   saveTheme,
@@ -41,9 +42,17 @@ function useTheme(): { dark: boolean; toggle: () => void } {
         setTheme(systemTheme());
       }
     };
+    // Another tab changed the stored choice.
+    const sync = (event: StorageEvent): void => {
+      if (event.key === STORAGE_KEY || event.key === null) {
+        setTheme(preferredTheme());
+      }
+    };
     media.addEventListener("change", follow);
+    globalThis.addEventListener("storage", sync);
     return () => {
       media.removeEventListener("change", follow);
+      globalThis.removeEventListener("storage", sync);
     };
   }, []);
   const toggle = useCallback(() => {

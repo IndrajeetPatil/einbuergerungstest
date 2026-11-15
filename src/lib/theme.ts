@@ -33,11 +33,17 @@ function preferredTheme(): Theme {
 }
 
 /**
- * Remembers the reader's choice across reloads.
+ * Remembers the reader's choice across reloads. Choosing what the system
+ * already shows undoes the override, so the app follows the system again
+ * rather than pinning that theme against later system changes.
  * @param theme - The chosen theme.
  */
 function saveTheme(theme: Theme): void {
-  localStorage.setItem(STORAGE_KEY, theme);
+  if (theme === systemTheme()) {
+    localStorage.removeItem(STORAGE_KEY);
+  } else {
+    localStorage.setItem(STORAGE_KEY, theme);
+  }
 }
 
 /**
@@ -51,6 +57,7 @@ function otherTheme(theme: Theme): Theme {
 
 export {
   DARK_QUERY,
+  STORAGE_KEY,
   storedTheme,
   systemTheme,
   preferredTheme,
