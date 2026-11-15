@@ -6,6 +6,7 @@ import type { View } from "#lib/useView.ts";
 import { CatalogueScreen } from "./CatalogueScreen.tsx";
 import { CurrentAffairsScreen } from "./CurrentAffairsScreen.tsx";
 import { DashboardScreen } from "./DashboardScreen.tsx";
+import { PrivacyScreen } from "./PrivacyScreen.tsx";
 import { ResultsScreen } from "./ResultsScreen.tsx";
 import type { ScreenProps } from "./screenProps.ts";
 import { SessionScreen } from "./SessionScreen.tsx";
@@ -16,6 +17,7 @@ const SCREENS: Readonly<
   dashboard: DashboardScreen,
   catalogue: CatalogueScreen,
   current: CurrentAffairsScreen,
+  privacy: PrivacyScreen,
   session: SessionScreen,
   results: ResultsScreen,
 };

@@ -10,7 +10,7 @@ on GitHub Pages.
 ```mermaid
 flowchart LR
   subgraph Browser["Browser · React 19"]
-    UI["Dashboard · Quiz · Results · Catalogue · Aktuelles"]
+    UI["Dashboard · Quiz · Results · Catalogue · Aktuelles · Datenschutz"]
     Logic["lib/quiz.ts<br/>sampling, shuffling, mastery"]
     Session["lib/session.ts<br/>session state"]
     Local[("localStorage<br/>active session, theme")]
@@ -82,7 +82,7 @@ shows it in the error banner.
 | One document, changed by pure functions | Validation, judging and statistics are unit-tested without a browser; each change is one transaction |
 | Answers judged in the store, against the bundled key | Stored results and imported backups never depend on what the caller claims |
 | Active session in `localStorage`, results in IndexedDB | Reloads resume instantly; only finished evidence is permanent |
-| Hash routes (`#katalog`, `#aktuell`) | Work on GitHub Pages' subpath without a 404 fallback |
+| Hash routes (`#katalog`, `#aktuell`, `#datenschutz`) | Work on GitHub Pages' subpath without a 404 fallback |
 | Base path from `BASE_PATH` | `/` locally, `/<repository>/` on Pages; pictures use `import.meta.env.BASE_URL` |
 | Catalogue bundled as its own chunk | App code and question data cache independently |
 | Hand-drawn SVG chart | One small chart does not justify a charting library |

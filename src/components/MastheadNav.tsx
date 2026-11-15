@@ -7,6 +7,7 @@ const LINKS: readonly { view: View["name"]; href: string; text: string }[] = [
   { view: "dashboard", href: "#uebersicht", text: "Übersicht" },
   { view: "catalogue", href: "#katalog", text: "Fragenkatalog" },
   { view: "current", href: "#aktuell", text: "Aktuelles · Current affairs" },
+  { view: "privacy", href: "#datenschutz", text: "Datenschutz · Privacy" },
 ];
 
 function navClass(active: boolean): string {

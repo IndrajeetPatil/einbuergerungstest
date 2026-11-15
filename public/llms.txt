@@ -19,6 +19,7 @@ This is a static web app that runs entirely in the browser: there are no account
 - [Dashboard, mock exam and practice](https://www.indrapatil.com/einbuergerungstest/): Start a mock exam or a practice session and see progress.
 - [Question catalogue](https://www.indrapatil.com/einbuergerungstest/#katalog): The general questions and those of the chosen Bundesland, with answers and explanations, searchable by text or question number.
 - [Current affairs](https://www.indrapatil.com/einbuergerungstest/#aktuell): The latest answers to time-dependent questions, with sources.
+- [Privacy](https://www.indrapatil.com/einbuergerungstest/#datenschutz): What the app does with your data: progress stays in the browser, and visits are counted with Google Analytics.
 
 ## Optional
 
