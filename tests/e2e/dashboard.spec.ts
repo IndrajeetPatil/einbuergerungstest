@@ -79,6 +79,9 @@ test("follows the system theme until dark mode is toggled", async ({
   await expect(html).not.toHaveClass("dark");
   await toggle.click();
   await expect(html).toHaveClass("dark");
+  // Back at the system theme, nothing is pinned: it follows the system again.
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(html).not.toHaveClass("dark");
   await expectAccessible(page);
 });
 

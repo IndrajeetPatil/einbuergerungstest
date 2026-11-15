@@ -154,8 +154,10 @@ both.
 ## Dark mode
 
 - **Switching:** a `.dark` class on `<html>`, with `color-scheme: dark`. The
-  reader's choice is stored in `localStorage` (`lid.theme`); without one, the
-  app follows `prefers-color-scheme` and keeps following it live. An inline
+  reader's choice is stored in `localStorage` (`lid.theme`) only while it
+  differs from the system: toggling back to what the system shows clears it.
+  Without one, the app follows `prefers-color-scheme` and keeps following it
+  live, and open tabs pick up a change made in another. An inline
   script in `index.html` applies the same rule before first paint, so there
   is no flash of the other mode, and `theme-color` follows the page paper.
 - **Accent fills:** the accent flips from dark teal to bright teal, so text on

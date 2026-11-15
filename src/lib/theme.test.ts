@@ -26,6 +26,7 @@ beforeEach(() => {
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => store.get(key) ?? null,
     setItem: (key: string, value: string) => store.set(key, value),
+    removeItem: (key: string) => store.delete(key),
   });
   prefersDark(false);
 });
@@ -43,6 +44,27 @@ describe(preferredTheme, () => {
     store.set("lid.theme", "sepia");
     prefersDark(true);
     expect([storedTheme(), preferredTheme()]).toStrictEqual([null, "dark"]);
+  });
+});
+
+describe(saveTheme, () => {
+  test("stores a choice that differs from the system", () => {
+    saveTheme("dark");
+    expect(storedTheme()).toBe("dark");
+  });
+
+  test("keeps the choice when the system later matches it", () => {
+    saveTheme("dark");
+    prefersDark(true);
+    expect(storedTheme()).toBe("dark");
+  });
+
+  test("returns to the system when the choice matches it", () => {
+    saveTheme("dark");
+    saveTheme("light");
+    expect(storedTheme()).toBeNull();
+    prefersDark(true);
+    expect(preferredTheme()).toBe("dark");
   });
 });
 
