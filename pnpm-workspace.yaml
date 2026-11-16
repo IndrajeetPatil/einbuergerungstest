@@ -11,3 +11,8 @@ peerDependencyRules:
 permissions:
   fallow:
     skills: true
+
+# Refuse to install under a Node or pnpm older than package.json's `engines`;
+# without this pnpm only warns, so a stale local Node quietly builds the site
+# with different semantics from CI. pnpm 11+ ignores this setting in .npmrc.
+engineStrict: true

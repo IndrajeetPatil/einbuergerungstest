@@ -30,8 +30,8 @@ const FONTS = "node_modules/@fontsource-variable";
 
 /**
  * Inlines a font file as a data URL, so the page needs no file access.
- * @param path - Font file under node_modules.
- * @returns A `data:` URL for an `@font-face` rule.
+ * @param {string} path - Font file under node_modules.
+ * @returns {Promise<string>} A `data:` URL for an `@font-face` rule.
  */
 async function fontUrl(path) {
   const font = await readFile(`${FONTS}/${path}`);
@@ -112,8 +112,8 @@ const CARD_HTML = `<!doctype html>
 
 /**
  * A page that draws the favicon on a full-bleed paper background.
- * @param scale - Size of the mark relative to the icon.
- * @returns The icon page.
+ * @param {string} scale - Size of the mark relative to the icon.
+ * @returns {string} The icon page.
  */
 function iconHtml(scale) {
   return `<!doctype html>

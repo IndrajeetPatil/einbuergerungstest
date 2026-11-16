@@ -8,7 +8,14 @@ dependencies = ["pillow>=13.0.0"]
 
 [dependency-groups]
 # Tools live here, pinned by uv.lock, so their rulesets cannot change between runs.
-dev = ["pyrefly>=1.4.1", "pytest>=9.2.0", "ruff>=0.17.5", "ty>=0.0.104"]
+dev = [
+  "pyrefly>=1.4.1",
+  "pytest>=9.2.0",
+  "pytest-cov>=7.1.0",
+  "pytest-random-order>=1.2.0",
+  "ruff>=0.17.5",
+  "ty>=0.0.104",
+]
 
 [tool.uv]
 # Allow newly published dependencies immediately.
@@ -19,6 +26,14 @@ package = false
 # pytest 9 strict mode: rejects unknown config keys and markers, makes
 # unexpectedly passing xfails fail, and forbids duplicate parametrisation ids.
 strict = true
+addopts = [
+  # pytest-random-order shuffles tests on every run so order dependencies surface.
+  "--random-order",
+  "--cov=.",
+  "--cov-branch",
+  "--cov-report=term-missing",
+  "--cov-fail-under=73",
+]
 # Warnings are failures: a deprecation is exactly the early signal to act on.
 filterwarnings = ["error"]
 pythonpath = ["."]
