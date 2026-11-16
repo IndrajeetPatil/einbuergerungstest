@@ -19,7 +19,7 @@ then iterate until `make ci` passes.
 | Python              | `requires-python` in `scripts/pyproject.toml`                                              | Ruff `target-version` and ty `python-version` in the same file                              |
 | Python packages     | `cd scripts && uv lock --upgrade`, then raise the floors in `pyproject.toml`               | `scripts/uv.lock`                                                                           |
 | prek hooks          | `make hooks-update` (frozen SHAs), including `conventional-pre-commit` and `ruff-pre-commit` | —                                                                                           |
-| prek                | Latest release                                                                             | `PREK_VERSION` in `makefiles/hooks.mk`, `minimum_prek_version` in `prek.toml`, `prek-version` in `commitlint.yml` and `prek.yml` |
+| prek                | Latest release                                                                             | `PREK_VERSION` in `makefiles/hooks.mk`, `minimum_prek_version` in `prek.toml`; `commitlint.yml` and `prek.yml` install `prek-action`'s `latest-known` version in CI |
 | GitHub Actions      | Latest stable release of every action in `.github/workflows/`                              | Full commit SHA plus `# vX.Y.Z` comment                                                     |
 | Local tools         | `uv`, poppler, typos, lychee, gitleaks                                                     | `make doctor` lists the toolchain versions                                                  |
 
@@ -44,6 +44,10 @@ project dependencies and lockfiles:
 
 ## Rules
 
+- CI installs prek with `prek-version: latest-known`, the newest version in the
+  prek action's bundled checksum table, so updating the action pin also updates
+  prek. Never replace it with `latest` or a version absent from that table: the
+  action silently skips SHA256 verification for those.
 - Never reference third-party actions by floating tags (`@main`, `@v*`); pin the
   full commit SHA of the release tag and update both the SHA and the comment.
 - Do not mirror Node or pnpm versions into workflows; `setup-vp` reads

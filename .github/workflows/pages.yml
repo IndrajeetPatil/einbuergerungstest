@@ -40,10 +40,8 @@ jobs:
           node-version-file: ".node-version"
           cache: false
           cache-toolchain: false
-          run-install: false
-
-      - name: Install dependencies
-        run: vp install --frozen-lockfile
+          run-install: |
+            args: [--frozen-lockfile]
 
       # Pages serves a project site from /<repository>/.
       - name: Build
