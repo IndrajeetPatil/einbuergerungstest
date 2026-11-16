@@ -53,14 +53,6 @@ entry = "node --run file-naming"
 pass_filenames = false
 always_run = true
 
-# Staged-diff secret scan with gitleaks; CI scans full history.
-[[repos.hooks]]
-id = "gitleaks"
-name = "gitleaks (staged secret scan)"
-language = "system"
-entry = "gitleaks git --pre-commit --redact --staged --verbose"
-pass_filenames = false
-
 # Submodules are not allowed.
 [[repos.hooks]]
 id = "forbid-submodules"
