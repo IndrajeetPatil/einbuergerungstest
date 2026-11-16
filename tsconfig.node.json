@@ -10,7 +10,7 @@
       "DOM"
     ],
     "types": ["node"],
-    "skipLibCheck": true,
+    "skipLibCheck": false,
 
     /* Node 26 runs these files directly (type stripping) */
     "module": "nodenext",
@@ -22,6 +22,8 @@
 
     /* Strictest (mirrors @tsconfig/strictest) */
     "strict": true,
+    "checkJs": true,
+    "noUncheckedSideEffectImports": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
     "exactOptionalPropertyTypes": true,
@@ -36,5 +38,5 @@
     "forceConsistentCasingInFileNames": true,
     "erasableSyntaxOnly": true
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "tests"]
+  "include": ["vite.config.ts", "playwright.config.ts", "tests", "scripts"]
 }

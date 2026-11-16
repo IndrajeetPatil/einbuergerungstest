@@ -4,7 +4,7 @@
  *
  * Scores each CSS source file across three dimensions and fails if
  * maintainability or complexity drop below the configured thresholds.
- * Performance is reported but not enforced: the @import statements
+ * Performance is reported but not enforced: the CSS `@import` statements
  * required by Tailwind CSS v4 and the font packages inflate the
  * penalty at analysis time even though they are resolved at build time.
  */
@@ -54,7 +54,10 @@ for (const file of files.toSorted((left, right) =>
     { dimension: "complexity", data: complexity, note: "" },
   ];
   for (const { dimension, data, note } of rows) {
-    const threshold = THRESHOLDS[dimension];
+    const threshold =
+      dimension === "maintainability" || dimension === "complexity"
+        ? THRESHOLDS[dimension]
+        : undefined;
     const below = threshold !== undefined && data.score < threshold;
     let marker = styleText("blue", "ℹ");
     if (threshold !== undefined) {

@@ -29,7 +29,7 @@ async function startSession(
   summary: Summary | null,
   request: StartRequest,
 ): Promise<ActiveSession | null> {
-  if (summary === null || summary.settings.state === null) {
+  if (!summary?.settings.state) {
     return null;
   }
   const { state, shuffleOptions } = summary.settings;

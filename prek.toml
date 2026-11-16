@@ -53,6 +53,14 @@ entry = "node --run file-naming"
 pass_filenames = false
 always_run = true
 
+# Submodules are not allowed.
+[[repos.hooks]]
+id = "forbid-submodules"
+name = "forbid submodules"
+language = "fail"
+entry = "submodules are not allowed in this repository:"
+types = ["directory"]
+
 # Type-aware linting resolves the app's own dependencies, so this hook runs
 # against the locked node_modules from `make install`.
 [[repos.hooks]]
@@ -92,8 +100,15 @@ hooks = [
   # tsconfig files are JSONC.
   { id = "check-json", exclude = "^tsconfig(\\.\\w+)?\\.json$" },
   { id = "check-merge-conflict" },
+  { id = "check-case-conflict" },
+  { id = "check-shebang-scripts-are-executable" },
+  { id = "check-executables-have-shebangs" },
+  { id = "check-symlinks" },
+  { id = "destroyed-symlinks" },
+  { id = "check-illegal-windows-names" },
   { id = "mixed-line-ending" },
   { id = "check-added-large-files", args = ["--maxkb=1024"] },
   { id = "detect-private-key" },
   { id = "fix-byte-order-marker" },
+  { id = "no-commit-to-branch", args = ["--branch=main"] },
 ]

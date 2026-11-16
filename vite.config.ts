@@ -140,6 +140,8 @@ export default defineConfig({
       perf: "error",
       style: "error",
       restriction: "error",
+      // Vite+ pins Oxlint, so new nursery rules arrive only with an upgrade.
+      nursery: "error",
     },
     env: {
       browser: true,
@@ -160,8 +162,31 @@ export default defineConfig({
     ],
     rules: {
       "vite-plus/prefer-vite-plus-imports": "error",
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "^(vite|vitest|@vitest/[^/]+)(/|$)",
+              message: "Import from the matching vite-plus entry point.",
+            },
+          ],
+        },
+      ],
 
-      // Security: block code injection through string-evaluating escape hatches.
+      // Security: block XSS and code injection through escape hatches.
+      // DOM sinks that parse strings as HTML. React renders the markup, so no
+      // client script needs them.
+      "no-restricted-properties": [
+        "error",
+        { property: "innerHTML" },
+        { property: "outerHTML" },
+        { property: "insertAdjacentHTML" },
+        { property: "createContextualFragment" },
+        { property: "setHTMLUnsafe" },
+        { object: "document", property: "write" },
+        { object: "document", property: "writeln" },
+      ],
       "import/no-dynamic-require": ["error", { esmodule: true }],
       "no-eval": "error",
       "no-new-func": "error",
