@@ -1,6 +1,7 @@
 ##@ Git hooks
 
-# One prek version for local hooks and CI, including its built-in hooks.
+# Local prek version, including its built-in hooks. Keep it aligned with
+# prek-action's latest-known version in CI.
 PREK_VERSION := 0.5.11
 PREK := $(UV) tool run prek@$(PREK_VERSION)
 

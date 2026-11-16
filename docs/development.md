@@ -96,7 +96,7 @@ Each version has one source of truth.
 | Vite+ | `catalog` in `pnpm-workspace.yaml`, plus `VP_VERSION` and checksums in `scripts/install-vp.sh` |
 | Python and its tools | `scripts/pyproject.toml`, locked in `scripts/uv.lock` |
 | Playwright image | `.github/workflows/e2e.yml` and `makefiles/testing.mk`, matching `@playwright/test` |
-| prek | `PREK_VERSION` in `makefiles/hooks.mk`, `minimum_prek_version` in `prek.toml`, `prek-version` in the workflows |
+| prek | `PREK_VERSION` in `makefiles/hooks.mk`, `minimum_prek_version` in `prek.toml`, `prek-action`'s `latest-known` version in CI |
 | rumdl, zizmor, actionlint, gitleaks | `makefiles/quality.mk`, `makefiles/security.mk` |
 | GitHub Actions | Commit SHA plus `# vX.Y.Z` comment in each workflow |
 
@@ -107,7 +107,7 @@ upgrading all of them.
 
 | Kind | Files |
 | --- | --- |
-| Conventions | [AGENTS.md](../AGENTS.md), imported by `CLAUDE.md` |
+| Conventions | [AGENTS.md](../AGENTS.md) |
 | Skills | [`agent-browser`](../.agents/skills/agent-browser/SKILL.md), [`frontend-pr-screenshot`](../.agents/skills/frontend-pr-screenshot/SKILL.md) |
 | Prompts | [`address-review`](../.github/prompts/address-review.md), [`update-deps`](../.github/prompts/update-deps.md), [`simplify-codebase`](../.github/prompts/simplify-codebase.md), [`codex-security`](../.github/prompts/codex-security.md) |
 
