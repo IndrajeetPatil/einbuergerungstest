@@ -34,9 +34,13 @@ const SECTIONS: readonly { heading: string; body: ReactNode }[] = [
     heading: "Besuche zählen · Counting visits",
     body: (
       <>
-        Like the rest of indrapatil.com, the site counts visits with Google
-        Analytics: Google learns that the page was opened, with details such as
-        your browser and rough location, but never your answers or progress. The{" "}
+        Like the rest of{" "}
+        <ExternalLink href="https://www.indrapatil.com/">
+          indrapatil.com
+        </ExternalLink>
+        , the site counts visits with Google Analytics: Google learns that the
+        page was opened, with details such as your browser and rough location,
+        but never your answers or progress. The{" "}
         <ExternalLink href="https://www.indrapatil.com/privacy/">
           privacy notice
         </ExternalLink>{" "}
@@ -49,7 +53,12 @@ const SECTIONS: readonly { heading: string; body: ReactNode }[] = [
     body: (
       <>
         Spotted a mistake, a privacy concern, or something that does not work?
-        Open an issue on <ExternalLink href={ISSUES}>GitHub</ExternalLink>.
+        Open an issue on <ExternalLink href={ISSUES}>GitHub</ExternalLink>. If
+        you liked this application, explore{" "}
+        <ExternalLink href="https://www.indrapatil.com/experience/open-source/#applications">
+          other applications I&apos;ve built
+        </ExternalLink>
+        .
       </>
     ),
   },
