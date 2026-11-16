@@ -2,7 +2,7 @@
 
 # Pinned Playwright image for CI-identical end-to-end runs. Keep the tag and
 # digest in lockstep with @playwright/test in package.json and e2e.yml.
-PLAYWRIGHT_IMAGE := mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d
+PLAYWRIGHT_IMAGE := mcr.microsoft.com/playwright:v1.65.1-noble@sha256:1507cbfc550a63a6b7396791ca4f00df17beb56342d2447b3f106c306f525579
 
 .PHONY: test
 test: test-unit test-scripts ## Unit tests: TypeScript (Vitest) and Python (pytest)
