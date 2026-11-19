@@ -9,12 +9,12 @@ dependencies = ["pillow>=13.0.0"]
 [dependency-groups]
 # Tools live here, pinned by uv.lock, so their rulesets cannot change between runs.
 dev = [
-  "pyrefly>=1.4.1",
+  "pyrefly>=1.5.0",
   "pytest>=9.2.0",
   "pytest-cov>=7.1.0",
   "pytest-random-order>=1.2.0",
   "ruff>=0.17.5",
-  "ty>=0.0.104",
+  "ty>=0.0.107",
 ]
 
 [tool.uv]

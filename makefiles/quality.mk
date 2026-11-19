@@ -1,6 +1,6 @@
 ##@ Quality
 
-RUMDL_VERSION := 0.3.4
+RUMDL_VERSION := 0.3.5
 
 .PHONY: qa
 qa: qa-js qa-python lint-markdown spell-check ## Run every static quality gate (no network)
