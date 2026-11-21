@@ -24,7 +24,7 @@ Pick **one** simplification in one of these categories:
 Prefer changes that delete code, remove branching, collapse indirection or
 eliminate duplicated logic. Do not refactor for aesthetics alone.
 
-Apply these simplification categories to both source code and artifacts
+Apply these simplification categories to both source code and artefacts
 relevant for agentic engineering: check whether changes in CLIs or dependencies
 allow simplifying `AGENTS.md`, agentic skills (under `.agents/skills/`), or
 their referenced assets by removing obsolete workarounds, redundant
@@ -56,7 +56,7 @@ instructions, or superseded steps.
 2. Confirm a newer dependency feature or a proven package removes it.
 3. Implement the smallest coherent change that fully replaces the old approach.
 4. Remove obsolete code, comments and tests, keeping behaviour-focused coverage,
-   and update or simplify corresponding agentic engineering artifacts
+   and update or simplify corresponding agentic engineering artefacts
    (`AGENTS.md`, skills, or skill assets) affected by the change.
 5. Validate with the narrowest checks first, then `make ci`, `make hooks` and
    `make hooks-push`. For UI changes, click through the app in a fresh browser
