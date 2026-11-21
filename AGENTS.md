@@ -101,11 +101,16 @@ These are not caught by the gates, or the reason matters when they fire.
   [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md),
   checked to render on the PR.
 - The task ends at the merge, not at opening the PR. After each push, fix
-  every failing workflow, then get a Codex review of the current head:
-  comment `@codex review`, fix merited findings, and reply to and resolve the
-  threads you addressed. Repeat until every workflow passes and Codex gives
-  the current head a thumbs-up with no unresolved findings.
-- If Codex reports exhausted usage, stop requesting reviews, leave the PR
-  open and report it; no other reviewer or silence counts as approval.
+  every failing workflow. Codex reviews every PR automatically and decides
+  itself whether later pushes need another review, so never comment
+  `@codex review`. Fix merited findings, and reply to and resolve the threads
+  you addressed. Repeat until every workflow passes and Codex gives a
+  thumbs-up with no unresolved findings.
+- If Codex reports exhausted usage, leave the PR open and report it; no other
+  reviewer or silence counts as approval. Once usage refreshes, comment
+  `@codex review` once; only this case needs the comment.
+- Never write `@codex` anywhere else in a PR title, body, or comment, not
+  even inside backticks: Codex treats any mention as a task request and skips
+  its automatic review.
 - Then recheck the head, checks and threads, and squash-merge with
   `gh pr merge --squash --match-head-commit <sha>`.
