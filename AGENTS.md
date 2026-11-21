@@ -109,5 +109,8 @@ These are not caught by the gates, or the reason matters when they fire.
 - If Codex reports exhausted usage, leave the PR open and report it; no other
   reviewer or silence counts as approval. Once usage refreshes, comment
   `@codex review` once; only this case needs the comment.
+- Never write `@codex` anywhere else in a PR title, body, or comment, not
+  even inside backticks: Codex treats any mention as a task request and skips
+  its automatic review.
 - Then recheck the head, checks and threads, and squash-merge with
   `gh pr merge --squash --match-head-commit <sha>`.
