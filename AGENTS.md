@@ -86,31 +86,50 @@ These are not caught by the gates, or the reason matters when they fire.
 
 ## Pull requests
 
-- Commit messages and PR titles are Conventional Commits. Keep the PR title
-  and body in sync with the net diff.
-- `main` is protected: squash merges of pull requests whose every workflow
-  passes on a branch up to date with `main`. Never rewrite `main`. To catch
-  up, rebase onto `origin/main` and push with `--force-with-lease`; GitHub's
-  "Update branch" adds a merge commit that fails the commit check.
-- Open pull requests ready for review, not as drafts.
+Follow these rules without relying on any instructions outside this
+repository:
+
+- Write every commit message and PR title as a Conventional Commit,
+  `type(scope): description`, lowercase and imperative, with an allowed type
+  (`build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`,
+  `revert`, `style`, `test`). Keep the PR title and body in sync with the
+  net diff.
+
+- Open every PR ready for review with `gh pr create`, never as a draft.
+
+- Never add agent or tool attribution to commits, PRs, or comments.
+
 - This repository is public. Never name or link a private repository in PR
   titles, bodies or comments, commit messages, code or docs; describe what
   changed, not where it came from.
+
 - A PR that changes frontend source (`src/`, `index.html`), even a
   behaviour-only refactor, needs screenshots from the
   [`frontend-pr-screenshot` skill](.agents/skills/frontend-pr-screenshot/SKILL.md),
   checked to render on the PR.
-- The task ends at the merge, not at opening the PR. After each push, fix
-  every failing workflow. Codex reviews every PR automatically and decides
-  itself whether later pushes need another review, so never comment
-  `@codex review`. Fix merited findings, and reply to and resolve the threads
-  you addressed. Repeat until every workflow passes and Codex gives a
-  thumbs-up with no unresolved findings.
+
+- After opening or pushing, wait for hosted CI to finish. Inspect failed jobs,
+  fix the cause, run the local checks (`make ci` and `make hooks`), push,
+  and repeat. Skipped, queued, or failing required checks are not success.
+
+- If an automatic AI review (Codex, for the owner) runs on the PR, wait for
+  its result instead of requesting one. Fix merited findings, reply to and
+  resolve addressed threads, and continue until the review approves the
+  current head with no unresolved findings. Never write `@codex` anywhere in
+  a PR, even in backticks: it cancels the automatic review. Say "a Codex
+  review request" instead.
+
 - If Codex reports exhausted usage, leave the PR open and report it; no other
   reviewer or silence counts as approval. Once usage refreshes, comment
   `@codex review` once; only this case needs the comment.
-- Never write `@codex` anywhere else in a PR title, body, or comment, not
-  even inside backticks: Codex treats any mention as a task request and skips
-  its automatic review.
-- Then recheck the head, checks and threads, and squash-merge with
-  `gh pr merge --squash --match-head-commit <sha>`.
+
+- Once CI is green and the review gate is met, squash-merge, then verify the
+  merged state. Recheck the head, threads, and checks immediately before
+  merging, and never bypass branch protections.
+
+- Update a PR branch from `main` only to resolve conflicts or pick up a change
+  the PR depends on, never just to bring it up to date. To catch up, rebase
+  onto `origin/main` and push with `--force-with-lease`.
+
+- Report local validation, hosted CI, review, and merge state separately. If
+  an external blocker stops completion, leave the PR open and say so.
