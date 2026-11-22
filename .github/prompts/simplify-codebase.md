@@ -47,6 +47,9 @@ instructions, or superseded steps.
 - Keep the exam format, answer judging in `src/lib/progress.ts`, the data cross-checks in
   `scripts/build_data.py`, the quality gates and the DESIGN.md rules intact.
 - Do not add a dependency to replace small, straightforward code.
+- Do not force a simplification if none is available: if the codebase is
+  already in an excellent condition with no clear liabilities to remove, report
+  that and stop.
 - Keep the change to one coherent theme. If no safe candidate exists, report
   why and stop.
 
