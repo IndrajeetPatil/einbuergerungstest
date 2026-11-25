@@ -68,7 +68,10 @@ export default defineConfig({
   // run against the current tree.
   run: {
     tasks: {
-      check: { command: "vp check --deny-warnings", cache: false },
+      check: {
+        command: "vp check --deny-warnings --continue-on-error",
+        cache: false,
+      },
       "test:unit": { command: "vp test --run --coverage", cache: false },
       fallow: {
         command: "fallow --fail-on-issues --coverage coverage",
