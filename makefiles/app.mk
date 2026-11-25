@@ -58,7 +58,7 @@ doctor: ## Show toolchain versions
 
 .PHONY: clean
 clean: ## Remove build output, reports and caches
-	rm -rf dist coverage .fallow playwright-report test-results .cache node_modules/.vite node_modules/.tmp
+	rm -rf dist coverage .fallow .lighthouseci playwright-report test-results .cache node_modules/.vite node_modules/.tmp
 
 .PHONY: distclean
 distclean: clean ## Also remove node_modules and the Python environment

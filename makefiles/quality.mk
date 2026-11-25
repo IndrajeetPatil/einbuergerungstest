@@ -68,4 +68,4 @@ link-check: ## Check links in Markdown and sources with lychee (network)
 	GITHUB_TOKEN="$${GITHUB_TOKEN:-$$(gh auth token 2>/dev/null || true)}" lychee --no-progress .
 
 .PHONY: ci
-ci: qa test-scripts build ## Everything the pull-request workflows run, except E2E and security
+ci: qa test-scripts build ## Everything the pull-request workflows run, except E2E, Lighthouse, and security
