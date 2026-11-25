@@ -28,6 +28,7 @@ The data pipeline needs Python 3.15 through uv. Then run `make install` and
 | --- | --- |
 | `make ci` | Before every push: every static gate, unit tests and the build |
 | `make test-e2e` | For UI changes: Playwright with axe audits |
+| `make lighthouse` | For UI, asset, or `index.html` changes: Lighthouse category and Web Vitals gates |
 | `make hooks` and `make hooks-push` | Before opening a pull request |
 | `make security` | When workflows or dependencies change |
 | `make link-check` | When links change |

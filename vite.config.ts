@@ -16,6 +16,7 @@ const GENERATED = [
   "data/**",
   ".cache/**",
   ".fallow/**",
+  ".lighthouseci/**",
   "playwright-report/**",
   "test-results/**",
 ];
@@ -79,6 +80,9 @@ export default defineConfig({
         dependsOn: ["build"],
         cache: false,
       },
+      // `make lighthouse` builds for GitHub Pages first, so the audit runs
+      // against the deployed base path.
+      lighthouse: { command: "vp dlx @lhci/cli@0.16.1 autorun", cache: false },
       build: { command: "vp build", cache: false },
     },
   },

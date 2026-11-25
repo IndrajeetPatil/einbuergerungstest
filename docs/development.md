@@ -21,7 +21,7 @@ Run `make` for the full list with descriptions.
 | --- | --- |
 | App | `start`, `serve`, `open`, `dev`, `build`, `build-pages`, `social-card` |
 | Quality | `qa`, `qa-js`, `qa-python`, `lint`, `lint-python`, `typecheck`, `typecheck-python`, `typecoverage-python`, `fallow`, `css-quality`, `file-naming`, `lint-markdown`, `spell-check`, `link-check`, `format`, `fix`, `ci` |
-| Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `test-e2e-docker` |
+| Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `test-e2e-docker`, `lighthouse` |
 | Security | `security`, `secret-scan`, `secret-scan-ci`, `workflow-lint`, `workflow-audit`, `audit-js`, `audit-python` |
 | Hooks | `hooks-install`, `hooks`, `hooks-push`, `hooks-update` |
 | Data | `data`, `data-refresh` |
@@ -31,6 +31,7 @@ Run `make` for the full list with descriptions.
 | --- | --- |
 | 5178 | `make dev` (hot reload) |
 | 5179 | `make start` / `make serve` (production build) |
+| 5189 | `make lighthouse` (Pages build at `/einbuergerungstest/`) |
 | 5199 | End-to-end tests and screenshots (fresh browser storage per test) |
 
 ## Quality gates
@@ -52,6 +53,7 @@ with narrow exceptions explained next to their configuration.
 | Python types | ty with every rule; pyrefly 100% type coverage | `typecheck-python`, `typecoverage-python` |
 | Python tests | pytest strict mode, warnings as errors | `test-scripts` |
 | End to end | Playwright on desktop and mobile, axe WCAG 2.2 AA audit of every screen | `test-e2e` |
+| Lighthouse | Lighthouse CI on the Pages build at its base path, five mobile-throttled runs with the median asserted: performance ≥ 90; accessibility, best practices, SEO, and agentic browsing 100; LCP ≤ 4 s, CLS ≤ 0.1, and TBT ≤ 200 ms | `lighthouse` |
 | Markdown | rumdl | `lint-markdown` |
 | Spelling | typos, British English | `spell-check` |
 | Links | lychee | `link-check` |
@@ -60,7 +62,8 @@ with narrow exceptions explained next to their configuration.
 | Dependencies | pnpm audit, uv audit | `audit-js`, `audit-python` |
 
 `make ci` runs everything the pull-request workflows run except end-to-end
-tests and security, which have their own targets.
+tests, Lighthouse, and security, which have their own targets. If Lighthouse
+fails, fix the page, never the threshold.
 
 ## Git workflow
 
@@ -98,6 +101,7 @@ Each version has one source of truth.
 | Playwright image | `.github/workflows/e2e.yml` and `makefiles/testing.mk`, matching `@playwright/test` |
 | prek | `PREK_VERSION` in `makefiles/hooks.mk`, `minimum_prek_version` in `prek.toml`, `prek-action`'s `latest-known` version in CI |
 | rumdl, zizmor, actionlint, gitleaks | `makefiles/quality.mk`, `makefiles/security.mk` |
+| Lighthouse CI (`@lhci/cli`) | `lighthouse` task in `vite.config.ts` |
 | GitHub Actions | Commit SHA plus `# vX.Y.Z` comment in each workflow |
 
 The [`update-deps` prompt](../.github/prompts/update-deps.md) walks through

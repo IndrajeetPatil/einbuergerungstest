@@ -75,3 +75,9 @@ jobs:
 
       - name: Production build
         run: make build
+
+      # Builds for GitHub Pages and audits that build at its base path. The
+      # runner's preinstalled Chrome runs Lighthouse; the median report is
+      # uploaded to temporary public storage and linked in the log.
+      - name: Lighthouse (performance, accessibility, best practices, SEO, and agentic browsing)
+        run: make lighthouse

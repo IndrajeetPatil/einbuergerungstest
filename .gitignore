@@ -41,6 +41,7 @@ coverage/
 scripts/.coverage
 scripts/.coverage.*
 .fallow/
+.lighthouseci/
 playwright-report/
 test-results/
 .ruff_cache/

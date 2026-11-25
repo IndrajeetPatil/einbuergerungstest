@@ -25,7 +25,8 @@ then iterate until `make ci` passes.
 
 Also keep the Playwright image tag and digest in `.github/workflows/e2e.yml` and
 `makefiles/testing.mk` in lockstep with `@playwright/test`, and check the pinned
-rumdl, zizmor, actionlint and gitleaks versions in `makefiles/`.
+rumdl, zizmor, actionlint and gitleaks versions in `makefiles/`, and the
+`@lhci/cli` version in the `lighthouse` task in `vite.config.ts`.
 
 ## Agent browser CLI and skill
 
