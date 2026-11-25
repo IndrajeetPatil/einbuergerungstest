@@ -1,53 +1,18 @@
-name: Hooks
+name: prek
 
-# The pre-commit hooks on every tracked file, on pull requests only.
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
 
-defaults:
-  run:
-    shell: bash
-
+# Distinct from the called workflow's own group, which would otherwise
+# deadlock with this one.
 concurrency:
-  group: prek-${{ github.ref }}
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-env:
-  PREK_COLOR: always
-
 jobs:
-  hooks:
-    name: prek hooks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install Vite+
-        uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
-        with:
-          node-version-file: ".node-version"
-          cache: true
-          cache-toolchain: true
-          run-install: false
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-
-      - name: Install dependencies
-        run: make install
-
-      - name: Run pre-commit hooks
-        uses: j178/prek-action@7b101f8338a08d2bd6fdb3625e4e7692428763a3 # v3.1.1
-        with:
-          # Newest prek in this action revision's SHA256 table, so every
-          # download stays checksum-verified and moves with the action pin.
-          prek-version: latest-known
-          extra-args: --all-files --stage pre-commit
+  prek:
+    uses: IndrajeetPatil/workflows/.github/workflows/prek-web-app.yml@main
