@@ -113,7 +113,7 @@ upgrading all of them.
 | --- | --- |
 | Conventions | [AGENTS.md](../AGENTS.md) |
 | Skills | [`agent-browser`](../.agents/skills/agent-browser/SKILL.md), [`frontend-pr-screenshot`](../.agents/skills/frontend-pr-screenshot/SKILL.md) |
-| Prompts | [`address-review`](../.github/prompts/address-review.md), [`update-deps`](../.github/prompts/update-deps.md), [`simplify-codebase`](../.github/prompts/simplify-codebase.md), [`codex-security`](../.github/prompts/codex-security.md) |
+| Prompts | [`address-review`](../.github/prompts/address-review.md), [`update-deps`](../.github/prompts/update-deps.md), [`simplify-codebase`](../.github/prompts/simplify-codebase.md) |
 
 ## Design
 
