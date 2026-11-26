@@ -89,7 +89,7 @@ export default defineConfig({
           "BASE_PATH=/einbuergerungstest/ vp build --logLevel warn && vp dlx --silent @lhci/cli@0.16.1 collect && vp dlx --silent @lhci/cli@0.16.1 assert",
         cache: false,
       },
-      build: { command: "vp build", cache: false },
+      build: { command: "vp build --logLevel warn", cache: false },
     },
   },
   test: {
