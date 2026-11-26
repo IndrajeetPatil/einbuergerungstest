@@ -87,7 +87,7 @@ export default defineConfig({
       // against the deployed base path.
       lighthouse: {
         command:
-          "vp build --logLevel warn && vp dlx --silent @lhci/cli@0.16.1 collect && vp dlx --silent @lhci/cli@0.16.1 assert",
+          "BASE_PATH=/einbuergerungstest/ vp build --logLevel warn && vp dlx --silent @lhci/cli@0.16.1 collect && vp dlx --silent @lhci/cli@0.16.1 assert",
         cache: false,
       },
       build: { command: "vp build", cache: false },
