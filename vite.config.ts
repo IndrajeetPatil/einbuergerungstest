@@ -85,7 +85,11 @@ export default defineConfig({
       },
       // `make lighthouse` builds for GitHub Pages first, so the audit runs
       // against the deployed base path.
-      lighthouse: { command: "vp dlx @lhci/cli@0.16.1 autorun", cache: false },
+      lighthouse: {
+        command:
+          "vp dlx --silent @lhci/cli@0.16.1 collect && vp dlx --silent @lhci/cli@0.16.1 assert",
+        cache: false,
+      },
       build: { command: "vp build", cache: false },
     },
   },

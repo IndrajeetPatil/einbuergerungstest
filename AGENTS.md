@@ -38,6 +38,14 @@ Fix failures rather than weakening a check: coverage floors only rise, and an
 exception is narrow, commented and only for a rule that contradicts another
 or forbids a core idiom. Never bypass hooks unless the user asks.
 
+## Lighthouse
+
+Keep audits in a self-contained `lighthouse.yml` workflow named `Lighthouse`.
+Exclude privacy pages, use native LHCI assertion output for coloured values,
+and retain report artefacts after failures. Cache dependencies and the exact
+Node/Vite+ toolchain, but always collect fresh measurements. Do not introduce
+a shared action, reusable Lighthouse workflow, or custom reporter.
+
 ## Invariants
 
 These are not caught by the gates, or the reason matters when they fire.

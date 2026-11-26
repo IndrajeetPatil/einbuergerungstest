@@ -65,13 +65,22 @@ with narrow exceptions explained next to their configuration.
 tests, Lighthouse, and security, which have their own targets. If Lighthouse
 fails, fix the page, never the threshold.
 
+The self-contained `Lighthouse` workflow runs on every pull request and manual
+dispatch. It builds for the deployed base path and audits only the main app
+page. `.lighthouserc.json` owns the routes, five-run median, and budgets.
+Native logs show actual values, limits, and samples in colour; HTML and JSON
+reports are retained as `lighthouse-reports` artefacts for 14 days, including
+after failures. Dependencies and the exact Node/Vite+ toolchain are cached;
+measurements always run afresh. No status token or public report storage is
+needed.
+
 ## Git workflow
 
 ```mermaid
 flowchart LR
   Branch["Feature branch"] --> Hooks["prek hooks<br/>pre-commit · pre-push · commit-msg"]
   Hooks --> PR["Pull request"]
-  PR --> CI["QA · E2E · Docs · Data pipeline<br/>Hooks · Security · Commit conventions"]
+  PR --> CI["QA · Lighthouse · E2E · Docs · Data pipeline<br/>Hooks · Security · Commit conventions"]
   CI --> Merge["Squash merge<br/>into main"]
 ```
 
@@ -85,7 +94,7 @@ flowchart LR
 | --- | --- |
 | Commit messages and PR titles | Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`, …) |
 | `main` | `protected-main` ruleset: pull requests, squash merges only, every workflow's check required on a branch up to date with `main`, no deletion or force-push |
-| Workflows | Pull requests only, except `Pages`, which deploys `main` to GitHub Pages; actions pinned to full commit SHAs; least-privilege tokens; no persisted credentials |
+| Workflows | Pull requests, with manual dispatch for `Lighthouse`; `Pages` deploys `main` to GitHub Pages; actions pinned to full commit SHAs; least-privilege tokens; no persisted credentials |
 | Merge settings | Squash only, auto-merge allowed, branches deleted after merge |
 
 ## Versions
