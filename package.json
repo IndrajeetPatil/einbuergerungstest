@@ -11,7 +11,7 @@
     "#data/*": "./src/data/*"
   },
   "scripts": {
-    "start": "vp build && vp preview --open",
+    "start": "vp build --logLevel warn && vp preview --open",
     "file-naming": "ls-lint",
     "css-quality": "node scripts/css-quality.mjs",
     "social-card": "node scripts/social-card.mjs"

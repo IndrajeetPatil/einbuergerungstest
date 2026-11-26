@@ -80,7 +80,6 @@ export default defineConfig({
       },
       "test:e2e": {
         command: "playwright test",
-        dependsOn: ["build"],
         cache: false,
       },
       // `make lighthouse` builds for GitHub Pages first, so the audit runs
@@ -90,7 +89,7 @@ export default defineConfig({
           "BASE_PATH=/einbuergerungstest/ vp build --logLevel warn && vp dlx --silent @lhci/cli@0.16.1 collect && vp dlx --silent @lhci/cli@0.16.1 assert",
         cache: false,
       },
-      build: { command: "vp build", cache: false },
+      build: { command: "vp build --logLevel warn", cache: false },
     },
   },
   test: {

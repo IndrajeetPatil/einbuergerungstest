@@ -4,7 +4,7 @@
 
 | Tool | Why |
 | --- | --- |
-| Node 26 and [Vite+](https://viteplus.dev) (`vp`) | Runtime and toolchain; `scripts/install-vp.sh` installs the pinned `vp`, which provisions Node and pnpm |
+| Node 26 and [Vite+](https://viteplus.dev) (`vp`) | Runtime and toolchain; provisions Node and pnpm |
 | [uv](https://docs.astral.sh/uv/) | Python data pipeline and its tools (Ruff, ty, pyrefly, pytest) |
 | poppler (`pdftotext`, `pdftoppm`) | Only for `make data` |
 | [prek](https://github.com/j178/prek) | Git hooks (run through `uv tool run`) |
@@ -21,7 +21,7 @@ Run `make` for the full list with descriptions.
 | --- | --- |
 | App | `start`, `serve`, `open`, `dev`, `build`, `build-pages`, `social-card` |
 | Quality | `qa`, `qa-js`, `qa-python`, `lint`, `lint-python`, `typecheck`, `typecheck-python`, `typecoverage-python`, `fallow`, `css-quality`, `file-naming`, `lint-markdown`, `spell-check`, `link-check`, `format`, `fix`, `ci` |
-| Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `test-e2e-docker`, `lighthouse` |
+| Tests | `test`, `test-unit`, `test-watch`, `test-scripts`, `test-e2e`, `lighthouse` |
 | Security | `security`, `secret-scan`, `secret-scan-ci`, `workflow-lint`, `workflow-audit`, `audit-js`, `audit-python` |
 | Hooks | `hooks-install`, `hooks`, `hooks-push`, `hooks-update` |
 | Data | `data`, `data-refresh` |
@@ -105,9 +105,8 @@ Each version has one source of truth.
 | --- | --- |
 | Node | `.node-version` (and a compatible `engines` in `package.json`) |
 | pnpm | `devEngines.packageManager` in `package.json` |
-| Vite+ | `catalog` in `pnpm-workspace.yaml`, plus `VP_VERSION` and checksums in `scripts/install-vp.sh` |
+| Vite+ | `catalog` in `pnpm-workspace.yaml` |
 | Python and its tools | `scripts/pyproject.toml`, locked in `scripts/uv.lock` |
-| Playwright image | `.github/workflows/e2e.yml` and `makefiles/testing.mk`, matching `@playwright/test` |
 | prek | `PREK_VERSION` in `makefiles/hooks.mk`, `minimum_prek_version` in `prek.toml`, `prek-action`'s `latest-known` version in CI |
 | rumdl, zizmor, actionlint, gitleaks | `makefiles/quality.mk`, `makefiles/security.mk` |
 | Lighthouse CI (`@lhci/cli`) | `lighthouse` task in `vite.config.ts` |

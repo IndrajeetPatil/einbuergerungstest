@@ -18,9 +18,9 @@ Pages. Start with the [README](README.md).
 
 ## Setup and commands
 
-On a fresh machine, install the pinned Vite+ CLI with
-`scripts/install-vp.sh`, put `~/.vite-plus/bin` on `PATH` and run
-`vp env setup && vp env on` so Node and pnpm come from Vite+, not the system.
+On a fresh machine, install the Vite+ CLI, put `~/.vite-plus/bin` on `PATH`
+and run `vp env setup && vp env on` so Node and pnpm come from Vite+, not the
+system.
 The data pipeline needs Python 3.15 through uv. Then run `make install` and
 `make hooks-install`. `make` lists every target.
 
