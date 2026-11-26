@@ -80,7 +80,6 @@ export default defineConfig({
       },
       "test:e2e": {
         command: "playwright test",
-        dependsOn: ["build"],
         cache: false,
       },
       // `make lighthouse` builds for GitHub Pages first, so the audit runs

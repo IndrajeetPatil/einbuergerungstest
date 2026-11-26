@@ -13,7 +13,7 @@ then iterate until `make ci` passes.
 | Area                | How                                                                                        | Keep in sync                                                                                |
 | ------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | JavaScript packages | `make update` (`vp update --latest`), then review `make outdated`                          | —                                                                                           |
-| Vite+               | `vp upgrade`, then bump `catalog` in `pnpm-workspace.yaml`                                 | `vite` alias in the same catalog; `VP_VERSION` and four checksums in `scripts/install-vp.sh` |
+| Vite+               | `vp upgrade`, then bump `catalog` in `pnpm-workspace.yaml`                                 | `vite` alias in the same catalog                            |
 | pnpm                | `devEngines.packageManager.version` in `package.json`                                      | —                                                                                           |
 | Node                | `.node-version` (latest release of the current major)                                      | `engines.node` in `package.json`                                                            |
 | Python              | `requires-python` in `scripts/pyproject.toml`                                              | Ruff `target-version` and ty `python-version` in the same file                              |

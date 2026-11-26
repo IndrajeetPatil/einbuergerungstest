@@ -21,8 +21,8 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
-    command: `vp preview --port ${PORT}`,
+    command: `vp build && vp preview --port ${PORT}`,
     url: `http://127.0.0.1:${PORT}/`,
-    reuseExistingServer: false,
+    reuseExistingServer: !isCI,
   },
 });
