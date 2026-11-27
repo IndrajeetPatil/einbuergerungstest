@@ -42,6 +42,12 @@ fix: node_modules ## Write formatting and safe lint fixes
 .PHONY: qa-python
 qa-python: lint-python typecheck-python typecoverage-python ## Python lint, format and type gates
 
+.PHONY: scripts-qa
+scripts-qa: qa-python test-scripts ## Run all Python script QA gates and tests
+
+.PHONY: qa-scripts
+qa-scripts: scripts-qa ## Alias for scripts-qa
+
 .PHONY: lint-python
 lint-python: ## Lint and format-check the data pipeline with Ruff (ALL rules, preview)
 	cd scripts && $(UV) run --locked ruff check .

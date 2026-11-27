@@ -7,6 +7,9 @@ test: test-unit test-scripts ## Unit tests: TypeScript (Vitest) and Python (pyte
 test-unit: node_modules ## Vitest unit tests with coverage floors
 	$(VP) run test:unit
 
+.PHONY: unit-test
+unit-test: test-unit ## Alias for test-unit
+
 .PHONY: test-watch
 test-watch: node_modules ## Vitest in watch mode
 	$(VP) test watch
