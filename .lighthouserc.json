@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "//": "`make lighthouse` builds for GitHub Pages (base /einbuergerungstest/) and serves that build with `vp preview`, so the audited page loads its assets from the same subpath as the deployed site. Lighthouse's default mobile throttling applies; assert the median of five runs so CI neither passes on one lucky sample nor fails on one or two slow ones.",
-      "startServerCommand": "BASE_PATH=/einbuergerungstest/ vp preview --port 5189",
+      "startServerCommand": "PAGES_BASE=/einbuergerungstest/ vp preview --port 5189",
       "startServerReadyPattern": "5189",
       "url": ["http://127.0.0.1:5189/einbuergerungstest/"],
       "numberOfRuns": 5

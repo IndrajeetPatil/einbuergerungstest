@@ -43,7 +43,7 @@ flowchart LR
 | Schemas | `src/lib/schemas.ts` | Zod schemas and inferred types for every value that crosses a boundary |
 | API | `src/lib/api.ts` | The app's only entry to progress: summary, settings, sessions, answers, backups |
 | Store | `src/lib/progress.ts`, `progressViews.ts`, `progressDb.ts`, `backup.ts` | Pure changes and answer judging, statistics, the IndexedDB transaction, backup files — see [Progress database](progress-database.md) |
-| Hosting | `vite.config.ts`, `.github/workflows/pages.yml` | `vp preview` locally; GitHub Pages with `BASE_PATH=/<repository>/` |
+| Hosting | `vite.config.ts`, `.github/workflows/pages.yml` | `vp preview` locally; GitHub Pages with `PAGES_BASE=/<repository>/` |
 
 ## Request flow
 
@@ -83,7 +83,7 @@ shows it in the error banner.
 | Answers judged in the store, against the bundled key | Stored results and imported backups never depend on what the caller claims |
 | Active session in `localStorage`, results in IndexedDB | Reloads resume instantly; only finished evidence is permanent |
 | Hash routes (`#katalog`, `#aktuell`, `#datenschutz`) | Work on GitHub Pages' subpath without a 404 fallback |
-| Base path from `BASE_PATH` | `/` locally, `/<repository>/` on Pages; pictures use `import.meta.env.BASE_URL` |
+| Base path from `PAGES_BASE` | `/` locally, `/<repository>/` on Pages; pictures use `import.meta.env.BASE_URL` |
 | Catalogue bundled as its own chunk | App code and question data cache independently |
 | Hand-drawn SVG chart | One small chart does not justify a charting library |
 
