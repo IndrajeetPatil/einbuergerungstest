@@ -31,7 +31,7 @@ build: node_modules ## Production build into dist/
 
 .PHONY: build-pages
 build-pages: node_modules ## Build for GitHub Pages, served from $(PAGES_BASE)
-	BASE_PATH=$(PAGES_BASE) $(VP) build
+	PAGES_BASE=$(PAGES_BASE) $(VP) build
 
 .PHONY: social-card
 social-card: node_modules ## Render the social sharing card and app icons into public/

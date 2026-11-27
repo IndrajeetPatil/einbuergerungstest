@@ -23,4 +23,4 @@ test-e2e: node_modules ## Build, then Playwright end-to-end and axe accessibilit
 # preview must serve the Pages build at that base path.
 .PHONY: lighthouse
 lighthouse: node_modules ## Lighthouse CI on the Pages build: five mobile runs, median asserted
-	BASE_PATH=$(PAGES_BASE) $(VP) run lighthouse
+	PAGES_BASE=$(PAGES_BASE) $(VP) run lighthouse

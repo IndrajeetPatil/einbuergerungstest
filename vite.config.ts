@@ -41,7 +41,7 @@ const NODE_FILES = ["scripts/**", "tests/e2e/**", "*.config.ts"];
 
 export default defineConfig({
   // GitHub Pages serves the site from /<repository>/; local runs use the root.
-  base: process.env["BASE_PATH"] ?? "/",
+  base: process.env["PAGES_BASE"] ?? process.env["BASE_PATH"] ?? "/",
   server: { port: 5178, strictPort: true, host: "127.0.0.1" },
   preview: { port: 5179, strictPort: true, host: "127.0.0.1" },
   build: {
@@ -86,7 +86,7 @@ export default defineConfig({
       // against the deployed base path.
       lighthouse: {
         command:
-          "BASE_PATH=/einbuergerungstest/ vp build --logLevel warn && vp dlx --silent @lhci/cli@0.16.1 collect && vp dlx --silent @lhci/cli@0.16.1 assert",
+          "PAGES_BASE=/einbuergerungstest/ vp build --logLevel warn && vp dlx --silent @lhci/cli@0.16.1 collect && vp dlx --silent @lhci/cli@0.16.1 assert",
         cache: false,
       },
       build: { command: "vp build --logLevel warn", cache: false },
