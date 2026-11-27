@@ -1,6 +1,6 @@
-name: Data pipeline
+name: Scripts QA
 
-# pytest suite of scripts/, on pull requests only.
+# Python lint, type checks, and pytest suite of scripts/, on pull requests only.
 on:
   pull_request:
     branches: [main]
@@ -13,7 +13,7 @@ defaults:
     shell: bash
 
 concurrency:
-  group: scripts-${{ github.ref }}
+  group: scripts-qa-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -21,8 +21,8 @@ env:
   UV_NO_PROGRESS: "1"
 
 jobs:
-  test-scripts:
-    name: Test Python Scripts
+  scripts-qa:
+    name: Scripts QA
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,5 +33,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
-      - name: pytest
+      - name: Python lint, format, and types (Ruff, ty, pyrefly)
+        run: make qa-python
+
+      - name: Python test suite
         run: make test-scripts
